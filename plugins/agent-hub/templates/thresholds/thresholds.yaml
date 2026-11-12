@@ -1,0 +1,69 @@
+# Master thresholds: every vendor number this ruleset copies, grouped. Read per refs/thresholds.md.
+# A group is a gate in a project only after docs/thresholds.yaml there carries approved for it (Q-D28-3-a); otherwise advisory.
+web_perf:
+  approved: null
+  numbers:
+    - {name: lcp_needs_work, value: 4.0, unit: s, source: "addy references/performance-checklist.md:15-29"}
+    - {name: inp_needs_work, value: 500, unit: ms, source: "addy references/performance-checklist.md:15-29"}
+    - {name: cls_needs_work, value: 0.25, unit: score, source: "addy references/performance-checklist.md:15-29"}
+    - {name: ttfb_slow, value: 800, unit: ms, source: "addy references/performance-checklist.md:15-29"}
+    - {name: lighthouse_performance_min, value: 90, unit: score, source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: fonts_total_max, value: 100, unit: KB, source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: tti_max_4g, value: 3.5, unit: s, source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: js_bundle_max, value: 200, unit: "KB gzipped", source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: css_max, value: 50, unit: "KB gzipped", source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: image_max_above_fold, value: 200, unit: KB, source: "addy skills/performance-optimization/SKILL.md:191-201"}
+    - {name: api_response_p95_max, value: 200, unit: ms, source: "addy skills/performance-optimization/SKILL.md:191-201"}
+security_auth:
+  approved: null
+  numbers:
+    - {name: bcrypt_cost_min, value: 12, unit: rounds, source: "addy references/security-checklist.md:38"}
+    - {name: login_attempts_max, value: 10, unit: "per 15 min", source: "addy references/security-checklist.md:41"}
+    - {name: reset_token_lifetime_max, value: 1, unit: h, source: "addy references/security-checklist.md:42"}
+security_headers:
+  approved: null
+  numbers:
+    - {name: hsts_max_age, value: 31536000, unit: s, source: "addy references/security-checklist.md:111"}
+rollout:
+  approved: null
+  note: "suggestions until approved; copy every number from the cited range, none invented"
+  numbers:
+    - {name: rollout_stage_percentages, value: "5-25-50-100", unit: "percent of users", source: "addy skills/shipping-and-launch/SKILL.md:99"}
+    - {name: flag_cleanup_max, value: 2, unit: "weeks after full rollout", source: "addy skills/shipping-and-launch/SKILL.md:106"}
+    - {name: monitoring_window_internal, value: 24, unit: "h", source: "addy skills/shipping-and-launch/SKILL.md:125"}
+    - {name: monitoring_window_canary, value: "24-48", unit: "h", source: "addy skills/shipping-and-launch/SKILL.md:130"}
+    - {name: monitoring_window_full, value: 1, unit: "week", source: "addy skills/shipping-and-launch/SKILL.md:138"}
+    - {name: error_rate_healthy_max, value: 10, unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:148"}
+    - {name: error_rate_warning_band, value: "10-100", unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:148"}
+    - {name: error_rate_critical, value: 2, unit: "x baseline", source: "addy skills/shipping-and-launch/SKILL.md:148"}
+    - {name: p95_latency_healthy_max, value: 20, unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:149"}
+    - {name: p95_latency_warning_band, value: "20-50", unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:149"}
+    - {name: p95_latency_critical, value: 50, unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:149"}
+    - {name: client_js_error_warning, value: 0.1, unit: "percent of sessions", source: "addy skills/shipping-and-launch/SKILL.md:150"}
+    - {name: business_metric_decline_warning, value: 5, unit: "percent", source: "addy skills/shipping-and-launch/SKILL.md:151"}
+    - {name: rollback_trigger_error_rate, value: 2, unit: "x baseline", source: "addy skills/shipping-and-launch/SKILL.md:156"}
+    - {name: rollback_trigger_p95, value: 50, unit: "percent above baseline", source: "addy skills/shipping-and-launch/SKILL.md:157"}
+    - {name: rollback_time_feature_flag, value: 1, unit: "min", source: "addy skills/shipping-and-launch/SKILL.md:281"}
+    - {name: rollback_time_redeploy, value: 5, unit: "min", source: "addy skills/shipping-and-launch/SKILL.md:282"}
+    - {name: rollback_time_database, value: 15, unit: "min", source: "addy skills/shipping-and-launch/SKILL.md:283"}
+observability:
+  approved: null
+  note: "the source presents these as illustrations and requires a threshold and duration justified by an SLO or historical data, not a guess (observability-checklist.md:61; observability-and-instrumentation SKILL.md:169); a project replaces them with its own before approving the group"
+  numbers:
+    - {name: alert_error_rate, value: 1, unit: percent, duration: "5 min", basis: example, source: "addy skills/observability-and-instrumentation/SKILL.md:158"}
+    - {name: alert_p99_latency, value: 2, unit: s, basis: example, source: "addy skills/observability-and-instrumentation/SKILL.md:159"}
+    - {name: alert_queue_age, value: 10, unit: min, basis: example, source: "addy skills/observability-and-instrumentation/SKILL.md:160"}
+    - {name: dashboard_default_range, value: "1-6", unit: h, basis: example, source: "addy references/observability-checklist.md:71"}
+ux_motion:
+  approved: null
+  numbers:
+    - {name: exit_duration_share_of_enter, value: "60-70", unit: "percent", source: "uupm references/quick-reference.md:146"}
+    - {name: stagger_per_item, value: "30-50", unit: "ms", source: "uupm references/quick-reference.md:147"}
+ux_type:
+  approved: null
+  numbers:
+    - {name: body_font_min_mobile, value: 16, unit: "px", source: "uupm references/quick-reference.md:98"}
+    - {name: line_height_body, value: "1.5-1.75", unit: "ratio", source: "uupm references/quick-reference.md:116"}
+    - {name: measure_mobile, value: "35-60", unit: "characters", source: "uupm references/quick-reference.md:99"}
+    - {name: measure_desktop, value: "60-75", unit: "characters", source: "uupm references/quick-reference.md:99"}
+    - {name: measure_text, value: "65-75", unit: "characters", source: "uupm references/quick-reference.md:117"}

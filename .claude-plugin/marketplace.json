@@ -1,0 +1,28 @@
+{
+  "name": "agent-hub",
+  "owner": {
+    "name": "agentHub contributors"
+  },
+  "plugins": [
+    {
+      "name": "agent-hub",
+      "source": "./plugins/agent-hub",
+      "description": "Multi-agent workflow for Claude Code: an orchestrator routes requests to specialist agents with spec, plan and review gates."
+    },
+    {
+      "name": "agent-hub-auditor",
+      "source": "./plugins/agent-hub-auditor",
+      "description": "Optional: /audit scores what the agent fleet did in a time window and writes a report."
+    },
+    {
+      "name": "agent-hub-integrations",
+      "source": "./plugins/agent-hub-integrations",
+      "description": "Optional: the lark-task skill, MCP launcher scripts and Codex/ChatGPT templates."
+    },
+    {
+      "name": "agent-hub-local-services",
+      "source": "./plugins/agent-hub-local-services",
+      "description": "Optional: Docker preflight hook and local-services reference."
+    }
+  ]
+}
