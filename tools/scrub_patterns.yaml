@@ -1,0 +1,23 @@
+# Public pattern classes and the allowlist for tools/scrub_check.py.
+# Private patterns (owner, company, hosts, ...) never live here: they are read from the private file.
+# This file lists the patterns themselves, so scrub_check skips it (allow_paths below).
+classes:
+  abs_home: '(?:/Users/[A-Za-z0-9._-]+|/home/[A-Za-z0-9._-]+|[A-Za-z]:\\Users\\[A-Za-z0-9._-]+)'
+  fleet_path: '(?:~|\$HOME)/\.claude/(?:agents|skills|refs|scripts|hooks|templates|rules|commands|code-style|CLAUDE\.md|SDD\.md|FLOW\.md|UI_RULES\.md|RTK\.md)'
+  decision_cite: '(?:\buser\s+20\d\d-\d\d-\d\d|\bQ\d{1,3}[a-z]?\b|\(\s*(?:OQ-\w+|FP-\d+|DC-\d+)|docs/adr/|docs/analysis/|\bADR-\d{3}\b)'  # scrub-allow: the pattern itself
+  language: '[À-ỹ]'  # scrub-allow: the pattern itself
+# Classes run only on the comment part of lines in comment_paths: plan ids belong to the plan, not the code.
+comment_classes:
+  plan_id: '\b(?:TC-[A-Z0-9]+(?:-[A-Za-z0-9]+)+|W\d+-[TR]\d+[a-z]?|FX-\d+-\d+(?:-\d+)?|E\d+-\d+|Q-[A-Z][A-Z0-9]*-\d+[a-z]?)\b'  # scrub-allow: the pattern itself
+comment_paths: [tests/*.py, tools/*.py, tools/*.sh, tools/*.yaml, .secret-scan-allow]
+# A line carrying this marker is never reported.
+marker: 'scrub-allow:'
+# Text that is the Claude Code default for everyone is blanked before the classes run.
+allow_text:
+  - '(?:~|\$HOME)/\.claude/(?:memory|agent-memory|projects|plugins)/'
+  - '(?:~|\$HOME)/\.claude/settings\.json'
+# Files skipped entirely (glob on the repo-relative path).
+allow_paths:
+  - tools/scrub_patterns.yaml
+# Binary files that may stay unscanned (glob on the repo-relative path).
+allow_binary_paths: []

@@ -1,0 +1,10 @@
+plan_id: demo-old
+objective: A plan written before the change-record standard
+tasks:
+  - id: T1
+    title: Old task
+    status: done
+    result:
+      summary: Done without a run window or data_impact.
+      commits: []
+      files_changed: [{path: src/old.py, note: old}]

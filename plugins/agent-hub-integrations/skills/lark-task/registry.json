@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "domain": "https://open.larksuite.com",
+  "me": {
+    "open_id": null
+  },
+  "template_tasklist_guid": null,
+  "fields": {
+    "priority": {
+      "guid": null,
+      "options": {
+        "P0 Urgent": null,
+        "P1 High": null,
+        "P2 Medium": null,
+        "P3 Low": null
+      }
+    },
+    "labels": {
+      "guid": null,
+      "options": {
+        "Frontend": null,
+        "Backend": null,
+        "Bug": null,
+        "Feature": null,
+        "Docs": null,
+        "Infra": null
+      }
+    },
+    "estimate_hours": {
+      "guid": null
+    },
+    "status": {
+      "guid": null,
+      "options": {
+        "Backlog": null,
+        "To do": null,
+        "In progress": null,
+        "Testing": null,
+        "Deploy": null,
+        "Done": null
+      }
+    }
+  },
+  "projects": {
+    "KEY": {
+      "name": "Project name",
+      "tasklist_guid": null,
+      "sections": {
+        "Backlog": null,
+        "To do": null,
+        "In progress": null,
+        "Testing": null,
+        "Deploy": null,
+        "Done": null
+      },
+      "next_n": 1
+    }
+  }
+}

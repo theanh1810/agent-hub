@@ -1,0 +1,120 @@
+# plan.yaml — lite template
+#
+# For a small bug or a hotfix: one wave, one or two tasks, no variants, no
+# pre-mortem. Still two files — plan.yaml and plan.<lang>.md — because a fix with no
+# written record is the one nobody can explain next month.
+#
+# Use this when ALL hold:
+#   - the fix touches ≤2 files and ≤80 diff lines
+#   - the root cause is already known and cited file:line
+#   - no contract, route, schema, or shared exported symbol changes
+#   - no approval gate fired
+# Any one of those fails -> use plan-template.yaml instead. Do not stretch this
+# one; a lite plan on structural work hides exactly the risk the full plan exists
+# to surface.
+
+lang: en                           # which language convention the values follow — agents/planner.md § Language
+plan_id: string                    # e.g. fix-alert-duplicate-20260830
+objective: >                       # 1-2 sentences: what is wrong now, and what the user sees once it is fixed
+tldr: |                            # 2-3 lines a reader can skim
+test_schema: layers                # cases carry `layer`, not `type` — refs/roles/planner/test-cases.md § Layers
+mode: lite                         # marks this as the reduced shape, so reviewer knows what to expect
+class: bug|hotfix
+requirements: [{id: R-1, text: string, source: "user YYYY-MM-DD, verbatim | Qn | UC-XXX/AC-N"}]   # what the user asked to be fixed, usually one entry; the task names it in covers_requirements — agent-hub check plan trace
+root_cause: >                      # required, with the file:line it was found at
+  # Example: several Sensors share one fieldKey, so buildErrorsBySensor
+  # (src/utils/errorsBySensor.js:41) returns an array and the error hits every sensor.
+
+waves:
+  - id: W1
+    name: Fix and verify
+    acceptance_criteria:           # observable — mirrored as - [ ] checkboxes in plan.<lang>.md
+      - string
+
+tasks:
+  - id: W1-T1
+    wave: W1
+    title: string                  # one line, user-visible
+    what: >                        # WHAT the work is, 1-2 sentences
+    purpose: >                     # WHY it exists — the user-visible problem it solves
+    out_of_scope: [string]         # what this task deliberately does not change, one line each; optional
+    files:                         # a list, not a count
+      - path: src/...
+        change: edit               # create | edit | delete
+        why: string
+    solution: >                    # HOW — the chosen fix, one paragraph; never a pointer into docs/brainstorm/
+    before_after:                  # behaviour before and after, per aspect — every task carries it, read before the steps; enforced on a logic task; shape and meaning: task-template.yaml
+      - {aspect: string, before: string, after: string}
+    logic: [string]                # numbered steps, a branch as if/then — required on a logic task
+    approach: {chosen: string, why: string, cost: string}   # required on a logic task
+    steps:                         # the edits in order, written by planner from the live files, each with done: false
+      - {n: 1, file: src/..., action: edit, anchor: string, before: string, after: string, expect: null, why: string, done: false}
+    alternatives_rejected: [{option: string, why_not: string}]   # mandatory on a logic task; [{none_because: string}] when no other way existed
+    user_visible_rules: []         # [{rule: string, ac: UC-XXX/AC-N}], ac on every entry, never empty
+    risks: []                      # strings, each pointing to a specs/_debt.md id, an open question id or a user decision
+    agent: implement
+    tier: L2                       # L0-L4 — refs/effort-routing.md
+    status: pending                # see agents/planner.md § Status lifecycle
+    blocker: null                  # only when status is `blocked` — why, and who unblocks it
+    subtasks: []                   # a lite plan splits no further; write [] so the reader knows it is deliberate
+    review_checkpoint:
+      required: true
+      estimate_min: 3              # ≤5
+      focus:                       # specific, ≤4 bullets
+        - string
+      risk_areas:
+        - string
+    acceptance_criteria:           # observable, one per line, each starting AC-n:, cited as {task_id}/AC-n; one restating a spec AC ends → UC-XXX/AC-N and its cases cite that id
+      - "AC-1: string"
+    test_cases:                    # REQUIRED — hotfix included. With no regression test the bug comes back.
+      - id: TC-W1-T1-1
+        scenario: string           # the situation that reproduces this exact bug
+        preconditions: [string]
+        steps: [string]
+        expected: string           # the observable result
+        # one value — refs/roles/planner/test-cases.md § Layers
+        layer: unit|integration|contract|e2e|security|local_validation
+        checks: [visual, a11y]        # an e2e case names its visual and a11y checks here
+        # one value — refs/roles/planner/test-cases.md § Kinds
+        kind: happy|edge|error|fallback|timeout|retry|security|partial_failure|concurrency
+        covers_acceptance: [string]   # {task_id}/AC-n for an AC above, e.g. W1-T1/AC-1, or the UC-XXX/AC-N its criterion names after →
+        api_endpoints: [string]       # required when layer is integration or contract and the case calls a route
+        expected_status: 200          # required when layer is integration or contract and the target is an HTTP route
+        expected_error_code: string   # required on HTTP 4xx/5xx or an IPC Err
+        contract_ref: string          # the OpenAPI path and operation; required when layer is contract
+    covers_requirements: [R-1]     # ids from requirements[] above — agent-hub check plan trace
+    touches: [logic]               # what the task touches: logic|api|shape|screen|input|state — test-cases.md § Layers by what the task touches
+    layer_waivers: []              # one {layer, reason, evidence: file:line} per required layer the task cannot have
+    case_kind_waivers: []          # one {kind, reason, evidence: file:line} per kind test_cases[] lacks — test-cases.md § Kinds
+    verification:                  # REQUIRED — runnable commands, hotfix included. A hot
+      - string                     # fix still needs a smoke command, or nobody can check it.
+    result: null                   # fill this in when status reaches done — see task-template.yaml
+
+validation_strategy:
+  final: string                    # what has to run for this to count as done
+  ac_check_from: W1                # the first wave whose finished tasks carry result.ac_check (refs/closeout.md § What every meaningful change answers); absent means the plan predates the rule and agent-hub check plan chk_ac_results skips it
+  change_record_standard: 1        # 1 marks a plan born under the change-record standard (refs/closeout.md § Data impact): every done task then carries result.run and result.data_impact; absent means the plan predates the rule and agent-hub check plan chk_data_impact skips it
+  state_case_standard: 1           # 1 marks a plan born under the screen-state standard (refs/roles/planner/test-cases.md § Screen states): every screen task then carries screen_states and a case or waiver per state; absent means the plan predates the rule and agent-hub check plan chk_screen_states skips it
+  commands: [string]               # exact commands, with what counts as pass
+  review_deep_paths: []            # [{path, section|null, reason}] copied from change_design: the final review explains these hunk by hunk and the packet lists them first
+  checkpoints: []                  # [{after_wave, task_ids, reason, expected_red: [{check, owner_task, reason}]}]: a test spawn in mode=script runs after that wave; a red check passes only when expected_red names it and its owner_task sits in a later wave
+
+rollback_strategy:
+  trigger: string                  # the signal that means turn back
+  steps: [string]                  # required for a hotfix, even when it is only reverting a commit
+
+# ---------------------------------------------------------------------------
+# CLOSEOUT (CLAUDE.md §21) — a lite plan has NO closeout task of its own. The
+# last task runs the 5 closing steps inside itself and returns the closeout
+# block in its handoff. Why: a lite plan has only 1-2 tasks, and one more task
+# just to close costs a whole spawn for four minutes of work.
+#
+# All 5 steps still run; none may be dropped:
+#   1 reindex   mcp__gitnexus__detect_changes → gitnexus analyze (exit 0)
+#   2 compare the real diff against the files[] the plan named
+#   3 write result into plan.yaml — the mirror carries status and the Result block rebuilt from it
+#   4 sync the spec — only when spec_required=true; a hotfix writes specs/_debt.md
+#   5 mem0 (≤3 entries, search before add) then clean {workspace_root}/.cm-tmp/{task_id}/
+# ---------------------------------------------------------------------------
+closeout_owner: string             # id of the last task, the one that runs closeout, e.g. W1-T1
+approval: null                     # stamped by agent-hub check plan --approve at the plan gate as {by: the user's words verbatim, at: ISO 8601 datetime with the local time zone, fingerprint: sha256, spec_fingerprint: sha256 over the UC and spec files covers_uc resolves to, null when no task names one}; a later edit to the plan fails chk_approval until it is approved again; agent-hub review-packet reads at as the approval time

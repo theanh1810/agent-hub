@@ -1,0 +1,279 @@
+# Schema of one task: the keys of one entry of plan.yaml tasks[]. A task is written
+# inline in plan.yaml; plan-verify chk_task_keys reads this file as the key list.
+# wave and depends_on sit on the task entry beside these keys. Layout and how the
+# plan is read: refs/plan-files.md.
+# English in every value here; the mirror plan.<lang>.md carries the reply language.
+# English/ASCII for keys, ids, enum values. File paths and code verbatim.
+
+id: W1-T1                      # stable id, referenced by commits + reviews
+title: Load plans from the active project   # one line, user-visible
+what: >                        # WHAT the work is, 2-4 sentences, plain language
+  Read docs/plan/*/plan.yaml from the directory of the active project
+  instead of from the build-time repo.
+purpose: >                     # WHY it exists — the user-visible problem it solves
+  Adding a new project to the app leaves the Plans tab empty, because the
+  plan list is frozen at build time.
+out_of_scope: []               # what this task deliberately does not change, one line each; a reviewer rejects a diff that touches one of them (matt triage AGENT-BRIEF.md:35-68). Optional: plans written before this key lack it and stay valid
+files:                         # WHERE — every file the work touches
+  - path: src-tauri/src/plans_cmd.rs
+    change: create             # create | edit | delete
+    why: the IPC commands that list and read plans by project path
+  - path: src/features/plans/PlansTab.tsx
+    change: edit
+    why: drop import.meta.glob, call the new hook
+solution: >                    # HOW, for the agent that edits — the chosen approach file by file, one paragraph that states the approach itself, never a pointer into the analysis record (`design.yaml`, `docs/brainstorm/{slug}.yaml`). What the user reads is before_after, logic and approach below
+  Add a Tauri command that reads the project's docs/plan directory and
+  returns the plan_id list, plus the yaml contents once one is selected.
+before_after:                  # per aspect, what the user sees or what data is written, before and after — behaviour, never code text; brainstorm writes it. Every task carries it: the behaviour-first header read before the steps; agent-hub check plan enforces it on a logic task only (touches holds screen, logic, api or state; refs/plan-files.md § Task sections of plan.<lang>.md); feeds the plan.<lang>.md section `Before / After`
+  - aspect: Plans tab after adding a project
+    before: the list stays empty until the app is rebuilt
+    after: the list shows the new project's plans the next time the tab opens
+logic:                         # numbered steps; a branch as if/then; a constant with its why and source. Required on a logic task; feeds the mirror section `Logic changed`
+  - "1. When the tab opens, call plans_list with the active project's path."
+  - "2. If the project has no docs/plan, return an empty list, not an error."
+approach:                      # the way chosen, why, and what is given up. Required on a logic task; feeds the mirror section `Approach chosen and why`
+  chosen: read the project's docs/plan through a Tauri command
+  why: the renderer cannot read the disk
+  cost: one IPC round trip each time the tab opens
+steps:                         # the edits in order, written by planner from the live files, each with done: false
+  - n: 1                       # (agents/planner.md § Workflow step 4); plan.<lang>.md renders each as - [ ] n.m
+    file: src-tauri/src/plans_cmd.rs   # relative to the workspace root; absolute only when binding_scope.files_allowed lists it exactly (plan-verify steps_shape)
+    action: create             # edit | create | delete | run
+    anchor: a new file         # what the edit sits next to, in words
+    before: ""                 # the exact text, occurring once; "" on create
+    after: |
+      #[tauri::command]
+      pub fn plans_list(project: String) -> Result<Vec<String>, String> { list_plan_dirs(&project) }
+    expect: null               # on run: "exit N" or "rc=N" first, then "; prints: TEXT" for a line stdout must contain (other text after the code is counted unverified), required; null on edit, create and delete (after occurs once, before no longer does)
+    why: the renderer cannot read the disk, so listing goes through a Rust command
+    done: false                # the task owner sets true at return for a step it did and verified; an undone step stays false, its reason in result.deviations
+  - {n: 2, file: src/features/plans/PlansTab.tsx, action: edit, anchor: the plan list source, before: "const plans = import.meta.glob('/docs/plan/*/plan.yaml')", after: "const plans = useProjectPlans(projectPath)", expect: null, why: "the build-time glob freezes the list to the app's own repo", done: false}
+interfaces:                    # what this task takes from earlier work and hands to later work —
+  consumes: []                 # signatures, or for a rule file the section it reads or writes
+  produces: ["plans_list(project: String) -> Result<Vec<String>, String>", "plans_read(project: String, id: String) -> Result<String, String>"]
+pattern_refs:                  # existing code to copy before writing new code: file:line — what to copy
+  - "src-tauri/src/projects_cmd.rs:14 — the command shape, errors mapped to String"
+alternatives_rejected:         # MANDATORY on a logic task: at least one {option, why_not}, or one {none_because} saying why no other way existed; [] only on a task that is not a logic task; feeds the mirror section `Alternatives rejected`
+  - option: Keep import.meta.glob, add the plans to the repo
+    why_not: works only for the app's own repo, unusable for any other project
+user_visible_rules:            # each rule a user will see, with the AC that states it; [] when the task adds none. fill ac on every entry, never leave it empty: a rule no AC states is a question to the user first (CLAUDE.md §0.2), and agent-hub check plan fails an entry with an empty ac. Feeds the mirror section `New rules the user sees`
+  - rule: Selecting project B lists only B's plans
+    ac: UC-010/AC-1
+risks:                         # each one pointing to a specs/_debt.md id, an open question id or a user decision; feeds the mirror section `Risks and open decisions`
+  - "specs/_debt.md D-012: a Windows extended-length project path is not covered yet"
+agent: implement
+tier: L2                       # L0-L4: the model and effort of this task's spawns — refs/effort-routing.md
+status: pending                # see agents/planner.md § Status lifecycle
+blocker: null                  # only when status is `blocked` — why, and who unblocks it
+design_brief_ref: null         # UI task only — {plan_dir}/design/<slug>/DESIGN.md, read by implement
+covers_uc: [UC-010]            # UC ids this task implements — null when it covers none; brainstorm reads it at bootstrap (agents/brainstorm.md § Sources).
+covers_requirements: [R-1]     # ids of plan.yaml requirements[] this task delivers, ≥1 on every task but closeout — agent-hub check plan trace
+est_diff_lines: 60             # PER TASK. An estimate; it caps nothing (CLAUDE.md §14).
+                               # Required, in the task key set of skills/planning-dag/SKILL.md
+                               # § Task schema; it counts the lines a reviewer must read, as
+                               # agents/planner.md § Workflow step 3 defines them.
+review_checkpoint:             # what a reviewer opens this diff to check
+  required: true
+  estimate_min: 4              # ≤5; longer means the task is too big
+  focus:
+    - the IPC command returns the active project's plans, not the first project's
+    - the path is built from the project path, never hardcoded
+  risk_areas:
+    - a project path holding unusual characters, or a Windows extended-length path
+acceptance_criteria:           # observable, one per line, each starting AC-n:, cited as {task_id}/AC-n; one restating a spec AC ends → UC-XXX/AC-N and its cases cite that id
+  - "AC-1: Selecting project B shows B's plans in the Plans tab, not A's → UC-010/AC-1"
+  - "AC-2: A project with no docs/plan shows an empty state, not an error → UC-010/AC-2"
+  - "AC-3: A plan.yaml that fails to parse, or a path outside the project root, shows its error in the Plans tab, not a blank list → UC-010/AC-3"
+test_cases:                    # see agents/planner.md § Test cases
+  - id: TC-W1-T1-1
+    scenario: Switch project, then open the Plans tab
+    steps:
+      - Select project B in the project bar
+      - Open the Plans tab
+    expected: The plan list is project B's
+    layer: e2e                    # refs/roles/planner/test-cases.md § Layers
+    checks: [visual, a11y]
+    states: [success]             # e2e or component case on a screen task: the screen states it checks — test-cases.md § Screen states
+    themes: [light]               # light, dark or both
+    # an e2e case names its visual and a11y checks above
+    kind: happy                   # happy|edge|error|fallback|timeout|retry|security|partial_failure|concurrency — test-cases.md § Kinds
+    covers_acceptance: UC-010/AC-1
+  - id: TC-W1-T1-2
+    scenario: plans_list on a project with no docs/plan
+    steps:
+      - Call plans_list with the path of a project that has no docs/plan
+    expected: An empty list, not an error
+    layer: contract
+    kind: edge
+    covers_acceptance: UC-010/AC-2
+    api_endpoints: [plans_list, plans_read]   # required on an integration or contract case that calls a route
+    contract_ref: plans_list                  # the OpenAPI path and operation; required on a contract case
+    # expected_status: 200        — HTTP route only; plans_list is an IPC command, so the case asserts Ok/Err
+    # expected_error_code: string — required on HTTP 4xx/5xx or when an IPC command returns Err
+  - id: TC-W1-T1-3
+    scenario: plans_read on a plan.yaml that does not parse
+    steps: [Call plans_read on a plan whose plan.yaml is not valid YAML]
+    expected: The parse error, with the path of the file
+    layer: unit                   # the repo's framework, command in verification
+    kind: error
+    covers_acceptance: UC-010/AC-3
+  - {id: TC-W1-T1-4, scenario: "plans_read with a ../ path outside the project root", steps: ["Call plans_read with <project>/../outside/plan.yaml"], expected: "Err naming the rejected path; no file outside the root is opened", layer: integration, kind: security, covers_acceptance: UC-010/AC-3, api_endpoints: [plans_read], expected_error_code: path_outside_project}
+touches: [api, logic]          # what the task touches: logic|api|shape|screen|input|state; each needs its layer (test-cases.md § Layers by what the task touches)
+layer_waivers: []              # one {layer, reason, evidence: file:line} per required layer the task cannot have, the same shape as case_kind_waivers
+case_kind_waivers: [{kind: fallback, reason: "the only source is fs::read_dir on <project>/docs/plan; its absence is edge case TC-W1-T1-2, not a fallback", evidence: "src-tauri/src/plans_cmd.rs:12"}, {kind: timeout, reason: "std::fs::read_to_string reads a local file; there is no network or IPC dependency to time out", evidence: "src-tauri/src/plans_cmd.rs:21"}, {kind: retry, reason: "plans_list returns Result and writes no state, so a repeated call returns the same list", evidence: "src-tauri/src/plans_cmd.rs:9"}, {kind: partial_failure, reason: "both commands only read; plans_read returns Ok(contents) and writes nothing, so nothing is left half-done", evidence: "src-tauri/src/plans_cmd.rs:25"}, {kind: concurrency, reason: "the module holds no static, cache or lock, so two calls share no state", evidence: "src-tauri/src/plans_cmd.rs:3"}]  # {kind, reason, evidence: file:line} per kind this task cannot have — test-cases.md § Kinds
+screen_states: {}              # a task touching screen: {states: [loading, empty, error, fallback, success, disabled, + selected, hover, focus where they exist], themes: [light] or [light, dark]}; each state needs a case whose states[] names it or a state_waivers entry — test-cases.md § Screen states; {} on every other task
+state_waivers: []              # one {state, reason, evidence: file:line} per screen state the task cannot have, the same shape as case_kind_waivers
+verification:                  # runnable commands proving the task is done — REQUIRED,
+  - "cargo test plans_cmd"     # not only at closeout. With no command nobody can check
+  - "npm run typecheck"        # it, and implement invents a check of its own. Only what no
+                               # test case holds — a suite, typecheck, lint; never a copy of
+                               # a test_cases[].steps line, so each command has one home.
+subtasks:                      # a big task splits into subtasks; each one is a single agent run
+  - id: W1-T1a
+    title: Rust commands plans_list + plans_read
+    what: >
+      Add two Tauri commands: list the project's docs/plan directory, and
+      read one plan's contents by id.
+    purpose: >
+      The renderer cannot read the disk, so it has to go through a Rust command.
+    files:
+      - path: src-tauri/src/plans_cmd.rs
+        change: create
+        why: where the two new commands live
+    solution: >
+      Read the directory with std::fs, keep the subdirectories holding a
+      plan.yaml, and return the ids sorted by modified time.
+    status: pending
+    review_checkpoint:
+      required: true
+      estimate_min: 3
+      focus:
+        - never reads outside the project directory
+    result: null
+result: null                   # fill this in when status reaches `done` — see CLAUDE.md §20
+
+# ---------------------------------------------------------------------------
+# result — filled in when this task reaches status: done (CLAUDE.md §20). It
+# lives in this file only; plan.<lang>.md carries status and the Result block rebuilt from it (refs/closeout.md § The result in the mirror).
+# A result with commits and file names but no before/after is a receipt, not
+# an explanation. An empty `cost` means the trade-off was not thought through.
+# The shape, commented out on purpose: copy these keys into result above.
+# ---------------------------------------------------------------------------
+# result:
+#   summary: >                   # what was actually done, in past tense
+#     Added plans_list/plans_read; PlansTab now reads the active project.
+#   commits: [46d260e]           # short shas
+#   files_changed:               # the follow-flow: where to read the code
+#     - path: src-tauri/src/plans_cmd.rs
+#       note: the new IPC commands, reading the project's docs/plan
+#     - path: src/features/plans/PlansTab.tsx
+#       note: build-time glob replaced by useProjectPlans
+#   entry_points:                # where to START reading to follow the flow
+#     - "PlansTab.tsx:56 → usePlans(projectPath) → api.plansList → plans_cmd::plans_list"
+#   verification:                # what was run, with the numbers
+#     - "cargo test plans_cmd — 4/4 pass"
+#     - "npx vitest run — 216/216 pass"
+#   deviations: >                # anything that differs from the plan, or null
+#     Left out the 5s cache — unnecessary at the current scale.
+#   changes:                     # one entry per meaningful change (CLAUDE.md §20)
+#     - step: 1                  # a step done as planned: its number and the four answers; before/after are the step's (D18)
+#       explanation: plans_list reads the active project's docs/plan through a Rust command.
+#       impact: PlansTab lists the open project's plans; no migration, no restart.
+#       benefit: the list follows the project instead of the app's own repo.
+#       cost: one IPC round trip each time the tab opens.
+#     - what: Split the error branch off the loading branch   # a deviation or an off-plan fix: all eight fields
+#       where: src/features/edits/EditDetailPanel.tsx:74
+#       before: "if (!edit || !diff) return <DetailSkeleton />"
+#       after: |
+#         if (!edit) return <DetailSkeleton />
+#         if (!diff && diffLoading) return <DetailSkeleton />
+#       explanation: >
+#         When the query fails, `diff` stays undefined and lands in the
+#         "loading" branch, so the panel hangs on the skeleton forever. It
+#         now shows a skeleton only while it really is loading.
+#       impact: >
+#         The review screen shows why it failed instead of a grey box. No
+#         DB change, no migration.
+#       benefit: '"Loading" is now distinguishable from "broken"; the error is scoped to one sha.'
+#       cost: One more render branch; still no auto-retry when IPC is flaky.
+#   ac_check:                    # one entry per acceptance_criteria item, never omitted (refs/closeout.md § What every meaningful change answers)
+#     - ac: AC-1
+#       met: true                # needs evidence and, for each tc_id, a result.commands[] row with that tc_id and exit: 0
+#       evidence: ["src-tauri/src/plans_cmd.rs:12-34"]
+#       tc_ids: [TC-W1-T1-1]
+#       note: plans_list reads the active project's docs/plan, so project B lists B's plans.
+#     - ac: AC-3
+#       met: false               # keeps the task at reviewing; the note says what is missing
+#       evidence: []
+#       tc_ids: [TC-W1-T1-3]
+#       note: plans_read still returns a blank list on a malformed plan.yaml; the error branch is not written.
+#   run:                         # the run window of the task, refs/closeout.md § Data impact: ISO 8601 UTC, seconds
+#     started_at: "2026-10-27T03:10:00Z"
+#     finished_at: "2026-10-27T03:24:30Z"
+#   data_impact:                 # the 13 declared keys of refs/closeout.md § Data impact, all present: a list of entries or "none: <reason>". Free text follows the reply language; keys, none:, enum values, paths, symbols and commands stay verbatim
+#     purpose: ["The plan list follows the open project instead of the repo fixed at build time"]
+#     flow: [{step: "Opening the Plans tab calls plans_list with the project path", where: "src/features/plans/PlansTab.tsx:56"}]
+#     ui: [{screen: "Plans tab", change: "the list changes with the project", where: "src/features/plans/PlansTab.tsx:56"}]
+#     endpoints: [{kind: tauri, name: plans_list, change: added, where: "src-tauri/src/plans_cmd.rs:9", request_fields: [project], response_fields: [plan_id]}]
+#     db_schema: "none: no table or column changes"
+#     data_reads: [{source: "the project docs/plan", where: "src-tauri/src/plans_cmd.rs:12", fields: [plan_id]}]
+#     data_writes: "none: read only, no writes"
+#     business_rules: [{rule: "Selecting project B lists only B's plans", ac: "UC-010/AC-1"}]
+#     access: "none: no access change"
+#     events_jobs: "none: no events or jobs"
+#     config: "none: no config added"
+#     code_changes: [{file: "src-tauri/src/plans_cmd.rs", symbol: plans_list, before: "absent", after: "reads the project docs/plan folder"}]
+#     risk_rollback: {risks: ["a project path with unusual characters"], rollback: "git revert the wave commit"}
+
+# ---------------------------------------------------------------------------
+# CLOSEOUT — tasks/WZ/WZ-CLOSEOUT.yaml, exactly one per plan that produces a
+# diff (CLAUDE.md §21). The same keys as above, with three differences:
+# owner: implement in place of agent — never normalise one into the other;
+# test_cases: [], the only task where an empty list is valid; and its task
+# entry in plan.yaml carries depends_on: [ALL] (plan-template.yaml). The
+# defaults below are commented out on purpose: copy them in, then fill them; keys not listed below keep the shape above.
+# ---------------------------------------------------------------------------
+# id: WZ-CLOSEOUT
+# title: Closeout — reindex, write results back, sync the spec, update mem0
+# what: >
+#   Run all five closeout steps: reindex GitNexus, compare the real diff
+#   against the planned file list, check that every finished task's result
+#   is in its task file — the mirror carries status and the Result block
+#   rebuilt from it — sync the spec, update mem0, then clear the temp files,
+#   finished worktrees and tool litter (agent-hub worktree-sweep).
+# purpose: >
+#   Working code is not the end of it. The GitNexus graph, the plan's result,
+#   the spec, mem0 and the temp directory all go stale the moment the diff
+#   lands. Nothing fails loudly — the next run reads them, believes them, and
+#   is wrong.
+# files:
+#   - path: "{plan_dir}/tasks/"
+#     change: edit
+#     why: a result missing from a finished task's file is written now
+#   - path: "{plan_dir}/plan.<lang>.md"
+#     change: edit
+#     why: the mirror — status, step ticks and the Result block rebuilt from the task files
+# solution: >
+#   Follow the order of CLAUDE.md §21: reindex first because the four steps
+#   after it all cite symbols; mem0 last because it records what shipped, not
+#   what was attempted.
+# owner: implement
+# status: pending                # as on every task — without it closeout never reaches done
+# covers_uc: null                # closeout covers no UC — it is what syncs them
+# acceptance_criteria:
+#   - "mcp__gitnexus__detect_changes ran and gitnexus analyze exited 0, or reindex records n/a - ~/.claude is never indexed (skills/gitnexus-flow Rule 2)"
+#   - "Every path in the diff is in the union of the task files' files[].path, or listed explicitly in closeout.unplanned_paths"
+#   - "Every done task has a full result in its task file; the mirror carries status and the Result block rebuilt from it"
+#   - "spec_required=true → every spec_delta written into its UC, ## History bumped, ### Test mapping filled"
+#   - "mem0 gains at most 3 new entries, or [] with a reason"
+#   - "git status --short shows no ?? created by this run"
+# test_cases: []                 # closeout has no test case — it is a gate, not a behaviour
+# verification:
+#   - "git status --short"
+#   - "mcp__gitnexus__detect_changes(scope='unstaged')"
+# review_checkpoint:
+#   required: true
+#   focus: [closeout_incomplete, result_write_back, artifact_litter, spec_drift]
+#   estimate_min: 4
+#   risk_areas: ["plan_written_back claiming more than is true", "mem0 storing transient data"]
+# result: null                   # fill this in when status reaches `done` — see CLAUDE.md §20
