@@ -1,0 +1,33 @@
+{
+  "name": "agent-hub",
+  "displayName": "agentHub",
+  "version": "0.1.0",
+  "description": "Multi-agent workflow for Claude Code: an orchestrator routes each request to brainstorm, planner, implement, reviewer, test, designer and devops agents, with spec, plan and review gates.",
+  "license": "MIT + Commons Clause 1.0",
+  "userConfig": {
+    "reply_language": {
+      "type": "string",
+      "title": "Reply language",
+      "description": "Language code (ISO 639-1, for example en, vi, ja) for replies, questions to you and the plan summary file. Files the agents read stay in English.",
+      "default": "en"
+    },
+    "read_guard": {
+      "type": "string",
+      "title": "Read guard",
+      "description": "on or off. When on, reading a whole file longer than read_guard_lines lines or larger than read_guard_bytes bytes, with the Read tool or a plain cat, is refused and the agent is told to read it in parts.",
+      "default": "on"
+    },
+    "read_guard_lines": {
+      "type": "string",
+      "title": "Read guard line limit",
+      "description": "Largest number of lines a whole-file read may return. Default 200.",
+      "default": "200"
+    },
+    "read_guard_bytes": {
+      "type": "string",
+      "title": "Read guard size limit",
+      "description": "Largest size in bytes a whole-file read may return. Default 16384 (16 KiB).",
+      "default": "16384"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# Ordered rule table for tools/port_paths.py. Rules run top to bottom on every line of every file;
+# a line carrying the scrub-allow marker, and a `name:` line inside frontmatter, are never touched.
+# kinds: body = agents/*.md, skills/**/SKILL.md, commands/*.md (Claude Code substitutes ${CLAUDE_PLUGIN_ROOT});
+# reference = every other .md, .yaml, .py. {root} in `replace` is ${CLAUDE_PLUGIN_ROOT}/ for body, empty for reference.
+# Every pattern must stop matching its own output, so a second run reports 0 hits.
+# skip: path globs (repo-relative, fnmatch) never ported. Scripts are code: a rewritten string would break
+# behaviour, so they are ported by hand with their tests.
+skip:
+  - 'plugins/*/scripts/*'
+vars:
+  home: '(?:~|\$HOME)/\.claude/'
+  names: 'orchestrator|brainstorm|scout|designer|planner|implement|reviewer|test|devops'
+  variant: '(?:-(?:low|medium|high|xhigh|max))?'
+  cite: '(?:user\s+20\d\d-\d\d-\d\d|Q\d+[a-z]?|`?docs/(?:adr|analysis)/[^\s`(),;]+`?|ADR-\d{3})'
+rules:
+  # (1) script calls -> the agent-hub dispatcher
+  - {id: script-plan-verify, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?plan-verify\.py', replace: 'agent-hub check plan'}
+  - {id: script-plan-locate, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?plan-locate\.py', replace: 'agent-hub locate'}
+  - {id: script-change-map, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?change-map\.py', replace: 'agent-hub change-map'}
+  - {id: script-review-packet, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?review-packet\.py', replace: 'agent-hub review-packet'}
+  - {id: script-secret-scan, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?secret-scan\.py', replace: 'agent-hub secret-scan'}
+  - {id: script-worktree-sweep, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?worktree-sweep\.py', replace: 'agent-hub worktree-sweep'}
+  - {id: script-docs-migrate, pattern: '(?<![\w./-])(?:python3?\s+)?(?:{home}scripts/|scripts/)?docs-migrate\.py', replace: 'agent-hub docs-migrate'}
+  - {id: script-check-ruleset, pattern: '(?<![\w./-])(?:bash\s+)?(?:{home}scripts/|scripts/)?check-ruleset\.sh', replace: 'tools/check ruleset (package repo only)'}
+  # (2) fleet paths -> plugin-relative forms (the import manifest mapping); user-data paths (memory, projects, ...) are not listed, so they stay
+  - {id: path-core, pattern: '{home}CLAUDE\.md', replace: '{root}rules/core.md'}
+  - {id: path-rule-file, pattern: '{home}(SDD|FLOW|UI_RULES|RTK)\.md', replace: '{root}rules/\1.md'}
+  - {id: path-code-style, pattern: '{home}(?:rules/)?code-style(?![\w-])', replace: '{root}rules/code-style'}
+  - {id: path-rules-other, pattern: '{home}rules/', replace: '{root}rules/'}
+  - {id: path-role-refs, pattern: '{home}agents/refs/', replace: '{root}refs/roles/'}
+  - {id: path-command-refs, pattern: '{home}commands/refs/', replace: '{root}refs/commands/'}
+  - {id: path-fleet-dir, pattern: '{home}(agents|skills|commands|templates|refs)/', replace: '{root}\1/'}
+  - {id: bare-role-refs, pattern: '(?<![\w.-])agents/refs/', replace: 'refs/roles/'}
+  - {id: bare-command-refs, pattern: '(?<![\w.-])commands/refs/', replace: 'refs/commands/'}
+  # (4) analyst pointers -> brainstorm; runs before the spawn rules so an analyst spawn value is renamed first and then qualified
+  - {id: analyst-file, pattern: '(?<![\w.-])agents/analyst(?:-[a-z]+)?\.md', replace: 'agents/brainstorm.md'}
+  - {id: analyst-word, pattern: '(?<![\w./-])analyst(?![\w/-])', replace: 'brainstorm'}
+  - {id: analyst-word-cap, pattern: '(?<![\w./-])Analyst(?![\w/-])', replace: 'Brainstorm'}
+  # (3) spawn names, only where the text names a spawn target
+  - {id: spawn-subagent-type, pattern: '(subagent_type\s*[=:]\s*["'']?)(?:({names}){variant})(?![\w-])', replace: '\1agent-hub:\2'}
+  - {id: spawn-subagent-type-auditor, pattern: '(subagent_type\s*[=:]\s*["'']?)auditor{variant}(?![\w-])', replace: '\1agent-hub-auditor:auditor'}
+  - {id: spawn-verb, pattern: '(\b(?:[Rr]e-)?[Ss]pawn(?:s|ed|ing)?\s+(?:a\s+|the\s+|one\s+)?`)(?:({names}){variant})`', replace: '\1agent-hub:\2`'}
+  - {id: spawn-verb-auditor, pattern: '(\b(?:[Rr]e-)?[Ss]pawn(?:s|ed|ing)?\s+(?:a\s+|the\s+|one\s+)?`)auditor{variant}`', replace: '\1agent-hub-auditor:auditor`'}
+  # (5) plan language
+  - {id: plan-lang-lite-template, pattern: 'plan\.vi-lite-template\.md', replace: 'plan.lang-lite-template.md'}
+  - {id: plan-lang-template, pattern: 'plan\.vi-template\.md', replace: 'plan.lang-template.md'}
+  - {id: plan-lang-mirror, pattern: 'plan\.vi\.md(?!\w)', replace: 'plan.<lang>.md'}
+  # (6) parentheticals whose whole content is decision citations; a mixed one is left for the residue tasks
+  - {id: strip-citation, pattern: '[ \t]*\(\s*{cite}(?:\s*[,;]\s*{cite})*\s*\)', replace: ''}

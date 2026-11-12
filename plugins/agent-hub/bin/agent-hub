@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""agent-hub: one entry point for the plugin's scripts.
+
+usage: agent-hub <subcommand> [args]
+Runs the script behind the subcommand with the remaining arguments; each script keeps its own CLI."""
+import sys
+
+MIN_PYTHON = (3, 11)
+
+SUBCOMMANDS = {  # subcommand -> script file in scripts/
+    "check": None,  # check <plan|ruleset>
+    "locate": "plan-locate.py",
+    "change-map": "change-map.py",
+    "review-packet": "review-packet.py",
+    "secret-scan": "secret-scan.py",
+    "worktree-sweep": "worktree-sweep.py",
+    "docs-migrate": "docs-migrate.py",
+}
+CHECKS = {"plan": "plan-verify.py"}
+RULESET_MESSAGE = "ruleset mode runs only in the agent-hub package repo: python3 tools/check.py ruleset"
+
+
+def python_floor_error(version_info):
+    """The message to print when this interpreter is older than the floor, else None."""
+    if tuple(version_info[:2]) < MIN_PYTHON:
+        return "agent-hub needs Python %d.%d or newer (found %d.%d)" % (MIN_PYTHON + tuple(version_info[:2]))
+    return None
+
+
+def usage():
+    names = " | ".join(SUBCOMMANDS)
+    return "usage: agent-hub <subcommand> [args]\nsubcommands: " + names + "\nagent-hub <subcommand> --help shows that script's options"
+
+
+def run_script(root, script, argv, prog):
+    import runpy
+    sys.argv = [prog] + argv
+    runpy.run_path(str(root / "scripts" / script), run_name="__main__")
+    return 0
+
+
+def main(argv):
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    import _paths
+    lib = _paths.lib_path()
+    if lib.is_dir():
+        sys.path.insert(0, str(lib))
+    if not argv:
+        print(usage(), file=sys.stderr)
+        return 2
+    sub, rest = argv[0], argv[1:]
+    if sub in ("-h", "--help"):
+        print(usage())
+        return 0
+    if sub not in SUBCOMMANDS:
+        print("agent-hub: unknown subcommand '%s'\n%s" % (sub, usage()), file=sys.stderr)
+        return 2
+    if sub == "check":
+        if not rest or rest[0] in ("-h", "--help"):
+            stream = sys.stdout if rest else sys.stderr
+            print("usage: agent-hub check <plan | ruleset> [args]", file=stream)
+            return 0 if rest else 2
+        if rest[0] == "ruleset":
+            print(RULESET_MESSAGE, file=sys.stderr)
+            return 2
+        if rest[0] not in CHECKS:
+            print("agent-hub check: unknown target '%s' (plan | ruleset)" % rest[0], file=sys.stderr)
+            return 2
+        return run_script(root, CHECKS[rest[0]], rest[1:], "agent-hub check plan")
+    return run_script(root, SUBCOMMANDS[sub], rest, "agent-hub " + sub)
+
+
+if __name__ == "__main__":
+    error = python_floor_error(sys.version_info)
+    if error:
+        print(error, file=sys.stderr)
+        sys.exit(2)
+    sys.exit(main(sys.argv[1:]))
