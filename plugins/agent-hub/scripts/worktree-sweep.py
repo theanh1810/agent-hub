@@ -4,7 +4,7 @@
 Judges every linked worktree of each --repo (git worktree list --porcelain, the first entry is the main worktree and is skipped)
 and every child folder of --orphans that has no .git file (those with a .git print one "KEEP <n> worktrees of <repo>" line per repository). Prints "PASS remove <path> (<KB> KB)" or "KEEP <path>: <reason>" per
 path, then "removed N (X MB) | kept M". Removes only with --apply, only a path that passes all four conditions, with
-`git -C <repo> worktree remove <path>` and no force option of any kind; never deletes a branch. Exit 0, or 2 on bad arguments.
+`git -C <repo> worktree remove <path>` and no force option of any kind; never deletes a branch. Exit 0, or 2 on bad arguments. On Windows it prints 'worktree-sweep: not supported on Windows' and exits 0 without judging or removing anything.
 
 Conditions, first failure wins: (1) every commit of the worktree is saved: none that the base branch lacks (git cherry), or HEAD reachable from a local branch or a refs/backup/wt ref, or, with --apply, pinned to refs/backup/wt/<name> first (a dry run prints PIN would and goes on as if pinned, writing no ref), (2) every changed, untracked or
 ignored path outside the regenerable list has identical bytes in the main worktree, (3) no process has its cwd inside, (4) git agrees
@@ -227,6 +227,9 @@ def main(argv=None):
     ap.add_argument('--orphans', metavar='DIR', help='a folder whose children without a .git file are judged')
     ap.add_argument('--json', action='store_true', help='print the result as a JSON list')
     args = ap.parse_args(argv)
+    if os.name == 'nt':
+        print('worktree-sweep: not supported on Windows')
+        return 0
     global APPLY, JSON_OUT
     APPLY, JSON_OUT = args.apply, args.json
     if not args.repo and not args.orphans:

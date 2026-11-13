@@ -3,6 +3,7 @@ decision trace itself (the scrub gate scans tests/ too).
 Run: python3 -m unittest tests.tools.test_port_paths  (also collected by pytest)."""
 import contextlib
 import io
+import os
 import re
 import sys
 import tempfile
@@ -253,7 +254,7 @@ class Cli(unittest.TestCase):
         body, _ = self.tree()
         body.chmod(0o640)
         self.run_main(str(body))
-        self.assertEqual(body.stat().st_mode & 0o777, 0o640)
+        self.assertEqual(body.stat().st_mode & 0o777, 0o666 if os.name == 'nt' else 0o640)
 
 
 if __name__ == "__main__":

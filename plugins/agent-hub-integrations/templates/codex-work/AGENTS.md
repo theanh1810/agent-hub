@@ -24,8 +24,8 @@ artifact paths, lock/writeback, gates, independent-review isolation, verificatio
 closeout from the source workflow. Run actual checks and report unavailable capabilities.
 
 Use `claude-workflow` as the entry skill. Migrated command skills are
-`source-command-spec`, `source-command-audit` and `source-command-codestyle`;
-`orchestrate` is the explicit full-pipeline entry. Work uses its supported skill selector;
+`source-command-spec`, `source-command-audit` and `source-command-codestyle`.
+Work uses its supported skill selector;
 these are not an assertion that Claude slash commands execute identically.
 
 Reply in Vietnamese, keep plan YAML English and the human mirror Vietnamese. General

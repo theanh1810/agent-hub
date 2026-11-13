@@ -147,12 +147,12 @@ class LocateTests(unittest.TestCase):
     def test_dated_archive_found(self):
         write(self.root / 'docs/specs/changes/archive/2026-10-13-demo/plan.yaml', 'plan_id: demo\n')
         found = LOCATE.locate(self.root, 'demo')
-        self.assertTrue(found['plan_dir'].endswith('archive/2026-10-13-demo'))
+        self.assertTrue(Path(found['plan_dir']).as_posix().endswith('archive/2026-10-13-demo'))
         self.assertEqual(found['plan_dir'], found['change_dir'])
 
     def test_legacy_archive_found(self):
         write(self.root / 'docs/specs/changes/archive/demo/plan.yaml', 'plan_id: demo\n')
-        self.assertTrue(LOCATE.locate(self.root, 'demo')['plan_dir'].endswith('archive/demo'))
+        self.assertTrue(Path(LOCATE.locate(self.root, 'demo')['plan_dir']).as_posix().endswith('archive/demo'))
 
     def test_plan_outside_specs_changes_has_no_change_dir(self):
         write(self.root / 'docs/plan/demo/plan.yaml', 'plan_id: demo\n')

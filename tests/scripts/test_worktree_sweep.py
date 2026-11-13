@@ -41,6 +41,7 @@ def load_module():
     return mod
 
 
+@unittest.skipIf(os.name == 'nt', 'worktree-sweep is macOS/Linux only')
 class WorktreeSweepTest(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory(prefix='wt-sweep-')
@@ -373,6 +374,26 @@ class WorktreeSweepTest(unittest.TestCase):
         self.assertIn('KEEP task-db.sh sweep:', res.stdout)
         self.assertEqual(res.returncode, 0)
         self.assertFalse(wt2.exists())
+
+
+@unittest.skipUnless(os.name == 'nt', 'Windows-only: worktree-sweep refusal')
+class WindowsRefusalTest(unittest.TestCase):
+    def test_windows_prints_not_supported_and_removes_nothing(self):
+        """TC-W-1: --apply --orphans on Windows exits 0, prints exactly the not-supported line and nothing on stderr, and leaves every path under the temp folder as it was; the task-db path does not exist, so a run reaching the task-db sweep would print a KEEP line (see test_task_db_failure_only_warns)"""
+        tmp = tempfile.TemporaryDirectory(prefix='wt-sweep-win-')
+        self.addCleanup(tmp.cleanup)
+        base = Path(os.path.realpath(tmp.name))
+        orphans = base / 'orphans'
+        (orphans / 'stale').mkdir(parents=True)
+        (orphans / 'stale' / 'note.txt').write_text('keep\n')
+        tree = lambda: sorted(str(Path(dp, n).relative_to(base)) for dp, ds, fs in os.walk(base) for n in ds + fs)
+        before = tree()
+        res = sweep('--apply', '--orphans', str(orphans), task_db=str(base / 'missing-task-db.sh'))
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(res.stdout, 'worktree-sweep: not supported on Windows\n')
+        self.assertEqual(res.stderr, '')
+        self.assertEqual(tree(), before)
+        self.assertEqual((orphans / 'stale' / 'note.txt').read_text(), 'keep\n')
 
 
 if __name__ == '__main__':

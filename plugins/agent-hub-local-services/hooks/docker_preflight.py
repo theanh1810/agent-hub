@@ -237,8 +237,11 @@ def start_decision(args):
     for n in [a for a in args if not a.startswith("-")]:
         if n in ALL_SHARED:
             continue
+        exe = shutil.which("docker")
+        if exe is None:
+            raise Unknown("docker inspect unavailable")
         try:
-            r = subprocess.run(["docker", "inspect", "--format", "{{.Config.Image}}", n],
+            r = subprocess.run([exe, "inspect", "--format", "{{.Config.Image}}", n],
                                capture_output=True, text=True, timeout=5)
         except Exception:
             raise Unknown("docker inspect unavailable")

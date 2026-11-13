@@ -137,6 +137,19 @@ class PostCompact(TmpCase):
         out = self._hook(self.transcript([""]))
         self.assertEqual((out.returncode, out.stdout), (0, ""))
 
+    def test_revision_prefixed_docs_path_is_kept(self):
+        p, q = (self.d / "docs" / "changes" / n / "plan.yaml" for n in ("p", "q"))
+        for f in (p, q):
+            f.parent.mkdir(parents=True)
+            f.write_text("a: 1\n")
+        bash = lambda cmd, ts: self._entry("assistant", [{"type": "tool_use", "name": "Bash", "input": {"command": cmd}}], ts)
+        t = self.transcript([bash("git show HEAD:docs/changes/p/plan.yaml", "2026-01-01T00:00:01Z"),
+                             bash("git show 0123abcd:docs/changes/q/plan.yaml", "2026-01-01T00:00:02Z")])
+        out = self._hook(t)
+        self.assertEqual(out.returncode, 0)
+        self.assertEqual(out.stdout, "%s\n%s\n%s\n" % (
+            "POST-COMPACT: the summary above is lossy. Re-read these files this session worked on before continuing:", q, p))
+
 
 class ClearHandoff(TmpCase):
     END = {"reason": "clear", "session_id": "s1"}

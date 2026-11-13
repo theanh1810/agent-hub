@@ -863,12 +863,13 @@ class ExternalStepFileTests(unittest.TestCase):
     def test_tilde_path_listed_resolves_under_home(self):
         put(self.out / 'f.txt', 'x = 1\n')
         f = self.fixture('~/f.txt', ['~/f.txt'])
-        env = dict(os.environ, HOME=str(self.out), PLAN_VERIFY_SKIP_MIRROR='1')
+        env = dict(os.environ, HOME=str(self.out), USERPROFILE=str(self.out), PLAN_VERIFY_SKIP_MIRROR='1')
         p = subprocess.run([sys.executable, str(SCRIPT), str(f.plan), '--root', str(f.root)], capture_output=True, text=True, env=env)
         found = {m.group(2): (m.group(1), m.group(3)) for m in map(LINE.match, p.stdout.splitlines()) if m}
         self.assertEqual(found['steps_shape'][0], 'PASS', found['steps_shape'])
         self.assertEqual(found['anchors'][0], 'PASS', found['anchors'])
 
+    @unittest.skipIf(os.name == 'nt', 'plan-verify --clone is refused on Windows')
     def test_clone_leaves_the_external_file_unchanged(self):
         f = self.fixture(self.ext, [str(self.ext)])
         clone = self.out / 'clone'
@@ -894,6 +895,7 @@ class ExternalStepFileTests(unittest.TestCase):
         self.assertIn('is absolute', found['steps_shape'][1])
         self.assertNotIn('external in memory', found['anchors'][1])
 
+    @unittest.skipIf(os.name == 'nt', 'plan-verify --clone is refused on Windows')
     def test_case_variant_spelling_of_root_inside_root_fails(self):
         f = Fixture(self)
         put(f.root / 'src/app.py', 'x = 1\n')
@@ -1107,6 +1109,25 @@ class MirrorGateTests(unittest.TestCase):
         ok, msg = self.check(self.plan(None))
         self.assertTrue(ok)
         self.assertIn('skipped: no mirror', msg)
+
+
+@unittest.skipUnless(os.name == 'nt', 'Windows-only: plan-verify --clone refusal')
+class WindowsCloneRefusalTests(unittest.TestCase):
+    def test_clone_is_refused_on_windows_and_nothing_is_written(self):
+        """TC-W-3: --clone on Windows exits 2 with exactly the refusal line on stdout and no gate line; the clone folder is never created and the fixture's files keep their names and bytes"""
+        f = Fixture(self)
+        out = tempfile.TemporaryDirectory(prefix='pv-win-')
+        self.addCleanup(out.cleanup)
+        clone = Path(out.name) / 'clone'
+        files = sorted(p for p in f.root.rglob('*') if p.is_file())
+        before = {p: p.read_bytes() for p in files}
+        code, found, stdout = f.verify('--clone', str(clone))
+        self.assertEqual(code, 2)
+        self.assertEqual(stdout, 'plan-verify: --clone needs rsync and bash; not supported on Windows\n')
+        self.assertEqual(found, {})
+        self.assertFalse(clone.exists())
+        self.assertEqual(sorted(p for p in f.root.rglob('*') if p.is_file()), files)
+        self.assertEqual({p: p.read_bytes() for p in files}, before)
 
 
 if __name__ == '__main__':

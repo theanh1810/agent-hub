@@ -548,9 +548,9 @@ def parse_args(argv):
     ap.add_argument('--dry-run', action='store_true', help='the default and, in T1, the only mode')
     ap.add_argument('--apply', action='store_true', help='re-plan, move, verify, write docs/changes/MIGRATION-MAP.tsv')
     ap.add_argument('--verify', action='store_true', help='verify a finished move against manifest-before.tsv and migration-map.tsv in --out')
-    ap.add_argument('--delete', type=Path, metavar='APPROVED.tsv', help='remove exactly the approved prune and delete lists (profile prune)')
+    ap.add_argument('--delete', type=Path, metavar='APPROVED.tsv', help='remove exactly the approved prune and delete lists (profile prune); refused on Windows')
     ap.add_argument('--verdicts', type=Path, help='verdicts.tsv recorded before the move: id, status, plan_dir, analysis_ref, error')
-    ap.add_argument('--locate', default=f'python3 {Path(__file__).resolve().with_name("plan-locate.py")}',
+    ap.add_argument('--locate', default=None,
                     help="plan-locate command, run as CMD --workspace ROOT ID; the word skip verifies without verdicts")
     ap.add_argument('--verify-tar', type=Path, metavar='TAR', help='stream TAR (mode r|gz, nothing extracted) and prove every row of --manifest: in_tar, bytes_equal, sha256_equal into tar-verify.tsv beside the manifest')
     ap.add_argument('--manifest', type=Path, help='manifest-before.tsv (path, bytes, sha256) that --verify-tar proves')
@@ -697,13 +697,19 @@ def check_verdicts(path, ids):
 
 
 def run_locate(cmd, root, plan_id):
-    """run shlex.split(cmd) (a leading ~ expanded) + ['--workspace', ROOT, ID]; -> a VERDICT_COLUMNS row: exit 0 -> status ok with the
+    """cmd None (the default): the running interpreter + plan-locate.py beside this script, no PATH lookup. Else run shlex.split(cmd) (POSIX split on POSIX hosts, native split on Windows; a leading ~ expanded) + ['--workspace', ROOT, ID]; -> a VERDICT_COLUMNS row: exit 0 -> status ok with the
     JSON plan_dir and analysis_ref (null -> empty) minus the ROOT prefix; exit 1 -> status error with stderr after 'plan-locate: '
     minus the ROOT prefix"""
     root = Path(root)
-    argv = [os.path.expanduser(a) for a in shlex.split(cmd)] + ['--workspace', str(root), plan_id]
+    if cmd is None:
+        toks = [sys.executable, str(Path(__file__).resolve().with_name('plan-locate.py'))]
+    else:
+        toks = shlex.split(cmd, posix=os.name != 'nt')
+        if os.name == 'nt':
+            toks = [t[1:-1] if len(t) >= 2 and t[0] == t[-1] and t[0] in '"\'' else t for t in toks]
+    argv = [os.path.expanduser(a) for a in toks] + ['--workspace', str(root), plan_id]
     p = subprocess.run(argv, capture_output=True, text=True)
-    strip = lambda s: s.replace(str(root) + '/', '')
+    strip = lambda s: s.replace(str(root) + os.sep, '').replace(str(root) + '/', '').replace(os.sep, '/')
     if p.returncode == 0:
         j = json.loads(p.stdout)
         return {'id': plan_id, 'status': 'ok', 'plan_dir': strip(j.get('plan_dir') or ''),
@@ -923,7 +929,10 @@ def cmd_delete(root, out, args):
     update each pending-delete row of the map under an approved path to pruned-in-backup (new is a path) or deleted-not-backed-up (new '-'),
     and each pending-delete row under a live row the approved list left out to kept-by-user (the path stays on disk); write
     out/manifest-after.tsv and compare it with manifest-before.tsv minus the approved pruned paths (exit 1 on a difference); os.rmdir emptied
-    roots, ROOT/.cm-tmp only when empty"""
+    roots, ROOT/.cm-tmp only when empty. Windows (os.name == 'nt'): refused first, exit 1, nothing read or removed"""
+    if os.name == 'nt':
+        print('docs-migrate: lsof-based open-file check unavailable on Windows; nothing was removed', file=sys.stderr)
+        return EXIT_STOPS
     if args.profile != 'prune':
         print('docs-migrate: --delete runs with --profile prune only', file=sys.stderr)
         return EXIT_REFUSED

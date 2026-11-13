@@ -79,7 +79,7 @@ def run_git(root, *argv):
 
 
 def list_files(base):
-    return sorted(os.path.relpath(os.path.join(d, n), base) for d, _, names in os.walk(base) for n in names)
+    return sorted(os.path.relpath(os.path.join(d, n), base).replace(os.sep, '/') for d, _, names in os.walk(base) for n in names)
 
 
 def read_text(path):
@@ -97,12 +97,12 @@ def expand(root, path, base_kind, base_ref):
     live = os.path.join(root, path)
     names = set()
     if os.path.isdir(live):
-        names |= {os.path.join(path, n) for n in list_files(live)}
+        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(live)}
     if base_kind == 'git':
         listed = run_git(root, 'ls-tree', '-r', '--name-only', base_ref, '--', path)
         names |= set((listed or '').split('\n')) - {''}
     elif base_kind == 'backup' and os.path.isdir(under(base_ref, root, path)):
-        names |= {os.path.join(path, n) for n in list_files(under(base_ref, root, path))}
+        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(under(base_ref, root, path))}
     return sorted(names) or [path]
 
 
@@ -176,7 +176,7 @@ def fix_round_paths(plan_dir, root):
         names = [f['path'] for x in fixes if isinstance(x, dict) for f in (x.get('files') or [])
                  if isinstance(f, dict) and isinstance(f.get('path'), str) and f['path']]
         if names:
-            return sorted({os.path.relpath(n, root) if os.path.isabs(n) else n for n in names})
+            return sorted({os.path.relpath(n, root).replace(os.sep, '/') if os.path.isabs(n) else n for n in names})
     return []
 
 
@@ -285,7 +285,7 @@ def packet(idx, tasks, rows, deep, rnd, note):
 
 
 def diff_only(rows, deep, plan_dir, root):
-    own = os.path.relpath(os.path.abspath(plan_dir), root) + '/'
+    own = os.path.relpath(os.path.abspath(plan_dir), root).replace(os.sep, '/') + '/'
     items = [(deep_reason(deep, n), n, d) for r in rows for n, d in r['files'] if not n.startswith(own)]
     out = []
     for why, name, diff in sorted(items, key=lambda x: not x[0]):

@@ -110,7 +110,7 @@ def scan_arg(arg):
     allow, out = read_allow(root), []
     for path in paths:
         if is_text(path):
-            out += [(path, *hit) for hit in scan_file(path, os.path.relpath(path, root), allow)]
+            out += [(path, *hit) for hit in scan_file(path, os.path.relpath(path, root).replace(os.sep, '/'), allow)]
     return out
 
 

@@ -87,7 +87,7 @@ class PacketTests(unittest.TestCase):
         self.assertIn('| T2 | AC-1 | TC-T2-1 | test -f c.txt | 0 | false |  | c.txt not yet checked |', text)
         self.assertIn('+TWO', text)
         self.assertLess(text.index('### b.txt DEEP (whole file: risky)'), text.index('### a.txt'))
-        self.assertEqual(oct((self.fx.out / 'review-packet-r0.md').stat().st_mode & 0o777), '0o644')
+        self.assertEqual(oct((self.fx.out / 'review-packet-r0.md').stat().st_mode & 0o777), '0o666' if os.name == 'nt' else '0o644')
 
     def test_created_path_diffs_against_empty(self):
         self.fx.run()
@@ -286,6 +286,28 @@ class PacketTests(unittest.TestCase):
         self.assertIn(f'git {sha}', text)
         self.assertIn('-g1', text)
         self.assertIn('+g2', text)
+
+    def test_git_base_directory_lists_each_file_once(self):
+        root = self.fx.root
+        if shutil.which('git') is None:
+            self.skipTest('git missing')
+        git = ['git', '-C', str(root), '-c', 'user.name=t', '-c', 'user.email=t@t']
+        subprocess.run(git + ['init', '-q'], check=True)
+        put(root / 'd/x.txt', 'x1\n')
+        subprocess.run(git + ['add', 'd/x.txt'], check=True)
+        subprocess.run(git + ['commit', '-q', '-m', 'base'], check=True)
+        sha = subprocess.run(git + ['rev-parse', 'HEAD'], capture_output=True, text=True, check=True).stdout.strip()
+        put(root / 'd/x.txt', 'x2\n')
+        put(root / 'd/y.txt', 'y\n')
+        t1 = yaml.safe_load((self.fx.plan / 'tasks/W1/T1.yaml').read_text())
+        t1['files'].append({'path': 'd', 'change': 'edit', 'why': 'w'})
+        t1['result']['baseline'] = {'head': sha, 'dirty_paths': []}
+        dump(self.fx.plan / 'tasks/W1/T1.yaml', t1)
+        self.fx.run()
+        text = self.fx.packet()
+        self.assertEqual([ln for ln in text.splitlines() if ln.startswith('### d')], ['### d/x.txt', '### d/y.txt'])
+        self.assertIn('-x1', text)
+        self.assertIn('+x2', text)
 
 
 class PacketLocationTests(unittest.TestCase):

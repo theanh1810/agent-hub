@@ -48,7 +48,6 @@ cleanup of this task's exact temporary paths.
 - Spec operations: `source-command-spec`; init/check helpers are supporting references.
 - Audit: `source-command-audit`.
 - Code style: `source-command-codestyle`.
-- Explicit full multi-agent pipeline: `orchestrate`.
 
 These are native skill entries, invoked with the host's skill selector. Hooks require the
 normal Codex trust review; do not bypass it. No skill authorizes a deployment, publication,

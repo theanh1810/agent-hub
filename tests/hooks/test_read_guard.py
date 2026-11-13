@@ -1,6 +1,7 @@
 """Tests for plugins/agent-hub/hooks/read_guard.py (runs under unittest and pytest)."""
 import json
 import os
+import shlex
 import statistics
 import subprocess
 import sys
@@ -135,7 +136,9 @@ class TestOptions(GuardCase):
 
 class TestBroken(GuardCase):
     def test_tc5_broken_input_and_no_writes(self):
-        for raw in ("", "not json", "[1, 2]", json.dumps(read_payload(self.big)).replace(str(self.big), "")):
+        blank = read_payload(self.big)
+        blank["tool_input"]["file_path"] = ""
+        for raw in ("", "not json", "[1, 2]", json.dumps(blank)):
             self.assertSilent(run(None, raw=raw))
         self.assertSilent(run({"tool_name": "Read", "tool_input": {"file_path": 42}}))
         self.assertSilent(run({"tool_name": "Read", "tool_input": "x"}))
@@ -165,7 +168,7 @@ class TestBroken(GuardCase):
 class TestBashCat(GuardCase):
     def test_tc7_cat_forms(self):
         (self.tmp / "small.txt").write_text("hi\n")
-        denied = [f"cat {self.big}", "cat big.txt", "cat ~/big.txt", "cat 'big.txt'"]
+        denied = [f"cat {shlex.quote(str(self.big))}", "cat big.txt", "cat ~/big.txt", "cat 'big.txt'"]
         for cmd in denied:
             proc = run(bash_payload(cmd, self.tmp), env_extra={"HOME": str(self.tmp), "USERPROFILE": str(self.tmp)})
             r = reason_of(proc)

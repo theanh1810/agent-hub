@@ -101,7 +101,7 @@ Claude statusLine has no documented equivalent in Work; use the native task/tool
 
 Commands migrate to skill entry points: source-command-spec, source-command-audit and
 source-command-codestyle; init/check are supporting refs, not separate user commands.
-Orchestrate remains a manual skill. Use the skill selector supported by Work/Codex rather
+Use the skill selector supported by Work/Codex rather
 than claiming that Claude slash commands were registered identically.
 
 The native Codex wrapper replaces Claude's plugin that calls Codex as an external engine.

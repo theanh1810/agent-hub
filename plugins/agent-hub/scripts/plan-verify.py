@@ -22,6 +22,7 @@ docs/brainstorm/{plan_id}.yaml.
 --ceiling-exception names a task the user allowed over 5 files; cite the decision beside the call.
 
 anchors applies every step not yet done, in wave order, in memory by default: each edit's before must occur exactly once at the moment it is applied, and a step file must stay inside the root unless it is absolute or ~-led, outside the root, and listed in binding_scope.files_allowed ; such a file is read in place and, under --clone, changed in memory only.
+--clone is POSIX only: on Windows it is refused with exit 2.
 --clone copies the workspace to DIR with rsync --delete --delete-excluded, so a reused DIR loses what the source lacks, and is not a sandbox: DIR must be new, empty or hold the marker .plan-verify-clone, and may not be, contain or sit inside the root unless under a folder excluded from the copy
 (the config-dir runtime folders are excluded by default when the root is the config dir, --exclude adds patterns). It applies the steps on disk and runs each run step there, with DIR as cwd, the root path rewritten to DIR (a path assembled at run time is not rewritten), then checks the exit code the step's expect names and any "prints: TEXT" that follows the exit code; other prose after the code is counted, not compared.
 --after-task CMD runs in DIR after each task with {root} replaced by DIR. A refusal or load failure exits 2 with one line on stdout.
@@ -439,7 +440,7 @@ def chk_anchors(ctx):
     root, clone, bad, texts, skipped, applied = ctx['root'], ctx['clone'], [], {}, [], 0
     base = clone or root
     ran = unverified = external = 0
-    rel_plan = os.path.relpath(ctx['plan_dir'], root) + '/'
+    rel_plan = os.path.relpath(ctx['plan_dir'], root).replace(os.sep, '/') + '/'
     plan_written = os.path.isdir(ctx['plan_dir'])
     for t in ordered(ctx):
         for s in t.get('steps') or []:
@@ -598,7 +599,7 @@ def template_leaves(node, path=''):
 def change_files(ctx):
     """-> folder, spec paths, names of the proposal.md and design.md present: the change folder as chk_spec_delta and chk_placeholders both read it"""
     root = ctx['root']
-    changes = os.path.relpath(ctx['plan_dir'], root).startswith(('docs/changes/', 'docs/specs/changes/'))
+    changes = os.path.relpath(ctx['plan_dir'], root).replace(os.sep, '/').startswith(('docs/changes/', 'docs/specs/changes/'))
     folder = ctx['plan_dir'] if changes else os.path.join(root, 'docs/analysis', str(ctx['plan_id']))
     specs = sorted(glob.glob(os.path.join(folder, 'specs/**/spec.md'), recursive=True)) if changes else []
     docs = [n for n in ('proposal.md', 'design.md') if os.path.isfile(os.path.join(folder, n))]
@@ -659,7 +660,7 @@ def chk_placeholders(ctx):
             with open(path, encoding='utf-8') as f:
                 for n, l in enumerate(f.read().splitlines(), 1):
                     if l.strip() in want:
-                        bad.append(f"{os.path.relpath(path, ctx['root'])}:{n}: line copied from {tpl}")
+                        bad.append(f"{os.path.relpath(path, ctx['root']).replace(os.sep, '/')}:{n}: line copied from {tpl}")
     return not bad, f"{len(values)} template values, {len(lines)} template lines, off={bad}"
 
 
@@ -754,7 +755,7 @@ def spec_fingerprint(plan_dir, root=None):
         ucs.update((load_yaml(os.path.join(plan_dir, e['file'])) if split else e).get('covers_uc') or [])
     if not ucs:
         return None, []
-    paths = sorted({os.path.relpath(p, root) for ref, ps in catalog(root, plan_dir).items() if ref.split('/')[0] in ucs for p in ps})
+    paths = sorted({os.path.relpath(p, root).replace(os.sep, '/') for ref, ps in catalog(root, plan_dir).items() if ref.split('/')[0] in ucs for p in ps})
     def digest(p):
         with open(os.path.join(root, p), 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()
@@ -877,7 +878,7 @@ def chk_spec_delta(ctx):
     bad, seen = [], {}
     for p in specs:
         with open(p, encoding='utf-8') as f:
-            bad += spec_problems(os.path.relpath(p, folder), f.read(), live, seen)
+            bad += spec_problems(os.path.relpath(p, folder).replace(os.sep, '/'), f.read(), live, seen)
     for n in docs:
         want = template_headings('templates/analysis/' + n.replace('.md', '-template.md'))
         with open(os.path.join(folder, n), encoding='utf-8') as f:
@@ -1202,6 +1203,8 @@ def main():
     ap.add_argument('--exclude', action='append', default=[])
     ap.add_argument('--approve', metavar='USER_WORDS')
     a = ap.parse_args()
+    if a.clone and os.name == 'nt':
+        die('--clone needs rsync and bash; not supported on Windows')
     missing = [t for t in [TEMPLATE] + [os.path.join(HOME, r) for r in TEMPLATE_SOURCES] if not os.path.isfile(t)]
     if missing:
         die(f'template file missing: {missing[0]}')

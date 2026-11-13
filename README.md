@@ -5,11 +5,11 @@ A multi-agent workflow for Claude Code. An orchestrator routes each request to s
 ## Install
 
 ```
-/plugin marketplace add <owner>/agentHub
+/plugin marketplace add theanh1810/agent-hub#release
 /plugin install agent-hub@agent-hub
 ```
 
-`<owner>` is the GitHub account that publishes the repository. Installing asks for one setting, the reply language (see Reply language).
+Installing asks for one setting, the reply language (see Reply language).
 
 ## Prerequisites
 

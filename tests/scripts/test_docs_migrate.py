@@ -381,9 +381,9 @@ def record_verdicts(ws, locate, dest, ids=IDS):
         p = subprocess.run([*locate.split(), '--workspace', str(ws), i], capture_output=True, text=True)
         if p.returncode == 0:
             j = json.loads(p.stdout)
-            rows.append('\t'.join([i, 'ok', j['plan_dir'].replace(str(ws) + '/', ''), (j['analysis_ref'] or '').replace(str(ws) + '/', ''), '']))
+            rows.append('\t'.join([i, 'ok', j['plan_dir'].replace(str(ws) + os.sep, '').replace(str(ws) + '/', '').replace(os.sep, '/'), (j['analysis_ref'] or '').replace(str(ws) + os.sep, '').replace(str(ws) + '/', '').replace(os.sep, '/'), '']))
         else:
-            rows.append('\t'.join([i, 'error', '', '', p.stderr.strip().split('plan-locate: ', 1)[1].replace(str(ws) + '/', '')]))
+            rows.append('\t'.join([i, 'error', '', '', p.stderr.strip().split('plan-locate: ', 1)[1].replace(str(ws) + os.sep, '').replace(str(ws) + '/', '').replace(os.sep, '/')]))
     Path(dest).write_text('\n'.join(rows) + '\n', encoding='utf-8')
 
 
@@ -538,6 +538,15 @@ class ArchivedRecordTests(MoveCase):
         self.assertEqual(after['zeta']['status'], 'error')
         self.assertIn('multiple machine records', after['zeta']['error'])
 
+    def test_apply_without_locate_needs_no_python3_on_path(self):
+        """no --locate: the default runs plan-locate.py beside the script with the running interpreter, so an empty PATH changes nothing"""
+        empty = Path(self.tmp.name) / 'empty-path'
+        empty.mkdir()
+        with mock.patch.dict(os.environ, {'PATH': str(empty)}):
+            code, err = self.dm('--apply', '--verdicts', str(self.v), stderr=True)
+        self.assertEqual((code, err), (0, ''))
+        self.assertTrue((self.ws / 'docs/changes/MIGRATION-MAP.tsv').is_file())
+
 
 class VerifyTests(MoveCase):
     def moved(self):
@@ -595,6 +604,7 @@ class DeleteCase(MoveCase):
         return self.dm('--delete', str(self.approved), '--profile', 'prune', '--keep', 'local-e2e-stack', stderr=stderr)
 
 
+@unittest.skipIf(os.name == 'nt', 'docs-migrate --delete is refused on Windows')
 class DeleteTests(DeleteCase):
     def test_delete_refuses_and_removes_nothing(self):
         """an empty list, a row whose files or bytes differ from its live row (a prune row and a delete row alike, DC-57), an extra row absent from the live list, and rows outside docs/ and .cm-tmp, under docs/requietment, under the live docs/specs layer, under docs/reviews/baselines, or naming the --keep entry, each exit 1 naming the path and leave the tree unchanged"""
@@ -748,6 +758,29 @@ class VerifyTarTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('docs/archives/x', err)
         self.assertFalse((self.d / 'tar-verify.tsv').exists())
+
+
+@unittest.skipUnless(os.name == 'nt', 'Windows-only: docs-migrate --delete refusal')
+class WindowsDeleteRefusalTests(unittest.TestCase):
+    def test_delete_is_refused_on_windows_and_nothing_is_read_or_removed(self):
+        """TC-W-2: --delete on Windows exits 1 with exactly the refusal line on stderr and nothing on stdout; every workspace file keeps its sha256 and mtime_ns, the approved list is byte-identical, and --out is never created"""
+        tmp = tempfile.TemporaryDirectory(prefix='docs-migrate-win-')
+        self.addCleanup(tmp.cleanup)
+        base = Path(tmp.name).resolve()
+        ws, out, approved = base / 'ws', base / 'out', base / 'approved.tsv'
+        base_tree(ws)
+        prune_tree(ws)
+        approved.write_text('category\tpath\tfiles\tbytes\nprune\tdocs/plan/alpha/amend-1.md\t1\t2\n', encoding='utf-8')   # never parsed: the guard runs first
+        before, listed = snapshot(ws), approved.read_bytes()
+        err, std = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(std):
+            code = DM.main(['--workspace', str(ws), '--out', str(out), '--delete', str(approved), '--profile', 'prune'])
+        self.assertEqual(code, 1)
+        self.assertEqual(err.getvalue(), 'docs-migrate: lsof-based open-file check unavailable on Windows; nothing was removed\n')
+        self.assertEqual(std.getvalue(), '')
+        self.assertEqual(snapshot(ws), before)
+        self.assertEqual(approved.read_bytes(), listed)
+        self.assertFalse(out.exists())
 
 
 if __name__ == '__main__':

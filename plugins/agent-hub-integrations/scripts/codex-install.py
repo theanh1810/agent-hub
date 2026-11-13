@@ -70,7 +70,7 @@ def install(stage, codex, skills, imported):
                 command = handler.get('command', '')
                 ours = command == hook_command and bool(prior_manifest)
                 try:
-                    native_import = event in owned.get('HOOKS', set()) and expected_import == shlex.split(command)
+                    native_import = event in owned.get('HOOKS', set()) and expected_import == shlex.split(command, posix=os.name != 'nt')
                 except ValueError:
                     native_import = False
                 if not ours and not native_import:

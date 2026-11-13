@@ -132,7 +132,7 @@ def git_show(repo, spec):
 def commit_files(repo, root, sha):
     """-> the paths one commit changed, relative to the workspace root (prefixed by the repo's folder when the repo is a child of root).
     Reads `git show --name-only --format= -z`, so a path with spaces or unicode arrives unquoted."""
-    rel = os.path.relpath(repo, root)
+    rel = os.path.relpath(repo, root).replace(os.sep, '/')
     names = [n for n in git_out(repo, 'show', '--name-only', '--format=', '-z', sha).split('\0') if n]
     return names if rel == '.' else [f'{rel}/{n}' for n in names]
 
@@ -231,7 +231,7 @@ def norm_path(p, root):
     p = str(p)
     if os.path.isabs(p):
         rel = os.path.relpath(p, root)
-        return p if rel == '..' or rel.startswith('..' + os.sep) else rel
+        return p if rel == '..' or rel.startswith('..' + os.sep) else rel.replace(os.sep, '/')
     while p.startswith('./'):
         p = p[2:]
     return p
@@ -357,7 +357,7 @@ def build_model(meta, tasks, root):
         for s in shas:
             repo, names = commit(s)
             changed |= set(names)
-            rels |= {os.path.relpath(repo, root)} - {'.'}
+            rels |= {os.path.relpath(repo, root).replace(os.sep, '/')} - {'.'}
         real = {p for p in changed if not p.startswith(IGNORED_PREFIXES)}
 
         def resolve(p):
@@ -374,7 +374,7 @@ def build_model(meta, tasks, root):
             info[i]['diff'] = {'declared': declared[i], 'changed': real, 'owned': owned, 'attached': attached[i]}
             for s in info[i]['shas']:
                 repo, names = commit(s)
-                rel = os.path.relpath(repo, root)
+                rel = os.path.relpath(repo, root).replace(os.sep, '/')
                 info[i]['deps'] += [e for n in names if n in owned and os.path.basename(n) in DEP_MANIFESTS
                                     for e in manifest_entries(repo, s, n if rel == '.' else n[len(rel) + 1:], n)]
     done = []

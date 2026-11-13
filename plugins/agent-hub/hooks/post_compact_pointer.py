@@ -19,7 +19,7 @@ MAX_EDITED = 10
 MAX_REQUEST_CHARS = 200
 MAX_OUT_BYTES = 2048
 KEEP = ("/docs/changes/", "/docs/brainstorm/", "/docs/plan/", "/docs/analysis/", "/docs/specs/changes/")  # scrub-allow: legacy analysis path read
-PATHRE = re.compile(r"[\w./~@+-]*docs/(?:changes|brainstorm|plan|analysis|specs/changes)/[^\s\"'`<>()\[\],;|]+")
+PATHRE = re.compile(r"(?:(?<![\w:])[A-Za-z]:[\\/])?[\w./\\~@+-]*docs[\\/](?:changes|brainstorm|plan|analysis|specs[\\/]changes)[\\/][^\s\"'`<>()\[\],;|]+")
 FILE_TOOLS = ("Read", "Write", "Edit")
 EDIT_TOOLS = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 NOT_REQUEST = ("<command-", "<local-command", "<system-reminder>")
@@ -98,7 +98,7 @@ def scan(path, cwd, wide, found, edited, req, seq):
                     cands.extend(PATHRE.findall(s))
             for p in cands:
                 p = norm(p, cwd)
-                if any(k in p for k in KEEP) and os.path.isfile(p):
+                if any(k in p.replace(os.sep, "/") for k in KEEP) and os.path.isfile(p):
                     found[p] = max(found.get(p, ("", 0)), (stamp, seq))
     return seq
 

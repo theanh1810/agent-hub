@@ -1,11 +1,15 @@
 """Tests for plugins/agent-hub-local-services/hooks/docker_preflight.py. Each case feeds {"tool_input": {"command": <cmd>}} on stdin and asserts the exit code and stderr."""
-import json, os, stat, subprocess, sys, tempfile, unittest
+import json, os, shlex, stat, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2] / 'plugins' / 'agent-hub-local-services'
 HOOK = PLUGIN / 'hooks' / 'docker_preflight.py'
 INFRA = '/opt/shared-infra'
-POINTER = 'refs/local-services.md'
+POINTER = os.path.join('refs', 'local-services.md')
+
+
+def q(p):
+    return shlex.quote(str(p))
 
 
 def preflight(cmd, env=None, inspect_image=None, cwd=None, infra=INFRA, fake_script=None, with_docker=True, raw_stdin=None):
@@ -22,13 +26,15 @@ def preflight(cmd, env=None, inspect_image=None, cwd=None, infra=INFRA, fake_scr
     e.pop('PYTHONPATH', None)  # the hook must find its own vendored PyYAML
     e.update(env or {})
     with tempfile.TemporaryDirectory() as d:
-        fake = Path(d) / 'docker'
+        win = os.name == 'nt'
+        fake = Path(d) / ('docker.cmd' if win else 'docker')
         if fake_script is not None:
-            fake.write_text(fake_script)
+            body = fake_script
         elif inspect_image is None:
-            fake.write_text('#!/bin/sh\nexit 1\n')
+            body = '@echo off\r\nexit /b 1\r\n' if win else '#!/bin/sh\nexit 1\n'
         else:
-            fake.write_text('#!/bin/sh\necho "%s"\n' % inspect_image)
+            body = ('@echo off\r\necho %s\r\n' if win else '#!/bin/sh\necho "%s"\n') % inspect_image
+        fake.write_text(body, newline='')
         fake.chmod(fake.stat().st_mode | stat.S_IEXEC)
         e['PATH'] = (d + os.pathsep + e.get('PATH', '')) if with_docker else d + os.sep + 'none'
         if not with_docker:
@@ -73,22 +79,22 @@ class PreflightTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / 'compose.yaml'
             f.write_text('services:\n  db:\n    image: postgres:16\n')
-            self.check('docker compose -f %s up -d' % f, 2)
+            self.check('docker compose -f %s up -d' % q(f), 2)
 
     def test_compose(self):
-        self.check('docker compose -f %s/postgres/compose.yaml up -d' % INFRA, 0)
+        self.check('docker compose -f %s up -d' % q(INFRA + '/postgres/compose.yaml'), 0)
         self.check('docker compose -f /tmp/x/deploy/app/docker-compose.yml up -d', 0)
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / 'compose.yaml'
             f.write_text('services:\n  r:\n    image: redis:7-alpine\n    ports:\n      - "6379:6379"\n')
-            self.check('docker compose -f %s up -d' % f, 2)
+            self.check('docker compose -f %s up -d' % q(f), 2)
             f.write_text('services:\n  r:\n    image: redis:7-alpine\n    container_name: shared-redis\n    ports:\n      - "127.0.0.1:6379:6379"\n')
-            self.check('docker compose -f %s up -d' % f, 0)
+            self.check('docker compose -f %s up -d' % q(f), 0)
             f.write_text('services:\n  s:\n    image: minio/minio\n    container_name: shared-minio\n')
-            self.check('docker-compose -f %s up -d' % f, 2)
+            self.check('docker-compose -f %s up -d' % q(f), 2)
             f.write_text('services:\n  a:\n    image: node:20\n    ports:\n      - "3000:3000"\n')
-            self.check('docker compose -f %s up -d' % f, 2)
-            self.check('docker compose -f %s down' % f, 0)
+            self.check('docker compose -f %s up -d' % q(f), 2)
+            self.check('docker compose -f %s down' % q(f), 0)
 
     def test_kill_switch(self):
         self.check('docker run -d postgres:16', 0, env={'CLAUDE_DOCKER_PREFLIGHT': 'off'})
@@ -132,17 +138,17 @@ class PreflightTest(unittest.TestCase):
     def test_f1a_cd_into_bad_dir(self):
         with tempfile.TemporaryDirectory() as d:
             P, N = self._dirs(d)
-            err = self.check('cd %s && docker compose up -d' % P, 2, cwd=N)
+            err = self.check('cd %s && docker compose up -d' % q(P), 2, cwd=N)
             self.assertIn('compose service db defines its own postgres', err)
 
     def test_f1b_cd_into_good_dir(self):
         with tempfile.TemporaryDirectory() as d:
             P, N = self._dirs(d)
-            self.assertEqual(preflight('cd %s && docker compose up -d web' % N, cwd=P), (0, ''))
+            self.assertEqual(preflight('cd %s && docker compose up -d web' % q(N), cwd=P), (0, ''))
 
     def test_f1c_tilde_infra_path(self):
         self.assertEqual(preflight('docker compose -f ~/infra/redis/compose.yaml up -d --wait',
-                                   env={'HOME': '/opt/h'}, infra='/opt/h/infra'), (0, ''))
+                                   env={'HOME': '/opt/h', 'USERPROFILE': '/opt/h'}, infra='/opt/h/infra'), (0, ''))
 
     def test_f1d_home_relative_paths(self):
         with tempfile.TemporaryDirectory() as d:
@@ -150,7 +156,7 @@ class PreflightTest(unittest.TestCase):
             (H / 'proj').mkdir(parents=True)
             (H / 'proj' / 'compose.yml').write_text('services:\n  db:\n    image: postgres:16\n    ports:\n      - "5432:5432"\n')
             for cmd in ('docker compose -f ~/proj/compose.yml up -d', 'docker compose --project-directory ~/proj up -d'):
-                err = self.check(cmd, 2, env={'HOME': str(H)})
+                err = self.check(cmd, 2, env={'HOME': str(H), 'USERPROFILE': str(H)})
                 self.assertIn('compose service db defines its own postgres', err)
 
     def test_f1e_cd_unknown(self):
@@ -186,7 +192,7 @@ class PreflightTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / 'compose.yaml'
             f.write_text('services:\n  a:\n    image: node:20\n    network_mode: host\n')
-            self.assertIn(msg, self.check('docker compose -f %s up -d' % f, 2))
+            self.assertIn(msg, self.check('docker compose -f %s up -d' % q(f), 2))
 
     def test_f2f_sudo(self):
         for cmd in ('sudo docker run -d postgres:16', 'sudo -E docker run -d postgres:16'):
@@ -216,7 +222,7 @@ class PreflightTest(unittest.TestCase):
     def test_inspect_timeout(self):
         import time
         t0 = time.time()
-        rc, err = preflight('docker start foo', fake_script='#!/bin/sh\nsleep 30\n')
+        rc, err = preflight('docker start foo', fake_script='@echo off\r\n:l\r\ngoto l\r\n' if os.name == 'nt' else '#!/bin/sh\nsleep 30\n')
         self.assertEqual(rc, 0)
         self.assertLess(time.time() - t0, 15)
         self.assertIn('could not parse', err)

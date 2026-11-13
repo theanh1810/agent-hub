@@ -42,7 +42,7 @@ def tasks_of(plan_dir, idx, read):
     that has a tasks/ folder (the legacy layout) and an entry naming a file reads that file through read(path), which may raise OSError
     or yaml.YAMLError as before."""
     split = os.path.isdir(os.path.join(plan_dir, 'tasks'))
-    return [read(os.path.join(plan_dir, e['file'])) if split and isinstance(e, dict) and 'file' in e else dict(e) for e in idx['tasks']]
+    return [read(os.path.normpath(os.path.join(plan_dir, e['file']))) if split and isinstance(e, dict) and 'file' in e else dict(e) for e in idx['tasks']]
 
 
 def plan_dir(root, plan_id):
