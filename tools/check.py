@@ -2,7 +2,7 @@
 """check: the package repo's one check command.
 
 usage: tools/check.py ruleset           run tools/check-ruleset.sh over plugins/agent-hub (needs bash; Windows: Git Bash or WSL)
-       tools/check.py plan PLAN [args]  run the plugin's plan-verify.py, the same script as `agent-hub check plan`
+       tools/check.py plan PLAN [args]  run the plugin's plan-check.py
 """
 import os
 import subprocess
@@ -21,7 +21,7 @@ def main(argv):
     if argv[0] == "ruleset":
         cmd = ["bash", str(REPO / "tools" / "check-ruleset.sh")] + argv[1:]
     else:
-        cmd = [sys.executable, str(PLUGIN / "scripts" / "plan-verify.py")] + argv[1:]
+        cmd = [sys.executable, str(PLUGIN / "scripts" / "plan-check.py")] + argv[1:]
     return subprocess.run(cmd, env=env).returncode
 
 

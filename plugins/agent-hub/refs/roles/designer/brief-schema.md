@@ -38,4 +38,4 @@ Implement consumes `design_brief_path`, `chosen_pattern.id`, `screens_detail[]`,
 | Design brief | `{plan_dir}/design/{slug}/DESIGN.md`; with no change id yet, `docs/brainstorm/{slug}/design/DESIGN.md` | one per slug; `{slug}` kebab-case with repo or product prefix, names the feature not the screen |
 | Reference images the brief cites | `{plan_dir}/design/{slug}/assets/` | describes what it shows (`alert-table-empty-state.png`, never `ref-1.png`) |
 
-No separate UX sketch file; flow analysis lives in the brief. Scratch: `{workspace_root}/.cm-tmp/{task_id}/`, deleted before done. Nothing at a sub-repo root, nothing at `{workspace_root}` outside the registered folders, nothing under `docs/changes/**`; naming and content: `CLAUDE.md` §19.4.
+No separate UX sketch file; flow analysis lives in the brief. Scratch: `{workspace_root}/.cm-tmp/{task_id}/`, deleted before done. Nothing at a sub-repo root, nothing at `{workspace_root}` outside the registered folders, nothing under `docs/changes/**`; naming and content: `refs/artifact-layout.md § Naming and content`.

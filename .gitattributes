@@ -1,0 +1,6 @@
+# Line endings: text files are LF in the work tree on every OS.
+* text=auto eol=lf
+# Byte-pinned texts (hash-checked or compared byte for byte) are never converted.
+plugins/agent-hub/store/** -text
+plugins/agent-hub/refs/vendored/** -text
+tools/upstream/** -text

@@ -1,8 +1,8 @@
 {
   "name": "agent-hub",
   "displayName": "agentHub",
-  "version": "0.1.0",
-  "description": "Multi-agent workflow for Claude Code: an orchestrator routes each request to brainstorm, planner, implement, reviewer, test, designer and devops agents, with spec, plan and review gates.",
+  "version": "0.2.0",
+  "description": "Multi-agent workflow for Claude Code: the main thread routes each request by a lane table to brainstorm, scout, designer, implement, reviewer, test and devops agents, with OpenSpec plan, spec and review gates.",
   "license": "MIT + Commons Clause 1.0",
   "userConfig": {
     "reply_language": {

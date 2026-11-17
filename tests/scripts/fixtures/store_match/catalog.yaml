@@ -1,0 +1,83 @@
+- id: typescript-pro
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [tsconfig.json], deps: [], task: "writing or reviewing TypeScript"}
+  roles: [implement, reviewer]
+  side_effects: none
+  status: ready
+- id: laravel-specialist
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [artisan], deps: [laravel/framework], task: "Laravel code"}
+  roles: [implement]
+  side_effects: none
+  status: ready
+- id: ant-design
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [], deps: [antd], task: "Ant Design screens"}
+  roles: [implement, designer]
+  side_effects: none
+  status: ready
+- id: ant-design-old
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [], deps: [antd], task: "never printed"}
+  roles: [implement]
+  side_effects: none
+  status: deferred
+  unblock: pin a sha
+- id: vue-expert
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [], deps: [vue], task: "Vue code"}
+  roles: [implement]
+  side_effects: none
+  status: ready
+- id: wordpress-pro
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [wp-config.php, "head:Plugin Name:"], deps: [], task: "WordPress code"}
+  roles: [implement]
+  side_effects: none
+  status: ready
+- id: vite
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: ["vite.config.*"], deps: [], task: "Vite config"}
+  roles: [implement]
+  side_effects: none
+  status: ready
+- id: blocked-ts
+  kind: skill
+  origin: fixture
+  licence: none
+  files: []
+  signal: {files: [tsconfig.json], deps: [], task: "never printed"}
+  roles: [implement]
+  side_effects: none
+  status: blocked_licence
+  unblock: licence
+- id: first-principles
+  kind: skill
+  origin: fixture
+  licence: MIT
+  files: [{path: text.md, sha256: "00", lines: 10}]
+  signal: {files: [], deps: [], task: "thinking text, no stack signal"}
+  roles: [brainstorm]
+  side_effects: none
+  status: ready

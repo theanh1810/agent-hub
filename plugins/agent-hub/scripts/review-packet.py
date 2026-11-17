@@ -1,71 +1,68 @@
 #!/usr/bin/env python3
-"""review-packet: write a batch plan's review packet and a diff-only copy for the independent layer.
+"""review-packet: write a change's review packet and a diff-only copy for the independent code review.
 
-usage: review-packet.py PLAN_DIR --round N [--backups DIR] [--base-dir DIR] [--out-dir DIR] [--diff-only-out PATH]
+usage: review-packet.py CHANGE_DIR --round N [--backups DIR] [--base-ref REF] [--base-dir DIR] [--out-dir DIR] [--diff-only-out PATH]
+                        [--files PATH,PATH,... --root DIR [--task-id ID]]
 
-PLAN_DIR holds plan.yaml (split or single-file). The packet is
-<root>/.cm-tmp/<plan_id>/review-packet-r<N>.md (plan_paths.ephemeral_dir; --out-dir replaces that folder), where <root> is the
-parent of the docs/ folder PLAN_DIR sits in; the change folder and any legacy reviews/ get nothing. It holds (1) a header, (2) a task | AC | case | cmd | exit | met | evidence | note table (the last three from
-result.ac_check, `no entry` when an AC has none) and
-(3) one unified diff per path any task lists in files[], the validation_strategy.review_deep_paths first.
---diff-only-out writes section (3) alone: no task id, AC or plan text, and none of the plan's own files. A deep path's header
-ends with DEEP and carries no reason.
+CHANGE_DIR is openspec/changes/<change> holding tasks.md. The packet is <root>/.cm-tmp/<change>/review-packet-r<N>.md
+(plan_paths.ephemeral_dir; --out-dir replaces that folder); <root> holds the openspec/ folder (--root DIR names it instead). It holds
+(1) the base of each path, (2) a task | covers | test table from tasks.md, (3) one unified diff per path any task lists in Files:.
+--diff-only-out writes section (3) alone: no task id, scenario or plan text, and none of the change folder's own files.
+A lane with no plan files (a small change, a config batch) gives --files, the touched paths: they replace the read of tasks.md, section (2)
+has no rows, and CHANGE_DIR is only the record folder whose name is the plan id. With --files and --root the script needs neither tasks.md
+nor an openspec/ folder; --files without --root still looks for an openspec/ ancestor and exits 2 naming --root when there is none.
+--task-id ID (default 1) names the backup folder of those paths: <backups>/<plan id>/<ID>/<path>.
 
-The base of a path is `git show <baseline.head>:<path>` of the first task touching it when <root> is a git work tree
-and that task's result.baseline.head is a sha; otherwise <backups>/<first task id>/<path> (default $AGENT_HUB_BACKUPS, else ~/.claude-backups).
-A backup copy is looked up by the path relative to <root> when files[].path is absolute. --base-dir DIR (a fix round)
-replaces the task paths: it diffs every file under DIR, plus every files[].path of the last PLAN_DIR/errors.yaml round
-with a non-empty analysis.fix_list, against its copy DIR/<path relative to <root>>, or against empty when it has none
-(created in the fix round); an unchanged path and a path neither under DIR nor in that fix_list are left out. A missing
-DIR, or no changed path, is one NO BASE row and exit 1.
-A path created by its first task diffs against empty; no base prints NO BASE and skips the diff; a glob path (`*`, `?` or `[`) is not expanded, prints `glob: not expanded` and skips the diff, and is not a NO BASE row. A backup is dated by the creation
-time of its <backups>/<task id>/ folder (st_birthtime, st_ctime where a file system keeps none), never by the copied file's mtime,
-which `cp -c` keeps from the source; it is flagged OLDER THAN APPROVAL when that time is before plan.yaml approval.at. With no
-approval.at the packet says the approval time is unknown and flags nothing. A deleted file under a node_modules/ segment is one
-line, `<path> deleted (<n> lines)`, n the line count of its base copy, never its content.
-Diffs use difflib only: never /usr/bin/diff and never `git diff`, which the RTK hook rewrites.
+The git decision is made per path, never once at <root>: with --base-ref REF, a path inside a git work tree (found from the nearest existing
+folder of <root>/<path>, so a workspace root that is not a repo can hold sub-repos) is read with `git -C <top> show REF:<path relative to
+top>` and a directory path expands with `git ls-tree` there (backups are then ignored; a REF that is not a commit in that top is exit 2).
+A path in no git tree, or no --base-ref: <backups>/<plan id>/<first task id>/<path> (default $AGENT_HUB_BACKUPS, else ~/.claude-backups;
+the plan id is the change folder's name, so another plan's backup never matches), else NO BASE (the diff is skipped). Section (1) names
+the repo as `git REF (<top relative to root>)`, `.` for the root or a repo above it. An absolute path is looked up
+relative to <root>. A path that resolves outside <root> is never read: one `NO BASE: outside workspace` row.
+--base-dir DIR (a fix round) replaces the task paths: it diffs every file under DIR, plus every file the last errors.yaml round
+names in analysis.fix_list, against its copy DIR/<path>, or against empty when it has none. A missing DIR or no changed path is one NO BASE row.
+A glob path (`*`, `?`, `[`) prints `glob: not expanded` and is skipped, not a NO BASE row. A deleted file under node_modules/ is one
+line, `<path> deleted (<n> lines)`. Diffs use difflib only: never /usr/bin/diff and never `git diff`.
 
-Exit 0 written; 1 written, but a NO BASE, `not run` or `no entry` row exists (a glob row is none of them); 2 usage error or unreadable plan.
+Exit 0 written; 1 written, but a NO BASE row exists; 2 usage error or unreadable change folder.
 """
 import argparse
 import datetime
+import difflib
+import importlib.util
 import os
-import re
 import subprocess
 import sys
 import tempfile
-import difflib
-import yaml
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # python3 -I leaves the script folder off sys.path
-import plan_paths
-from plan_paths import ephemeral_dir, workspace_root
+import plan_paths as P
+from plan_paths import ephemeral_dir, read_yaml, workspace_root
+
+_spec = importlib.util.spec_from_file_location('plan_check', Path(__file__).with_name('plan-check.py'))
+plan_check = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(plan_check)
 
 
-def read_yaml(path):
-    with open(path, encoding='utf-8') as f:
-        return yaml.safe_load(f)
-
-
-def load_plan(plan_dir):
-    """-> plan.yaml dict and its tasks (each with its task file merged in); ValueError when unreadable"""
+def load_tasks(folder):
+    """-> {task id: {key: value}} of tasks.md; ValueError when unreadable or empty"""
     try:
-        idx = read_yaml(os.path.join(plan_dir, 'plan.yaml'))
-        tasks = plan_paths.tasks_of(plan_dir, idx, read_yaml)
-    except (OSError, UnicodeDecodeError, yaml.YAMLError, TypeError, KeyError) as e:
-        raise ValueError(f'{plan_dir}: {type(e).__name__}: {e}')
-    if not isinstance(idx, dict) or not all(isinstance(t, dict) and t.get('id') for t in tasks):
-        raise ValueError(f'{plan_dir}: plan.yaml or a task file is not a mapping with an id')
-    return idx, tasks
+        tasks = plan_check.parse_tasks((Path(folder) / P.TASKS).read_text(encoding='utf-8'))
+    except (OSError, UnicodeDecodeError) as e:
+        raise ValueError(f'{folder}: {type(e).__name__}: {e}')
+    if not tasks:
+        raise ValueError(f'{folder}: no task in {P.TASKS}')
+    return tasks
 
 
 def first_touch(tasks):
-    """-> {path: (first task, change)} in first-touch order, files[].path of every task deduplicated"""
+    """-> {path: first task id} in first-touch order"""
     seen = {}
-    for t in tasks:
-        for f in t.get('files') or []:
-            if isinstance(f, dict) and f.get('path') and f['path'] not in seen:
-                seen[f['path']] = (t, f.get('change'))
+    for tid in sorted(tasks, key=plan_check.id_key):
+        for path in plan_check.csv(tasks[tid].get('Files', '')):
+            seen.setdefault(path, tid)
     return seen
 
 
@@ -92,83 +89,78 @@ def under(ref, root, name):
     return os.path.join(ref, os.path.relpath(name, root) if os.path.isabs(name) else name)
 
 
-def expand(root, path, base_kind, base_ref):
-    """-> [(file path, base text or None)] : a directory path becomes the files under it, base side and live side"""
-    live = os.path.join(root, path)
+def rel_to(top, root, name):
+    """name (relative to root, or absolute) as a posix path relative to the git top that holds it"""
+    return os.path.relpath(os.path.realpath(os.path.join(root, name)), top).replace(os.sep, '/')
+
+
+def git_top(root, path, tops):
+    """-> the git top-level of root/path, found from its nearest existing folder (its own, else the first existing parent); None in no git tree.
+    tops caches the answer per folder."""
+    d = os.path.join(root, path)
+    while not os.path.isdir(d) and d != os.path.dirname(d):
+        d = os.path.dirname(d)
+    if d not in tops:
+        top = (run_git(d, 'rev-parse', '--show-toplevel') or '').strip()
+        tops[d] = os.path.realpath(top) if top else None
+    return tops[d]
+
+
+def expand(root, path, kind, ref, top=None):
+    """-> [file path]: a directory path becomes the files under it, base side and live side; ref is the commit for kind git, with its repo top"""
     names = set()
-    if os.path.isdir(live):
-        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(live)}
-    if base_kind == 'git':
-        listed = run_git(root, 'ls-tree', '-r', '--name-only', base_ref, '--', path)
-        names |= set((listed or '').split('\n')) - {''}
-    elif base_kind == 'backup' and os.path.isdir(under(base_ref, root, path)):
-        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(under(base_ref, root, path))}
+    if os.path.isdir(os.path.join(root, path)):
+        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(os.path.join(root, path))}
+    if kind == 'git':
+        rel = rel_to(top, root, path)
+        for n in set((run_git(top, 'ls-tree', '-r', '--name-only', ref, '--', rel) or '').split('\n')) - {''}:
+            names.add(path if n == rel else f'{path.rstrip("/")}/{n[len(rel) + 1:]}')
+    elif kind == 'backup' and os.path.isdir(under(ref, root, path)):
+        names |= {f'{path.rstrip("/")}/{n}' for n in list_files(under(ref, root, path))}
     return sorted(names) or [path]
 
 
-def base_text(root, name, kind, ref):
-    if kind == 'none':
-        return None
-    if kind == 'empty':
-        return ''
+def base_text(root, name, kind, ref, top=None):
     if kind == 'git':
-        return run_git(root, 'show', f'{ref}:{name}') or ''
+        return run_git(top, 'show', f'{ref}:{rel_to(top, root, name)}') or ''
     p = under(ref, root, name)
     return read_text(p) if os.path.isfile(p) else ''
 
 
-def pick_base(root, backups, path, task, change, is_git):
-    """-> (kind, ref, detail, taken): kind git|backup|empty|glob|none; taken is when a backup folder was created, else ''"""
+def inside(root, name):
+    """True when root/name (or the absolute name) resolves to root or below it"""
+    top = Path(root).resolve()
+    live = Path(os.path.join(root, name)).resolve()
+    return live == top or top in live.parents
+
+
+def pick_base(root, backups, plan_id, path, task_id, base_ref, top):
+    """-> (kind, ref, detail): kind backup|git|glob|none; top is the git top-level holding path, None for no git tree"""
     if any(c in path for c in '*?['):
-        return 'glob', None, 'glob: not expanded', ''
-    head = ((task.get('result') or {}).get('baseline') or {}).get('head')
-    if change == 'create':
-        return 'empty', None, 'created: diffs against empty', ''
-    if is_git and isinstance(head, str) and re.fullmatch(r'[0-9a-f]{7,40}', head):
-        return 'git', head, f'git {head}', ''
-    ref = os.path.join(backups, str(task['id']))
+        return 'glob', None, 'glob: not expanded'
+    if not inside(root, path):
+        return 'none', None, 'NO BASE: outside workspace'
+    if base_ref and top:
+        shown = os.path.relpath(top, os.path.realpath(root)).replace(os.sep, '/')
+        return 'git', base_ref, f"git {base_ref} ({'.' if shown == '.' or shown.startswith('..') else shown})"
+    ref = os.path.join(backups, plan_id, task_id)
     copy = under(ref, root, path)
     if os.path.exists(copy):
-        st = os.stat(ref)
-        taken = datetime.datetime.fromtimestamp(getattr(st, 'st_birthtime', st.st_ctime))
-        return 'backup', ref, f'backup {copy} folder created {taken:%Y-%m-%d %H:%M}', taken
-    return 'none', None, f'NO BASE: no backup at {copy}', ''
+        return 'backup', ref, f'backup {copy}'
+    return 'none', None, f'NO BASE: no backup at {copy}'
 
 
 def unified(name, old, new):
-    if old is None:
-        return None
     lines = list(difflib.unified_diff(old.splitlines(), new.splitlines(), f'a/{name}', f'b/{name}', lineterm=''))
     return '\n'.join(lines) if lines else '(no change)'
 
 
-def approval_time(idx):
-    """-> the datetime of plan.yaml approval.at in local time, or None when it is absent or not a datetime"""
-    at = (idx.get('approval') or {}).get('at')
-    if isinstance(at, str):
-        try:
-            at = datetime.datetime.fromisoformat(at.replace('Z', '+00:00'))
-        except ValueError:
-            return None
-    if not isinstance(at, datetime.datetime):
-        return None
-    return at.astimezone().replace(tzinfo=None) if at.tzinfo else at
-
-
-def approval_note(idx, plan_dir):
-    at = approval_time(idx)
-    if at:
-        return f'Approval time: {at:%Y-%m-%d %H:%M} (plan.yaml approval.at).'
-    mtime = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(plan_dir, 'plan.yaml')))
-    return f'Approval time unknown: plan.yaml has no approval.at (plan.yaml was modified {mtime:%Y-%m-%d %H:%M}); no backup is compared.'
-
-
-def fix_round_paths(plan_dir, root):
-    """-> sorted files[].path of the last PLAN_DIR/errors.yaml round whose analysis.fix_list names one, relative to root"""
-    path = os.path.join(plan_dir, 'errors.yaml')
+def fix_round_paths(folder, root):
+    """-> sorted paths of the last errors.yaml round whose analysis.fix_list names files, relative to root"""
+    path = os.path.join(folder, P.ERRORS)
     try:
         doc = read_yaml(path) if os.path.isfile(path) else None
-    except (OSError, UnicodeDecodeError, yaml.YAMLError):
+    except Exception:   # an unreadable errors.yaml means no fix-round paths, not a crash
         doc = None
     rounds = (doc.get('errors') or []) if isinstance(doc, dict) else []
     for r in reversed([r for r in rounds if isinstance(r, dict)]):
@@ -183,113 +175,73 @@ def fix_round_paths(plan_dir, root):
 def collect_fix(root, base_dir, extra):
     """--base-dir rows: every file under base_dir plus the fix round's paths, each against its copy there or against empty"""
     if not os.path.isdir(base_dir):
-        return [dict(path=base_dir, files=[(base_dir, None)], detail='NO BASE: fix-round base dir missing', flag='', none=True)]
+        return [dict(path=base_dir, files=[(base_dir, None)], detail='NO BASE: fix-round base dir missing', none=True)]
     rows = []
     for name in sorted(set(list_files(base_dir)) | set(extra)):
-        copy = os.path.join(base_dir, name)
-        live = os.path.join(root, name)
+        if not inside(root, name):
+            rows.append(dict(path=name, files=[(name, None)], detail='NO BASE: outside workspace', none=True))
+            continue
+        copy, live = os.path.join(base_dir, name), os.path.join(root, name)
         old = read_text(copy) if os.path.isfile(copy) else ''
         new = read_text(live) if os.path.isfile(live) else ''
-        if old == new:
-            continue
-        detail = f'fix-round base {copy}' if os.path.isfile(copy) else 'created in fix round: diffs against empty'
-        rows.append(dict(path=name, files=[(name, unified(name, old, new))], detail=detail, flag='', none=False))
-    return rows or [dict(path='(fix round)', files=[('(fix round)', None)], detail='NO BASE: empty fix diff', flag='', none=True)]
+        if old != new:
+            detail = f'fix-round base {copy}' if os.path.isfile(copy) else 'created in fix round: diffs against empty'
+            rows.append(dict(path=name, files=[(name, unified(name, old, new))], detail=detail, none=False))
+    return rows or [dict(path='(fix round)', files=[('(fix round)', None)], detail='NO BASE: empty fix diff', none=True)]
 
 
-def collect(root, backups, idx, tasks):
-    """-> rows [dict(path, files [(name, diff|None)], detail, flag)] in first-touch order"""
-    is_git = (run_git(root, 'rev-parse', '--is-inside-work-tree') or '').strip() == 'true'
-    approved = approval_time(idx)
+def collect(root, backups, plan_id, tasks, base_ref):
+    """-> rows [dict(path, files [(name, diff|None)], detail, none)] in first-touch order; ValueError when base_ref is not a commit"""
+    tops, checked = {}, set()
     rows = []
-    for path, (task, change) in first_touch(tasks).items():
-        kind, ref, detail, taken = pick_base(root, backups, path, task, change, is_git)
-        flag = 'OLDER THAN APPROVAL' if taken and approved and taken < approved else ''
+    for path, tid in first_touch(tasks).items():
+        top = git_top(root, path, tops) if base_ref and not any(c in path for c in '*?[') and inside(root, path) else None
+        if top and top not in checked:
+            if run_git(top, 'rev-parse', '--verify', '--quiet', f'{base_ref}^{{commit}}') is None:
+                raise ValueError(f'--base-ref {base_ref}: not a commit in {top}')
+            checked.add(top)
+        kind, ref, detail = pick_base(root, backups, plan_id, path, tid, base_ref, top)
         files = []
-        for name in expand(root, path, kind, ref):
+        for name in ([path] if kind in ('glob', 'none') else expand(root, path, kind, ref, top)):
             if kind == 'glob':
                 files.append((name, 'glob: not expanded, diff skipped'))
-                continue
-            live = os.path.join(root, name)
-            old = base_text(root, name, kind, ref)
-            if old and not os.path.isfile(live) and 'node_modules' in name.split('/'):
-                files.append((name, f'{name} deleted ({len(old.splitlines())} lines)'))
-                continue
-            new = read_text(live) if os.path.isfile(live) else ''
-            files.append((name, unified(name, old, new)))
-        rows.append(dict(path=path, files=files, detail=detail, flag=flag, none=kind == 'none'))
+            elif kind == 'none':
+                files.append((name, None))
+            else:
+                live = os.path.join(root, name)
+                old = base_text(root, name, kind, ref, top)
+                if old and not os.path.isfile(live) and 'node_modules' in name.split('/'):
+                    files.append((name, f'{name} deleted ({len(old.splitlines())} lines)'))
+                else:
+                    files.append((name, unified(name, old, read_text(live) if os.path.isfile(live) else '')))
+        rows.append(dict(path=path, files=files, detail=detail, none=kind == 'none'))
     return rows
-
-
-def deep_reason(deep, name):
-    hits = [d for d in deep if isinstance(d, dict) and d.get('path') and
-            (name == d['path'] or name.startswith(d['path'].rstrip('/') + '/'))]
-    return '; '.join(f"{d.get('section') or 'whole file'}: {d.get('reason')}" for d in hits)
 
 
 def cell(v):
     return str(v).replace('|', '\\|').replace('\n', ' ')
 
 
-def verdict(entry):
-    """-> (met, evidence, note) cells of one result.ac_check entry, verbatim; `no entry` when there is none"""
-    if entry is None:
-        return 'no entry', '', ''
-    evidence = entry.get('evidence')
-    evidence = evidence if isinstance(evidence, list) else [evidence] if evidence else []
-    return str(entry.get('met')).lower(), '; '.join(str(v) for v in evidence), entry.get('note') or ''
+def packet(plan_id, tasks, rows, rnd):
+    out = [f'# Review packet: {plan_id} round {rnd}', '', f'Generated {datetime.datetime.now():%Y-%m-%d %H:%M}.', '',
+           '## 1. Base of each path', '', '| path | base |', '|---|---|']
+    out += [f"| {cell(r['path'])} | {cell(r['detail'])} |" for r in rows]
+    out += ['', '## 2. Task, covers, test', '', '| task | covers | test |', '|---|---|---|']
+    out += [f"| {tid} | {cell(tasks[tid].get('Covers', ''))} | {cell(tasks[tid].get('Test', ''))} |" for tid in sorted(tasks, key=plan_check.id_key)]
+    out += ['', '## 3. Diffs', '']
+    for r in rows:
+        for name, diff in r['files']:
+            out += [f'### {name}', '', '````diff', diff if diff is not None else 'NO BASE: diff skipped', '````', '']
+    return '\n'.join(out)
 
 
-def ac_rows(tasks):
-    """-> table lines and the number of gaps (`not run` rows)"""
-    out, gaps = [], 0
-    for t in tasks:
-        tid = t['id']
-        cmds = [c for c in ((t.get('result') or {}).get('commands') or []) if isinstance(c, dict)]
-        checks = (t.get('result') or {}).get('ac_check')
-        checks = {e.get('ac'): e for e in checks if isinstance(e, dict)} if isinstance(checks, list) else {}
-        cases = [c for c in t.get('test_cases') or [] if isinstance(c, dict)]
-        for ac in t.get('acceptance_criteria') or []:
-            m = re.match(r'AC-\d+(?=:)', str(ac))
-            if not m:
-                continue
-            keys = {f'{tid}/{m.group(0)}'} | set(re.findall(r'UC-\d+/AC-\d+', str(ac).partition('→')[2]))
-            mine = [c for c in cases if keys & {str(x).strip() for x in (c.get('covers_acceptance') if isinstance(c.get('covers_acceptance'), list) else [c.get('covers_acceptance')])}]
-            entry = checks.get(m.group(0))
-            gaps += entry is None
-            if not mine:
-                out.append((tid, m.group(0), 'no case', '', '') + verdict(entry))
-            for c in mine:
-                ran = [x for x in cmds if x.get('tc_id') == c.get('id')]
-                if not ran:
-                    gaps += 1
-                    out.append((tid, m.group(0), c.get('id'), 'not run', '') + verdict(entry))
-                out += [(tid, m.group(0), c.get('id'), x.get('cmd'), x.get('exit')) + verdict(entry) for x in ran]
-    lines = ['| task | AC | case | cmd | exit | met | evidence | note |', '|---|---|---|---|---|---|---|---|']
-    lines += ['| ' + ' | '.join(cell(v) for v in r) + ' |' for r in out]
-    return lines, gaps
-
-
-def packet(idx, tasks, rows, deep, rnd, note):
-    table, gaps = ac_rows(tasks)
-    order = sorted(((deep_reason(deep, n), n, d) for r in rows for n, d in r['files']), key=lambda x: not x[0])
-    out = [f"# Review packet: {idx.get('plan_id')} round {rnd}", '',
-           f"Generated {datetime.datetime.now():%Y-%m-%d %H:%M}.", '', note, '', '## 1. Base of each path', '',
-           '| path | base |', '|---|---|']
-    out += [f"| {cell(r['path'])} | {cell(r['detail'])}{' ' + r['flag'] if r['flag'] else ''} |" for r in rows]
-    out += ['', '## 2. Task, AC, case, command, exit', ''] + table + ['', '## 3. Diffs', '']
-    for why, name, diff in order:
-        out += [f"### {name}" + (f" DEEP ({why})" if why else ''), '',
-                '````diff', diff if diff is not None else 'NO BASE: diff skipped', '````', '']
-    return '\n'.join(out), gaps
-
-
-def diff_only(rows, deep, plan_dir, root):
-    own = os.path.relpath(os.path.abspath(plan_dir), root).replace(os.sep, '/') + '/'
-    items = [(deep_reason(deep, n), n, d) for r in rows for n, d in r['files'] if not n.startswith(own)]
+def diff_only(rows, folder, root):
+    own = os.path.relpath(os.path.abspath(folder), root).replace(os.sep, '/') + '/'
     out = []
-    for why, name, diff in sorted(items, key=lambda x: not x[0]):
-        out += [f'### {name}' + (' DEEP' if why else ''), '', '````diff', diff if diff is not None else 'NO BASE: diff skipped', '````', '']
+    for r in rows:
+        for name, diff in r['files']:
+            if not name.startswith(own):
+                out += [f'### {name}', '', '````diff', diff if diff is not None else 'NO BASE: diff skipped', '````', '']
     return '\n'.join(out)
 
 
@@ -310,31 +262,48 @@ def write(path, text):
 
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('plan_dir')
+    ap.add_argument('change_dir')
     ap.add_argument('--round', type=int, required=True, dest='rnd')
     ap.add_argument('--backups', default=os.environ.get('AGENT_HUB_BACKUPS') or os.path.expanduser('~/.claude-backups'))
+    ap.add_argument('--base-ref')
     ap.add_argument('--base-dir')
     ap.add_argument('--out-dir')
     ap.add_argument('--diff-only-out')
+    ap.add_argument('--files', help='comma-separated touched paths; replaces the read of tasks.md')
+    ap.add_argument('--root', help='the workspace root; replaces the lookup of an openspec/ ancestor')
+    ap.add_argument('--task-id', default='1', help='backup folder of the --files paths (default 1)')
     a = ap.parse_args(argv)
     try:
-        idx, tasks = load_plan(a.plan_dir)
-        root = workspace_root(a.plan_dir)
+        if a.files is not None:
+            names = [n.strip() for n in a.files.split(',') if n.strip()]
+            if not names:
+                raise ValueError('--files names no path')
+            tasks = {a.task_id: {'Files': ','.join(names)}}
+        else:
+            tasks = load_tasks(a.change_dir)
+        if a.root:
+            if not os.path.isdir(a.root):
+                raise ValueError(f'--root {a.root}: not a folder')
+            root = os.path.abspath(a.root)
+        else:
+            try:
+                root = workspace_root(a.change_dir)
+            except ValueError as e:
+                raise ValueError(f'{e}; with --files give --root DIR' if a.files is not None else str(e))
     except ValueError as e:
         print(f'review-packet: {e}', file=sys.stderr)
         return 2
-    deep = ((idx.get('validation_strategy') or {}).get('review_deep_paths')) or []
-    rows = collect_fix(root, a.base_dir, fix_round_paths(a.plan_dir, root)) if a.base_dir else collect(root, a.backups, idx, tasks)
-    text, gaps = packet(idx, tasks, rows, deep, a.rnd, approval_note(idx, a.plan_dir))
+    plan_id = os.path.basename(os.path.abspath(a.change_dir))
     try:
-        folder = a.out_dir or str(ephemeral_dir(root, str(idx.get('plan_id'))))
+        rows = collect_fix(root, a.base_dir, fix_round_paths(a.change_dir, root)) if a.base_dir else collect(root, a.backups, plan_id, tasks, a.base_ref)
     except ValueError as e:
         print(f'review-packet: {e}', file=sys.stderr)
         return 2
-    write(os.path.join(folder, f'review-packet-r{a.rnd}.md'), text)
+    folder = a.out_dir or str(ephemeral_dir(root, plan_id))
+    write(os.path.join(folder, f'review-packet-r{a.rnd}.md'), packet(plan_id, {} if a.files is not None else tasks, rows, a.rnd))
     if a.diff_only_out:
-        write(a.diff_only_out, diff_only(rows, deep, a.plan_dir, root))
-    return int(bool(gaps or any(r['none'] for r in rows)))
+        write(a.diff_only_out, diff_only(rows, a.change_dir, root))
+    return int(any(r['none'] for r in rows))
 
 
 if __name__ == '__main__':

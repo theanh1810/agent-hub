@@ -1,15 +1,15 @@
 # Rule authoring: the standard for every rule edit
-<Owner: CLAUDE.md §0.3>
+<Owner: rules/core.md § No invented rule>
 <Read when: writing or editing any rule file, agent, ref, skill, template or ADR in ~/.claude, and when a reviewer reviews such a diff>
 
-This file is the only home of authoring rules: skill and agent files, wording, testing a rule.
+This file is the only home of authoring rules: skill and agent files, wording, testing a rule. Writing a rule or a brief for an agent: read `refs/vendored/writing-for-agents.md` too.
 
 ## Agent-file criteria
 
 No file has a line or token ceiling; each added sentence earns its place.
 
 - A line in an agent file is a rule the agent acts on every run, or a pointer to the tier-3 ref that holds it; text needed only on a trigger goes to that ref.
-- Each rule has one home. Every other file points to it; `tools/check ruleset (package repo only)` N1 (`rule_no_duplicate_passage`) reports a passage stated in two files.
+- Each rule has one home. Every other file points to it; `python3 tools/check.py ruleset` (agent-hub repo only) N1 (`rule_no_duplicate_passage`) reports a passage stated in two files.
 - A section whose body is a `refs/` pointer holds that one line (N2, `pointer_section_one_line`); every ref and reference is named by path in another rule file (N3, the existing `no_orphan_ref_files`).
 - Prune test, applied to every sentence a diff adds: delete it and ask whether an agent would act differently; if not, the sentence is prunable and the diff drops it. The reviewer applies this on each rule diff.
 - One line states one rule; the sentence stays as long as that rule needs, split at the rule's boundary and not packed to reach a count.
@@ -66,15 +66,15 @@ Pick the form by the failure measured:
 
 ## ADRs
 
-Whether a decision gets an ADR is settled by the three-part filter in `refs/artifact-layout.md` § 19.1; a decision that fails it is recorded elsewhere. The body has the headings `Context` and `Decision`, 1-3 sentences, per the template `templates/adr/ADR-template.md`. Files are numbered NNN in the existing sequence; 013 stays unused.
+Whether a decision gets an ADR is settled by the three-part filter in `refs/artifact-layout.md` § Where writing is allowed; a decision that fails it is recorded elsewhere. In a workspace with OpenSpec a decision goes in the change's `design.md` and no ADR is written. The body has the headings `Context` and `Decision`, 1-3 sentences, per the template `templates/adr/ADR-template.md`. Files are numbered NNN in the existing sequence; 013 stays unused.
 
 ## Behavioural testing
 
 Only a new rule or an ADR-level change gets a behavioural test; a wording fix is read by a stranger and shipped.
-- Planner writes one pressure scenario per new rule, with a forced A/B/C choice and the expected choice taken from the rule text.
+- Brainstorm writes one pressure scenario per new rule, with a forced A/B/C choice and the expected choice taken from the rule text.
 - Main thread spawns two short sonnet runs per scenario: a baseline given the governing text as it was before the change, and a with-rule run given the new text. Each writes its choice and a one-sentence reason under `.cm-tmp/{plan_id}/rule-tests/`.
 - `test mode=script` compares each recorded choice with the expected one. A with-rule run that chooses wrong is a finding for brainstorm `mode=error-batch`.
-- A subagent asks main thread for a run and spawns none (`CLAUDE.md` §2.1).
+- A subagent asks main thread for a run and spawns none (`rules/core.md`, first paragraph).
 
 ## Scripts
 

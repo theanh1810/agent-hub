@@ -33,11 +33,11 @@ def build_prompt(proj, ts, log_dir, proj_name):
     return (f"You are the auditor agent. Effective cwd: {proj}. Window: the last 24 hours. "
             "Read docs/changes/ (archive included) and the legacy roots docs/plan/ and docs/specs/changes/ "
             "(archive included, the latter when docs/specs/README.md exists), docs/audits/, errors.yaml, "
-            "mem0 (when the MCP is available; for every user correction found, search then add or update its "
-            "lesson counter, never delete), and git log --since='24 hours ago'. Write the report using the "
+            "claude-mem (when the MCP is available; search it for the lesson, then run `agent-hub lesson sight` for "
+            "every user correction found to count it, never delete), and git log --since='24 hours ago'. Write the report using the "
             f"skeleton in the auditor agent file to docs/audits/{ts}.md when that directory exists, otherwise "
             f"{log_dir}/{proj_name}-{ts}.md. The report body is in the reply language. Read-only outside the "
-            "audit file and the mem0 lesson counter. Close with a three-sentence summary.")
+            "audit file and the lesson ledger (`agent-hub lesson`). Close with a three-sentence summary.")
 
 
 def allowed_tools(log_dir):
@@ -45,8 +45,8 @@ def allowed_tools(log_dir):
     def absolute(path):
         return "Edit(//%s/**)" % str(path).lstrip("/")
     return ",".join(["Read", "Grep", "Glob", "Bash(git log:*)", "Edit(docs/audits/**)", absolute(log_dir),
-                     absolute(config_dir() / "agent-memory" / "auditor"), "mcp__mcp_mem0__search_memories",
-                     "mcp__mcp_mem0__add_memory", "mcp__mcp_mem0__update_memory"])
+                     absolute(config_dir() / "agent-memory" / "auditor"), "mcp__plugin_claude-mem_mcp-search__search",
+                     "Bash(agent-hub lesson:*)"])
 
 
 def command(claude_bin, proj, log_dir):

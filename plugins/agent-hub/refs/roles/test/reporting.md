@@ -27,17 +27,17 @@ Status: GREEN
 Plan: {plan_id}  Task: {task_id}
 Test cases run: N  passed: N  failed: 0  steps: code, pass 1, pass 2 (n/a and accepted_drop named)
 Commands: N run, all exit 0  (table: <run_dir>)
-Coverage: AC=N/N  endpoints=N/N  bindings=N/N
+Coverage: scenarios=N/N  endpoints=N/N  bindings=N/N
 Evidence: <run_dir>
 Duration: Ns
 passed_test_case_ids: [TC1, TC2, ...]
 ```
 
-`spec_required: true` adds one line, `ac_coverage: UC-042 AC-1..AC-4 → 4/4 tested, 0 missing` (missing ACs by id). An accepted drop adds `accepted_not_run: [TC… | code] — <date of the user's answer>`. No per-case narrative for passes, no dumps, no inline screenshots. State which `thinking_mode` ran.
+`spec_required: true` adds one line, `ac_coverage: 4/4 scenarios tested, 0 missing` (missing scenarios by name). An accepted drop adds `accepted_not_run: [TC… | code] — <date of the user's answer>`. No per-case narrative for passes, no dumps, no inline screenshots. State which `thinking_mode` ran.
 
 ## The red block
 
-Same header with `Status: RED`, `failed: M`, `failed_test_case_ids: [...]`, plus one failure report per failed case at `.cm-tmp/{task_id}/failure-docs/{test_case_id}.md` from `templates/test/FAILURE-report-template.md` (read it, never reproduce from memory). Each failure is listed verbatim with `test_case_id`, `evidence_path` and `failure_doc_path`, for planner to transcribe. `flow_results[]` carries **only** failed cases. The run report lists failing commands, one row each `| cmd | exit | evidence_path |`.
+Same header with `Status: RED`, `failed: M`, `failed_test_case_ids: [...]`, plus one failure report per failed case at `.cm-tmp/{task_id}/failure-docs/{test_case_id}.md` from `templates/test/FAILURE-report-template.md` (read it, never reproduce from memory). Each failure is listed verbatim with `test_case_id`, `evidence_path` and `failure_doc_path`, for brainstorm to transcribe. `flow_results[]` carries **only** failed cases. The run report lists failing commands, one row each `| cmd | exit | evidence_path |`.
 
 ## Error batching (HARD)
 

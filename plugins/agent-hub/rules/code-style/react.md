@@ -30,7 +30,7 @@ Mechanics only. Comments: `_discipline.md` §5. Naming, function shape, structur
 
 - Server data belongs to what the repo uses (react-query, SWR, a context); never introduce a second mechanism beside it.
 - Context is for what is genuinely global (auth, theme, a realtime connection); frequently-changing values in context re-render every consumer.
-- A new state library is a new dependency and needs the approval gate (`CLAUDE.md` §15).
+- A new state library is a new dependency and needs the approval gate (`refs/code-standards.md § Code Standards`).
 
 ## Async in components
 
@@ -56,4 +56,4 @@ A clickable thing is a `<button>`, a navigation an `<a>` (a `<div onClick>` is u
 
 - Query the way a user does — role, label, text; a CSS-class query breaks on a restyle.
 - Assert what renders, not how state got there.
-- A UI change is not verified by a unit test alone: `CLAUDE.md` §9 requires `test` on a real browser with a screenshot, console errors and network failures.
+- A UI change is not verified by a unit test alone: `test` is required on a real browser with a screenshot, console errors and network failures.

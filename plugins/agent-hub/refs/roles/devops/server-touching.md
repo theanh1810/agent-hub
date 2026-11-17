@@ -9,7 +9,7 @@
 
 Every project devops **deploys to, or fetches logs from** MUST have `{workspace_root}/docs/devops/SERVER-INFO.md` (a single-machine desktop build needs none). Template: `templates/SERVER-INFO.md`.
 
-- **First action**: check it exists. Missing → **propose** the template copy and return `needs_user_input`, one question per fact (hostnames, SSH access, CI pipeline names, log paths, monitoring URLs, vault refs). **Devops never writes the file itself** (unapproved scope, `CLAUDE.md` §0.2); it is written as an approved step after the answers.
+- **First action**: check it exists. Missing → **propose** the template copy and return `needs_user_input`, one question per fact (hostnames, SSH access, CI pipeline names, log paths, monitoring URLs, vault refs). **Devops never writes the file itself** (unapproved scope, `rules/core.md § Ask, never guess`); it is written as an approved step after the answers.
 - **Before every deploy, log fetch or debug request** re-read it, every run; cite the section and line for every command run from it.
 - **It contradicts the host's real state** → ask, never pick one.
 - **Update** it when an environment is added, a host changes, a vault path moves or a rollback is refined. Vault references only, never a secret value. It also declares alert owners, channels and short runbooks (`skills/devops-deploy/references/observability.md`).
@@ -17,7 +17,7 @@ Every project devops **deploys to, or fetches logs from** MUST have `{workspace_
 
 ## Infra escalation
 
-On an `infra_escalation_request` from test (`agents/test.md § Infra escalation`, Contract C1 of plan `agent-workflow-fix-20260605`):
+On a test return with `needs_devops: true` and `failure_type: transient` (`agents/test.md § Infra escalation`):
 
 1. Re-read SERVER-INFO. Missing → `needs_user_input` for the stack bring-up commands.
 2. Run `stack_check` per §3: probe each `urls_checked[]` URL again from the devops side and check process health for each tracked service.
@@ -38,7 +38,7 @@ Binds every Docker command, local or on a server (R-DOCKER-REUSE): no duplicate 
 
 1. **Image.** `docker image inspect <image>:<tag>` first. Present → no pull. Pull only when absent or another tag or digest is needed; compose runs `--pull missing`, never `--pull always`.
 2. **Look first.** `docker compose -p <project> ps -a` for a compose stack, otherwise `docker ps -a --filter name=<name>` and `docker ps -a --filter ancestor=<image>`.
-3. **Backing service** (redis, kafka, a database: software the project runs but does not write). One exists → reuse it even when tag, port or env differ; stopped → `docker start <name>` or `docker compose -p <project> up -d --no-recreate <service>`. Never `--force-recreate` it. For Postgres the one existing service is `shared-postgres` (`refs/local-postgres.md`); for Redis, S3 and Mailpit it is `shared-redis`, `shared-s3` and `shared-mailpit` (`refs/local-services.md`; no MinIO, Q-S3). On this machine every published port binds 127.0.0.1 (`refs/local-services.md` rule 2); `deploy/` stacks keep their own (Q-W6). The app cannot use it as it is → `needs_user_input` (recreating can lose data, `CLAUDE.md` §0.2).
+3. **Backing service** (redis, kafka, a database: software the project runs but does not write). One exists → reuse it even when tag, port or env differ; stopped → `docker start <name>` or `docker compose -p <project> up -d --no-recreate <service>`. Never `--force-recreate` it. For Postgres the one existing service is `shared-postgres` (`agent-hub-local-services: refs/local-postgres.md`); for Redis, S3 and Mailpit it is `shared-redis`, `shared-s3` and `shared-mailpit` (`agent-hub-local-services: refs/local-services.md`; no MinIO, Q-S3). On this machine every published port binds 127.0.0.1 (`agent-hub-local-services: refs/local-services.md` rule 2); `deploy/` stacks keep their own (Q-W6). The app cannot use it as it is → `needs_user_input` (recreating can lose data, `rules/core.md § Ask, never guess`).
 4. **App service** (FE, BE: the project's own code). May be rebuilt or re-pulled and recreated: `docker compose -p <project> up -d --no-deps [--build] <service>` (recreates only when config or image changed; both unchanged, as on a broken stack (5) → add `--force-recreate`).
 5. **One container per service.** Never a second project or container name for a service that has one. A stack that will not start → recreate its app services per 4; still failing → `needs_user_input`; never `down` on a backing service.
 6. A service fitting neither 3 nor 4 → `needs_user_input` with that one question.
@@ -52,13 +52,13 @@ Infrastructure does **not** use Use Cases: it uses an ADR in the project's ADR f
 
 ## Artifact filenames
 
-`CLAUDE.md` §19.1 owns which paths devops may write and §19.4 owns naming. Four devops artifacts:
+`refs/artifact-layout.md § Where writing is allowed` owns which paths devops may write and `refs/artifact-layout.md § Naming and content` owns naming. Four devops artifacts:
 
 | Writes | Path | Naming |
 |---|---|---|
 | ADR | `<docs>/adr/{YYYY-MM-DD}-{kebab-title}.md` | links the UC or BR it affects |
-| Fetched logs | `{plan_dir}/logs/{task_id}-{YYYYMMDD-HHMMSS}.log` | full and verbatim; the handoff cites the path plus ≤50 lines |
+| Fetched logs | `.cm-tmp/{plan_id}/logs/{task_id}-{YYYYMMDD-HHMMSS}.log` (no plan: `{plan_id}` reads as brainstorm's `{slug}`) | full and verbatim; the handoff cites the path plus ≤50 lines; swept at closeout |
 | Failure record | `docs/devops/{agent}-{task_id}-{YYYYMMDD-HHMMSS}.yaml` | on `status=failed`; `docs/devops/` is registered to devops as a whole folder |
 | Server info | `docs/devops/` — `SERVER-INFO.md` and what it references | from the template, only after the user answered; vault references only |
 
-Everything else is ephemeral under `.cm-tmp/{task_id}/`, deleted before the task is done. Nothing at a sub-repo root or at `{workspace_root}` outside the §19.1 folders; nothing under `docs/changes/**` beyond the plan files and `logs/`.
+Everything else is ephemeral under `.cm-tmp/{task_id}/`, deleted before the task is done. Nothing at a sub-repo root or at `{workspace_root}` outside the `refs/artifact-layout.md § Where writing is allowed` folders; nothing under `{plan_dir}`.

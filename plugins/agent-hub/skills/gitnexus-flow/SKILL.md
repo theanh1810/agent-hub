@@ -31,15 +31,15 @@ Before changing a shared or exported symbol, a route or handler contract, or whe
 1. `mcp__gitnexus__list_repos`: confirm the repo is indexed.
 2. `mcp__gitnexus__query`: intent-driven search; capture top entry points.
 3. `mcp__gitnexus__context`: callers, callees, refs, module of a candidate symbol.
-4. `mcp__gitnexus__impact` (`target` + `direction`): blast radius, risk level and affected symbols by depth (`d=1` breaks). Required whenever the answer decides wave order, a consumer list, or a change to a shared symbol (`agents/planner.md § Evidence` counts a wave order from module names, or a `contracts[]` entry with no consumer task, as guesswork).
+4. `mcp__gitnexus__impact` (`target` + `direction`): blast radius, risk level and affected symbols by depth (`d=1` breaks). Required whenever the answer decides wave order, a consumer list, or a change to a shared symbol.
 5. `mcp__gitnexus__api_impact` (a `route`, or a handler `file`): required before changing a route or its handler contract; the only tool that lists route consumers, the response fields they read and the middleware guarding them.
 6. `mcp__gitnexus__route_map` / `tool_map`: HTTP routes / MCP tool definitions.
 7. `mcp__gitnexus__cypher`: only for graph queries the above cannot express.
 8. `mcp__gitnexus__detect_changes(scope='unstaged')`: before commit or handoff, to confirm only planned files and symbols changed; put the result in the handoff.
 
-Steps 4 and 5 answer different questions: `impact` takes a symbol, `api_impact` a route, and a shared symbol reached over a route needs both. This chain is stated here only; `CLAUDE.md` §7 and `agents/brainstorm.md` § Sources point here.
+Steps 4 and 5 answer different questions: `impact` takes a symbol, `api_impact` a route, and a shared symbol reached over a route needs both. This chain is stated here only; `agents/brainstorm.md` § Workflow points here.
 
-Cross-repo groups: `group_list | group_sync` (the only group tools the server exposes, `list-mcp.md`).
+Cross-repo groups: `group_list | group_sync` (the only group tools the server exposes).
 
 ## Inside `binding_scope`
 
@@ -61,7 +61,7 @@ A graph missing recent files is refreshed by whoever hit it: an agent with `Bash
 | Caller | When | Command | Data |
 |---|---|---|---|
 | `brainstorm` | scope, Phase 5 | `query` → `context` → `impact`; `api_impact` over a route or contract | entry points, `d=1` blast radius → `file_shortlist`, `binding_scope.files_allowed[]` |
-| `brainstorm` | `mode=change-design` | `impact` on shared symbols; `api_impact` on routes | dependency edges → `change_design.wave_order_evidence`, contract consumers |
+| `brainstorm` | `mode=plan-write` | `impact` on shared symbols; `api_impact` on routes | dependency edges → the plan's wave order evidence, contract consumers |
 | `implement` | gate 4, before saving a shared symbol | `impact`; `api_impact` | what breaks at `d=1`; the route's consumers |
 | `implement` | closeout step 1, after coding and review | `detect_changes(scope='unstaged')`, then `gitnexus analyze --force --skip-skills --index-only` per sub-repo; `group_sync` across repos | changed symbols; a fresh graph |
 | `reviewer` | reviewing a diff | `impact` on shared symbols; `api_impact` on routes; `detect_changes` | who else breaks; only planned files changed |

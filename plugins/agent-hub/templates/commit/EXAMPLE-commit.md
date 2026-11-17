@@ -1,6 +1,6 @@
 # Commit message — worked example
 
-Reference shape for `agents/implement.md` § Close the task. Read it when unsure what a
+Reference shape for `refs/roles/implement/close-task.md` § Close the task. Read it when unsure what a
 good body looks like, take the shape from it and write your own words; do not copy its wording.
 
 ```

@@ -12,11 +12,11 @@ Present: `javascript` · `typescript` · `react` (web and Next.js) · `python` �
 
 ## Why this exists
 
-`CLAUDE.md` §15 requires `Pattern reference: <file:line>` from a neighbour, but the neighbour is chosen fresh every session: two sessions pick two neighbours and produce two dialects in one module, unnoticed because each diff matched *something*. A style in a file stops being re-derived.
+`refs/code-standards.md § Code Standards` requires `Pattern reference: <file:line>` from a neighbour, but the neighbour is chosen fresh every session: two sessions pick two neighbours and produce two dialects in one module, unnoticed because each diff matched *something*. A style in a file stops being re-derived.
 
 ## Precedence (HARD — the only statement of the ladder)
 
-`CLAUDE.md` §15 carries an extract with this numbering and points back here; `agents/implement.md` and `agents/reviewer.md` keep no copy. A second copy is a defect.
+`refs/code-standards.md § Code Standards` carries an extract with this numbering and points back here; `agents/implement.md` and `agents/reviewer.md` keep no copy. A second copy is a defect.
 
 | # | Source | What the rank means |
 |---|---|---|
@@ -35,7 +35,7 @@ The repo file wins, and the disagreement is a finding: the neighbour is drift or
 
 Rank 1 is empty (the common case), so ranks 2 and 4 decide and **discipline wins**: on a drifted codebase the neighbour is evidence of drift, not licence to extend it (a repo of one-symbol `utils` files does not repeal `_discipline.md` §1). Follow `_discipline.md`, name the neighbour not followed, say under `Risks` the repo has no `docs/CODE-STYLE.md`, and suggest `/codestyle`.
 
-**Why discipline outranks the neighbour**: `agents/implement.md` § Priorities never lets a lower priority overrule a higher one, and "copy the codebase" above "hold the discipline" would have the next author extend every drift, as it once did for comment density. **Accepted cost**: on a legacy repo new code visibly differs from its surroundings, marking where the discipline starts.
+**Why discipline outranks the neighbour**: `refs/roles/implement/craft.md` § Priorities never lets a lower priority overrule a higher one, and "copy the codebase" above "hold the discipline" would have the next author extend every drift, as it once did for comment density. **Accepted cost**: on a legacy repo new code visibly differs from its surroundings, marking where the discipline starts.
 
 ## Loading (HARD — read only what the task touches)
 
@@ -71,7 +71,7 @@ The answer is written before the test as one line of the repo's `docs/CODE-STYLE
     PLAYWRIGHT_JSON_OUTPUT_FILE="$PWD/.cm-tmp/{task_id}/pw.json" npx playwright test --list --reporter=json
     node -e 'const r = require("./.cm-tmp/{task_id}/pw.json"); for (const s of r.suites) console.log(require("path").resolve(r.config.rootDir, s.file))'
 
-The report goes to a file because a test printing while loading would break JSON on stdout; Playwright writes paths relative to `testDir`, so the last command makes them absolute. `comm -23 <(sort tests-before.txt) <(sort tests-after.txt)` prints nothing, the second list is longer by exactly the new test files, and the handoff's Validation quotes both counts. A runner not installed is a new dependency (`agents/implement.md` § Ask, do not guess), except a tool named in `refs/roles/planner/test-cases.md` § Toolset per layer (the plan's install task installs it, approved at the plan gate).
+The report goes to a file because a test printing while loading would break JSON on stdout; Playwright writes paths relative to `testDir`, so the last command makes them absolute. `comm -23 <(sort tests-before.txt) <(sort tests-after.txt)` prints nothing, the second list is longer by exactly the new test files, and the handoff's Validation quotes both counts. A runner not installed is a new dependency (`rules/core.md` § Ask, never guess), except a tool named in `refs/roles/test/cases.md` § Toolset per layer (the plan's install task installs it, approved at the plan gate).
 
 **No migration**: existing test files stay (Q-TL-2). **Coverage** goes to `.cm-tmp/{task_id}/coverage/`, set on the command line (`--coverageDirectory`, `--coverage.reportsDirectory`, `--cov-report=html:`) leaving repo config untouched; pytest-cov's `.coverage` also needs `COVERAGE_FILE=<that folder>/.coverage`. It is runner output (`refs/artifact-layout.md` § 19.2).
 

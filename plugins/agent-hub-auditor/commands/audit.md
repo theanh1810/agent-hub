@@ -1,5 +1,5 @@
 ---
-description: "Run the auditor agent to check fleet effectiveness (default: last 24h). Reads docs/changes/, errors.yaml, mem0, and MR history when present."
+description: "Run the auditor agent to check fleet effectiveness (default: last 24h). Reads docs/changes/, errors.yaml, claude-mem, and MR history when present."
 ---
 
 # /audit — Daily fleet effectiveness audit

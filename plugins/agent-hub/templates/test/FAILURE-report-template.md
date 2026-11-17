@@ -1,6 +1,6 @@
 <!-- Template for agents/test.md § Output discipline — failures only.
      One file per failed test case, written to
-     {workspace_root}/.cm-tmp/{task_id}/failure-docs/{test_case_id}.md — CLAUDE.md §19.0.
+     {workspace_root}/.cm-tmp/{task_id}/failure-docs/{test_case_id}.md — `refs/artifact-layout.md § Where the workspace root is`.
      Report what happened. Do not diagnose — that is brainstorm work. -->
 
 # Failure: {test_case_id} — {scenario}

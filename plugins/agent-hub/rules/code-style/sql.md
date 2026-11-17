@@ -12,12 +12,12 @@ Covers Prisma, Mongoose and hand-written SQL. Mechanics only. The repo's `docs/C
 
 ## Naming
 
-Follow the existing schema exactly (`device_field_configs` beside `DeviceFieldConfig` is two conventions). With no precedent: tables plural, columns `snake_case` in SQL and `camelCase` in Prisma/Mongoose models, booleans as predicates (`is_active`, `has_expired`), timestamps ending `_at`, foreign keys `<entity>_id`. Business names come from `specs/entities/`, never invented (`agents/implement.md` § Naming).
+Follow the existing schema exactly (`device_field_configs` beside `DeviceFieldConfig` is two conventions). With no precedent: tables plural, columns `snake_case` in SQL and `camelCase` in Prisma/Mongoose models, booleans as predicates (`is_active`, `has_expired`), timestamps ending `_at`, foreign keys `<entity>_id`. Business names come from `specs/entities/`, never invented (`refs/roles/implement/craft.md` § Naming).
 
 ## Migrations (HARD)
 
 - **Additive first.** Add the column nullable or with a default, backfill, switch the code, drop the old column in a **later** migration once nothing reads it. A rename is add + backfill + drop, never in place.
-- **A destructive step needs the approval gate and a stated backup**: `DROP`, `TRUNCATE`, `NOT NULL` on an existing column, a type narrowing (`CLAUDE.md` §10).
+- **A destructive step needs the approval gate and a stated backup**: `DROP`, `TRUNCATE`, `NOT NULL` on an existing column, a type narrowing (`rules/core.md § Safety`).
 - **Write the down-migration and say whether it restores data** ("down drops the column and its data is gone" is honest, an empty one is not).
 - One concern per migration: schema change and backfill in one file cannot be rolled back independently.
 - Never edit a migration that has run anywhere; write a new one.

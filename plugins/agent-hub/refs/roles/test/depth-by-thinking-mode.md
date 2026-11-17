@@ -29,15 +29,15 @@ Auto-derive when `thinking_mode` is null. A user cue ("test thoroughly", "test i
 
 ## Three rules override the table
 
-1. A case's own layer always runs its stage: an `e2e` visual or a11y check, a `security` case, a `local_validation` case run even in `quick`. Legacy plan: a `visual` or `a11y` `type` does the same.
+1. A case's own layer always runs its stage: an `e2e` visual or a11y check, a `security` case, a `script` case run even in `quick`.
 2. A stage that already failed is always re-run; a fix is not verified by a shallower pass than the one that caught the bug.
-3. Never downgrade below the plan. Depth narrows each case, never drops one from `test_cases[]`; skipping a listed case is `needs_revision`.
+3. Never downgrade below the plan. Depth narrows each case, never drops a derived one; skipping a listed case is `needs_revision`.
 
 Record the original mode and the reason for every rise; depth only rises, never falls ("it's a one-line change" does not argue it down).
 
 ## The patterns that force `extended`
 
-`changed_files[]`, or routes the `test_cases[].api_endpoints` name, matching **any** pattern sets `thinking_mode: extended` (same mechanism as `rules/SDD.md` §11.1).
+`changed_files[]`, or routes a case's `api_endpoints` name, matching **any** pattern sets `thinking_mode: extended` (same mechanism as `rules/SDD.md` §11.1).
 
 | Group | Patterns |
 |---|---|

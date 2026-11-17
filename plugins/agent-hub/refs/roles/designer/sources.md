@@ -25,12 +25,12 @@ The user cue `design carefully`, `deep ux` or `redesign everything` forces `exte
 
 | # | Source | Why |
 |---|---|---|
-| 1 | brainstorm machine record and `design.md` (`refs/change-files.md`) | the problem as framed, `binding_scope` |
+| 1 | brainstorm machine record and `design.md` (`refs/plan-lane.md`) | the problem as framed, `binding_scope` |
 | 2 | live UC and the change's spec delta in `uc_ids[]` | the agreed flow; read before drawing any flow |
 | 3 | `specs/entities/<context>.md` | screens and components take names from the Entity Model |
 | 4 | the repo's theme, tokens, component library | read-only; match house style, never a parallel scale |
 | 5 | `rules/UI_RULES.md` | §1 layout primitive, §6 z-index ladder, §12 mobile rules |
-| 6 | Figma (`figma.com/` URL) | `mcp__mcp_figma__get_figma_data` |
+| 6 | Figma (`figma.com/` URL) | `mcp__mcp_figma__get_design_context` |
 | 7 | reference `DESIGN.md` of other products, only with no house style | § Reference design systems |
 | 8 | an old plan path in the brief or a task file that no longer exists → `agent-hub locate --resolve PATH` | the new path from `docs/changes/MIGRATION-MAP.tsv`; the old folder is never recreated |
 
@@ -38,7 +38,7 @@ The pattern catalog: `refs/roles/designer/catalog.md`.
 
 ## Paths
 
-Every `docs/…` path resolves from `{workspace_root}` (`CLAUDE.md` §19.0); `specs/` is `{workspace_root}/docs/specs/`. A `{slug}` carries the repo or product as prefix; folders stay flat. The design library alone is global: `~/.claude/docs/design-library/{lib}/`, shared and referenced in place, never copied per repo.
+Every `docs/…` path resolves from `{workspace_root}` (`refs/artifact-layout.md § Where the workspace root is`); `specs/` is `{workspace_root}/docs/specs/`. A `{slug}` carries the repo or product as prefix; folders stay flat. The design library alone is global: `~/.claude/docs/design-library/{lib}/`, shared and referenced in place, never copied per repo.
 
 ## Reference design systems
 
@@ -104,7 +104,7 @@ When the user asks the agent to read a Figma or image design, the agent follows 
 | implement | does not build it; `needs_design_clarification` naming screen and element; starts no UI task while a red question is open |
 | test | runs the check below |
 
-**Test's check.** On a UI task whose DESIGN.md names a `design_source` of kind `figma`, `image` or `existing_screen`, test compares each built screen with `screens_detail[].components[]` (each `origin: source|requested`) plus `requested_elements[]`: Figma re-read with `get_figma_data`; an image or the existing screen's baseline kept beside the new screenshot. An element on screen in neither list is a `fidelity_findings[]` entry `verdict: extra`; a source element missing is `verdict: missing`. Any finding makes the gate `RED`, `failure_type: fixable`; the oracle is DESIGN.md's `design_source` and `requested_elements[]`. A DESIGN.md without `design_source` (pre-rule) skips the check and the report says so.
+**Test's check.** On a UI task whose DESIGN.md names a `design_source` of kind `figma`, `image` or `existing_screen`, test compares each built screen with `screens_detail[].components[]` (each `origin: source|requested`) plus `requested_elements[]`: Figma re-read with `get_design_context`; an image or the existing screen's baseline kept beside the new screenshot. An element on screen in neither list is a `fidelity_findings[]` entry `verdict: extra`; a source element missing is `verdict: missing`. Any finding makes the gate `RED`, `failure_type: fixable`; the oracle is DESIGN.md's `design_source` and `requested_elements[]`. A DESIGN.md without `design_source` (pre-rule) skips the check and the report says so.
 
 | Rationalization | Reality |
 |---|---|

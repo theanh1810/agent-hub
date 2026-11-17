@@ -1,6 +1,6 @@
 # SERVER-INFO — {project_name}
 
-**Location**: `{workspace_root}/docs/devops/SERVER-INFO.md`, one per product — `docs/devops/` is a registered directory at the workspace root (CLAUDE.md §19.0-19.1), not a sub-repo folder. NEVER commit secrets — use placeholders + reference to vault.
+**Location**: `{workspace_root}/docs/devops/SERVER-INFO.md`, one per product — `docs/devops/` is a registered directory at the workspace root (`refs/artifact-layout.md § Where the workspace root is` and `refs/artifact-layout.md § Where writing is allowed`), not a sub-repo folder. NEVER commit secrets — use placeholders + reference to vault.
 
 **Owner**: devops agent reads + maintains. brainstorm reads when debugging server-side issue.
 

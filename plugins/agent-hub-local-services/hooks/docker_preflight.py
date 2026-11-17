@@ -278,8 +278,6 @@ def decide(seg, cwd):
     toks = list(seg)
     while toks and "=" in toks[0] and not toks[0].startswith("-"):
         toks.pop(0)
-    if toks and toks[0] == "rtk":
-        toks.pop(0)
     if toks and toks[0] == "sudo":
         toks.pop(0)
         while toks and toks[0].startswith("-"):

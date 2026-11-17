@@ -10,7 +10,7 @@
 
 **2. Apply the codebase's patterns completely, not partially.** Same error type, logging call, folder, naming as the codebase. Half a pattern is worse than none: the next reader cannot tell which convention is current. Two carve-outs only: **how many comments the diff carries** (rule 5 and § Comments decide; a neighbour dense with comments is drift, not licence) and **the folder of a new test file** (`code-style/README.md` § Test layout, not a neighbouring `__tests__/`).
 
-**3. Prefer the simple, low-risk, whole solution.** Of two working options take the one easier to read and harder to get wrong, even at a few lines or some elegance. Write the correct naive version first; optimise only after tests prove it. Trade-offs stay inside the task's scope and go in `result.changes[].cost`.
+**3. Prefer the simple, low-risk, whole solution.** Of two working options take the one easier to read and harder to get wrong, even at a few lines or some elegance. Write the correct naive version first; optimise only after tests prove it. Trade-offs stay inside the task's scope and go in the handoff's cost line (`close-task.md § Write the result`).
 
 - Before writing, climb this ladder and stop at the first rung that works: (1) does it need to exist; (2) the best solution for the real data, simple unless a measurement, an acceptance criterion or known large data calls for an optimised algorithm; (3) a library: the standard library, the platform, or an installed dependency (a new dependency stops and asks); (4) a standard pattern; (5) code already in the project, used or adapted, and extracted on the third copy. Lazy about the solution, never the change: update the callers, tests and fixtures it breaks, since they are part of it.
 - Deletion beats addition: removing code the change makes unnecessary is the smallest diff.
@@ -25,7 +25,7 @@
 
 **6. Clean code.** No leftover lines, dead branches, commented-out blocks or half-finished abstraction.
 
-**7. Write the result into the plan before finishing**, bug fix and hotfix included: `refs/roles/implement/close-task.md` § Close the task.
+**7. Tick the task and write the result into the handoff before finishing**, bug fix and hotfix included: `refs/roles/implement/close-task.md` § Write the result.
 
 ## Evidence (HARD)
 
@@ -36,7 +36,7 @@
 - **Contract change**: the tool result listing every call site, `impact` by depth for a symbol, `api_impact` by consumer for a route; never a guess from naming.
 - **Algorithm choice**: the complexity and the input size.
 - **Test result**: the command, exit code and real numbers, tagged with the test-case id, run in this turn. "Should work", "looks fine" and "tests pass" without a count are not results; a clean lint is not a passing build.
-- **Trade-off**: what was given up, in `result.changes[].cost`; empty means not thought about.
+- **Trade-off**: what was given up, in the handoff's cost line; empty means not thought about.
 - **No savings claims** ("saved X lines"): only counted figures.
 
 ## Craft — naming, shape, structure
@@ -88,7 +88,7 @@ Also: every requirement done, no edge case missed; tests check behaviour, not mo
 - **NOTICED BUT NOT TOUCHING**: something worth fixing outside the task is listed with its path and the reason in `extra.findings[]`, asking whether to make a task. Never fix it.
 - **Four states**: done · done with concerns (settled before review) · needs context · blocked. A stop is never an error: "Bad work is worse than no work." Act on every escalation and change something before a retry; never ignore it or force the same model to retry unchanged.
 - **Stop and report, do not push through**, when: an architectural decision has several valid directions · you must understand code beyond what you were given · you are unsure of the right way · the work needs restructuring beyond the plan · you read file after file without progress.
-- Detail is the task record's `result` (`refs/roles/implement/close-task.md`); the returned message is short. A TDD task's `verification[]` carries red (command, failing output, why that failure is right) and green (command, passing output).
+- Detail is the handoff (`refs/roles/implement/close-task.md § Write the result`); the returned message is short. A TDD task's handoff carries red (command, failing output, why that failure is right) and green (command, passing output).
 
 ## Comments
 

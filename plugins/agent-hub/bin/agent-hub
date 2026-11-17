@@ -3,21 +3,23 @@
 
 usage: agent-hub <subcommand> [args]
 Runs the script behind the subcommand with the remaining arguments; each script keeps its own CLI."""
+import os
 import sys
 
 MIN_PYTHON = (3, 11)
 
 SUBCOMMANDS = {  # subcommand -> script file in scripts/
     "check": None,  # check <plan|ruleset>
+    "stamp": None,  # stamp plan <change-dir> --words <file>
+    "store": None,  # store <match|list|verify>
     "locate": "plan-locate.py",
-    "change-map": "change-map.py",
     "review-packet": "review-packet.py",
     "secret-scan": "secret-scan.py",
     "worktree-sweep": "worktree-sweep.py",
-    "docs-migrate": "docs-migrate.py",
+    "lesson": "lesson-ledger.py",
 }
-CHECKS = {"plan": "plan-verify.py"}
 RULESET_MESSAGE = "ruleset mode runs only in the agent-hub package repo: python3 tools/check.py ruleset"
+OPENSPEC_ABSENT = "openspec: not installed, validate skipped (owed)"
 
 
 def python_floor_error(version_info):
@@ -35,8 +37,42 @@ def usage():
 def run_script(root, script, argv, prog):
     import runpy
     sys.argv = [prog] + argv
-    runpy.run_path(str(root / "scripts" / script), run_name="__main__")
+    try:
+        runpy.run_path(str(root / "scripts" / script), run_name="__main__")
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
     return 0
+
+
+def check_plan(root, argv):
+    """openspec validate --strict when the binary is on PATH, then always the five checks; exit 0 only when both pass.
+    The folder is the first argument that is not a flag (`check plan --stamped <dir>` is valid)."""
+    import shutil
+    import subprocess
+    names = [a for a in argv if not a.startswith("--")]
+    if not names:
+        print("usage: agent-hub check plan [--stamped] <change-dir>", file=sys.stderr)
+        return 2
+    from pathlib import Path
+    folder = Path(names[0])
+    code = 0
+    if shutil.which("openspec"):
+        code = subprocess.run(["openspec", "validate", folder.name, "--strict"], cwd=str(folder.parent.parent.parent), env={**os.environ, "OPENSPEC_TELEMETRY": "0"}).returncode
+    else:
+        print(OPENSPEC_ABSENT)
+    checks = run_script(root, "plan-check.py", argv, "agent-hub check plan")
+    return code or checks
+
+
+def run_store(root, argv):
+    import importlib.util
+    if not argv or argv[0] not in ("match", "list", "verify"):
+        print("usage: agent-hub store <match | list | verify> [args]", file=sys.stderr)
+        return 2
+    spec = importlib.util.spec_from_file_location("store_match", root / "scripts" / "store-match.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.main(argv)
 
 
 def main(argv):
@@ -65,10 +101,17 @@ def main(argv):
         if rest[0] == "ruleset":
             print(RULESET_MESSAGE, file=sys.stderr)
             return 2
-        if rest[0] not in CHECKS:
+        if rest[0] != "plan":
             print("agent-hub check: unknown target '%s' (plan | ruleset)" % rest[0], file=sys.stderr)
             return 2
-        return run_script(root, CHECKS[rest[0]], rest[1:], "agent-hub check plan")
+        return check_plan(root, rest[1:])
+    if sub == "stamp":
+        if not rest or rest[0] != "plan":
+            print("usage: agent-hub stamp plan <change-dir> --words <file>", file=sys.stderr)
+            return 2
+        return run_script(root, "plan-check.py", ["stamp"] + rest[1:], "agent-hub stamp plan")
+    if sub == "store":
+        return run_store(root, rest)
     return run_script(root, SUBCOMMANDS[sub], rest, "agent-hub " + sub)
 
 

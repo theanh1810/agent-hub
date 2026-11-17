@@ -66,7 +66,6 @@ class PreflightTest(unittest.TestCase):
             ('docker run -d --name other-redis redis:7', 2),
             ('docker run -d postgres:16', 2),
             ('docker create --name m axllent/mailpit', 2),
-            ('rtk docker run -d postgres:16', 2),
         ]:
             self.check(cmd, want)
 

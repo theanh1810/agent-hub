@@ -2,7 +2,7 @@
 <Owner: skills/design-ui/references/ux-rules-core.md>
 <Read when: a brief or a UI review concerns motion, a form, feedback or a chart>
 
-Same source and exclusions as `ux-rules-core.md`; navigation rows sit in the catalog's Navigation block. Exit duration as a share of enter, and stagger per item: group `ux_motion` (`refs/thresholds.md`), never copied here.
+Same source and exclusions as `ux-rules-core.md`; navigation rows sit in the catalog's Navigation block. Motion timing groups: the motion row of `rules/UI_RULES.md`, never copied here.
 
 ## Motion
 

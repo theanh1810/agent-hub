@@ -13,7 +13,7 @@ metadata:
 - {lang/runtime, frameworks, DB, infra}
 
 ## Project files index (where AI looks)
-- Workspace root: <abs path>            # CODE_ROOT + one segment, CLAUDE.md §19.0
+- Workspace root: <abs path>            # CODE_ROOT + one segment, `refs/artifact-layout.md § Where the workspace root is`
 - Server info: `{workspace_root}/docs/devops/SERVER-INFO.md`
 - Plan dir: `{workspace_root}/docs/changes/`
 - Design library: `~/.claude/docs/design-library/{lib}/`   # global, shared across products, never per product

@@ -5,7 +5,7 @@
 # Fleet audit report — {YYYY-MM-DD}
 
 **Time window:** {from} → {to}
-**Sources scanned:** {N plan dirs}, {N error files}, {N MRs}, {N mem0 entries}, {N session logs}
+**Sources scanned:** {N plan dirs}, {N error files}, {N MRs}, {N claude-mem entries}, {N session logs}
 **Total tasks run:** {N} | **Completed:** {N} ({completion_rate}%) | **Failed:** {N} | **Rework:** {N} ({rework_rate}%)
 
 ---
@@ -14,8 +14,7 @@
 
 | Agent | Tasks | Done | Fail | Done% | Rework | Loop | Latency avg | Tools/task | Note |
 |---|---|---|---|---|---|---|---|---|---|
-| orchestrator | ... | ... | ... | ...% | ... | ... | ... | ... | {status} |
-| brainstorm | ... | ... | ... | ...% | ... | ... | ... | ... | ... |
+| brainstorm | ... | ... | ... | ...% | ... | ... | ... | ... | {status} |
 | ...
 
 ## 1a. By tier and run_mode
@@ -63,7 +62,7 @@
 | "redo this button's UI" | ui-button-fix | implement | 5 | 7 | plan-XXX |
 | ...
 
-A row marked `not yet accumulated` in the Cumulative total column means mem0 was unavailable at run time; the next auditor run applies that row exactly once.
+A row marked `not yet accumulated` in the Cumulative total column means the lesson ledger (`agent-hub lesson`) was unavailable at run time; the next auditor run applies that row exactly once.
 
 ### 2.2 Unreasonable failures
 | plan_id | task_id | Symptom | Why unreasonable | Recommendation |
