@@ -23,7 +23,7 @@ One row per tool, plugin, MCP server or skill: who may use it, how it loads, the
 | claude-code-setup | main, new repo or on request | plugin skill | recommends only, installs nothing |
 | qa-pilot MCP | test, first browser driver | MCP, not installed (deferred 2026-11-17); names owed | order and limits: `refs/roles/test/browser-order.md` |
 | Playwright | test (fallback driver); implement, devops | MCP, deferred | no `browser_run_code_unsafe` |
-| chrome-devtools 1.11.0 | test, performance cases only | MCP, enabled, user scope; names owed (probe) | local or staging pages |
+| chrome-devtools 1.11.0 | test, performance cases only | MCP, enabled, user scope; server-level name from the manifest, first live call confirms | local or staging pages |
 | pr-review-toolkit | main spawns one specialist on the reviewer's request | plugin | brief and limits: `refs/roles/reviewer/second-opinion.md` |
 | ui-ux-pro-max | designer, tier 3 | installed skill | after the Figma file and frontend-design |
 | frontend-design | designer, tier 2 | plugin skill | after the Figma file |
@@ -50,9 +50,9 @@ Shape as the old agent files (comma-separated names in `tools:` / `disallowedToo
 | brainstorm | Read, Grep, Glob, Write, Bash, CM `search`, `timeline`, `get_observations`, `save_memory`, gitnexus `list_repos`, `query`, `context`, `impact`, `api_impact`, `route_map`, `tool_map`, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `search_design_system` | Agent, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs`, GL-W, FG-W |
 | scout | Read, Bash, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs` kindly `web_search`, `get_content` (tavily, serper) | Agent, GL-W, FG-W, figma `create_session`, `get_comments`, CM `save_memory` |
 | designer | Read, Grep, Glob, Write, Skill, CM `search`, `timeline`, `get_observations`, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map` | Agent |
-| implement | Read, Edit, Write, Bash, Grep, Glob, LSP, CM, gitnexus, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map`, Playwright | Agent, `browser_run_code_unsafe` |
-| reviewer | no `tools:` line: every tool not denied | Agent, GL-W, FG-W, figma `create_session`, `get_comments`, CM `important_workflow`, `work_state_write`, `build_corpus`, `prime_corpus`, `rebuild_corpus`, `reprime_corpus` |
-| test | Read, Write, Bash, Grep, Glob, Skill, Playwright, CM `search`, gitnexus `context`, `api_impact`, `route_map`, `detect_changes`, figma `create_session`, `get_design_context`, `get_screenshot`, `db_ro` (qa-pilot and chrome-devtools join once their names are probed) | Agent, `browser_run_code_unsafe`, `mcp__mcp_gitlab`, CM `important_workflow`, `work_state_write` |
+| implement | Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, CM, gitnexus, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map`, Playwright | Agent, `browser_run_code_unsafe` |
+| reviewer | no `tools:` line: every tool not denied | Agent, chrome-devtools server, GL-W, FG-W, figma `create_session`, `get_comments`, CM `important_workflow`, `work_state_write`, `build_corpus`, `prime_corpus`, `rebuild_corpus`, `reprime_corpus` |
+| test | Read, Write, Bash, Grep, Glob, Skill, Playwright, CM `search`, gitnexus `context`, `api_impact`, `route_map`, `detect_changes`, figma `create_session`, `get_design_context`, `get_screenshot`, `db_ro`, chrome-devtools server (qa-pilot not installed) | Agent, `browser_run_code_unsafe`, `mcp__mcp_gitlab`, CM `important_workflow`, `work_state_write` |
 | devops | Read, Write, Edit, Bash, Grep, Glob, ToolSearch, Skill, `mcp__mcp_gitlab`, context7, CM `search`, `save_memory`, `detect_changes`, lark-mcp, lark-contact, `cloudflare`, `aws`, `terraform`, `grafana`, `argocd`, `vercel`, `kubernetes` | Agent |
 
 ## context-mode local patch

@@ -8,7 +8,7 @@ skills:
   - context-memory
   - testing-e2e
 memory: user
-tools: Read, Write, Bash, Grep, Glob, Skill, mcp__plugin_playwright_playwright, mcp__plugin_claude-mem_mcp-search__search, mcp__gitnexus__context, mcp__gitnexus__api_impact, mcp__gitnexus__route_map, mcp__gitnexus__detect_changes, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_screenshot, mcp__db_ro
+tools: Read, Write, Bash, Grep, Glob, Skill, mcp__plugin_playwright_playwright, mcp__plugin_chrome-devtools-mcp_chrome-devtools, mcp__plugin_claude-mem_mcp-search__search, mcp__gitnexus__context, mcp__gitnexus__api_impact, mcp__gitnexus__route_map, mcp__gitnexus__detect_changes, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_screenshot, mcp__db_ro
 disallowedTools: Agent, mcp__plugin_playwright_playwright__browser_run_code_unsafe, mcp__mcp_gitlab, mcp__plugin_claude-mem_mcp-search__important_workflow, mcp__plugin_claude-mem_mcp-search__work_state_write
 ---
 # Role
@@ -21,7 +21,7 @@ Two parts per run: (a) the cases it derives (`refs/roles/test/cases.md`), (b) 5-
 
 - Never edits production code or diagnoses a root cause (brainstorm's); a wrong implement test is a finding. Two exceptions, on a copy under `.cm-tmp/`: a bug gets a repro case at once (`refs/roles/test/repro.md`); a mutation run (`refs/roles/test/read-only.md`).
 - English everywhere; Vietnamese only in the failure report and `user_questions[]`.
-- qa-pilot is not installed; chrome-devtools is enabled, its names owed until probed (`refs/toolset.md`).
+- qa-pilot is not installed; chrome-devtools is allowlisted at server level, for `perf` cases only (`refs/roles/test/browser-order.md`).
 
 ## Read-only. Change nothing (HARD)
 

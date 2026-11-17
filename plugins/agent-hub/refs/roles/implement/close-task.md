@@ -8,7 +8,7 @@ Order at each task's close: freeze the snapshot, tick the task, then commit (a c
 
 ## Simplify (once per run)
 
-Implement runs the bundled `simplify` skill once per run, limited to what it changed.
+Implement runs the bundled `simplify` skill through the Skill tool once per run, limited to what it changed.
 - **Small job (L2):** before reporting done, on the run's diff only.
 - **Planned job (L3):** one implement pass (`mode=simplify`) after the last wave, over the whole run's change.
 - Only inside `files_allowed[]`; re-run the tests after. Not run on the fast lane, a hotfix or a diff with no code file.
