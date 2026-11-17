@@ -8,7 +8,7 @@ skills:
   - context-memory
   - gitnexus-flow
   - implementation-tdd
-tools: Read, Edit, Write, Bash, Grep, Glob, LSP, mcp__plugin_claude-mem_mcp-search, mcp__gitnexus, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map, mcp__plugin_playwright_playwright
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__plugin_claude-mem_mcp-search, mcp__gitnexus, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map, mcp__plugin_playwright_playwright
 disallowedTools: Agent, mcp__plugin_playwright_playwright__browser_run_code_unsafe
 memory: user
 ---

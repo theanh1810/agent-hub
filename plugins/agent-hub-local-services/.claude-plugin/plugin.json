@@ -1,7 +1,7 @@
 {
   "name": "agent-hub-local-services",
   "displayName": "agentHub local services",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Optional guard for shared local services: blocks a second Postgres, Redis, S3 or mail container and any Docker port publish beyond 127.0.0.1.",
   "license": "MIT + Commons Clause 1.0",
   "dependencies": ["agent-hub"],
