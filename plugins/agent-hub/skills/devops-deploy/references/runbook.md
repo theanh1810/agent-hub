@@ -8,4 +8,4 @@ User decision 50: these runbooks live in devops. A runbook is a guide script, no
 2. Open the exact URL, then ask for the value. Take secrets as hidden input.
 3. Ask for `confirm` before any irreversible step.
 4. Never run the whole script yourself; check it statically only (syntax, the values it names, the URLs it opens).
-5. Ask for approval again at each step: an approval for one step never carries to the next (`needs_approval`, `CLAUDE.md` §2.1A).
+5. Ask for approval again at each step: an approval for one step never carries to the next (`needs_approval`, `refs/gates.md § Gate procedures`).

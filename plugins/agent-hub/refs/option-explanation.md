@@ -1,13 +1,13 @@
 # Option explanation
 
-Tier 3 of `CLAUDE.md` §17 — the rules live here; `CLAUDE.md` keeps one pointer line per section.
+Tier 3 of `rules/core.md § Ask, never guess` — the rules live here; the core keeps one pointer line.
 Read when: building an `AskUserQuestion` call — every agent with a gate that asks the user.
 
 ---
 
 # 17. Option Explanation Standard (HARD — AskUserQuestion)
 
-**Ask the open question first**: state the decision plainly and let the user answer in their own words, `options[]` empty. Offer 2-4 options with a recommendation when the user is stuck or the choice is a real trade-off. One decision per question; a clarify turn may carry up to **5** questions, all on one issue (another issue goes in its own round, D18), each its own decision, never bundled. Every option gets a full explanation in the reply language (`core.md` §1), never a vague one-liner.
+**Ask the open question first**: state the decision plainly and let the user answer in their own words, `options[]` empty. Offer 2-4 options with a recommendation when the user is stuck or the choice is a real trade-off. One decision per question; a clarify turn may carry up to **5** questions, all on one issue (another issue goes in its own round, D18), each its own decision, never bundled. Every option gets a full explanation in the reply language (`rules/core.md § Language`), never a vague one-liner.
 
 **Per option**: Solution (1-2 sentences) · How (the steps) · Impact (files · behaviour change · performance · risk) · Trade-off (✅ / ❌) · When to choose it · Effort (S/M/L) · Reversibility; the headings are shown in the reply language.
 
@@ -42,4 +42,4 @@ Read when: building an `AskUserQuestion` call — every agent with a gate that a
 
 # The user_questions block
 
-`user_questions[]` is required on `needs_user_input`: main thread passes it verbatim to `AskUserQuestion`. Its text is in the reply language (`core.md` §1); the shape of a question, the count per round and the one-issue rule are § 17 above.
+`user_questions[]` is required on `needs_user_input`: main thread passes it verbatim to `AskUserQuestion`. Its text is in the reply language (`rules/core.md § Language`); the shape of a question, the count per round and the one-issue rule are § 17 above.

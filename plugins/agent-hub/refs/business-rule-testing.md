@@ -1,10 +1,10 @@
 # Business-rule testing
-<Owner: refs/roles/planner/test-cases.md § Business rules>
-<Read when: brainstorm lists `change_design.business_rules[]` at change-design, planner or implement writes the cases of a task a rule names, or test chooses its exploratory probes and reports one it cannot judge>
+<Owner: refs/roles/test/cases.md § Business rules>
+<Read when: brainstorm lists `change_design.business_rules[]` at plan-write, test or implement writes the cases of a task a rule names, or test chooses its exploratory probes and reports one it cannot judge>
 
 ---
 
-Every business rule of a touched screen, API or flow gets one case where it holds and one where it is broken; an unrecorded rule is asked, never guessed (a form once saved a start date after the expiry date uncaught). The one statement; brainstorm, planner and test point here and copy none of it.
+Every business rule of a touched screen, API or flow gets one case where it holds and one where it is broken; an unrecorded rule is asked, never guessed (a form once saved a start date after the expiry date uncaught). The one statement; brainstorm and test point here and copy none of it.
 
 ## Rule categories
 
@@ -20,11 +20,11 @@ The input kinds — empty, absent, boundary, wrong shape, too large — belong t
 
 ## Where a rule comes from
 
-A rule is listed only from: a UC acceptance criterion or the change's spec delta; the user's own words with their date; a `Q-` id of the analysis record's `user_decisions_verbatim[]`. A rule recorded nowhere (one the code seems to enforce, or one "every app has") is a Clarify question, one decision (`CLAUDE.md` §0.2), answered into `user_decisions_verbatim[]` first. When the spec is silent, the report says "spec missing" and asks the user, never judging by what a user would reasonably expect.
+A rule is listed only from: a UC acceptance criterion or the change's spec delta; the user's own words with their date; a `Q-` id of the analysis record's `user_decisions_verbatim[]`. A rule recorded nowhere (one the code seems to enforce, or one "every app has") is a Clarify question, one decision (`rules/core.md § Ask, never guess`), answered into `user_decisions_verbatim[]` first. When the spec is silent, the report says "spec missing" and asks the user, never judging by what a user would reasonably expect.
 
 ## The record
 
-Brainstorm writes the rules at change-design, at `change_design` level beside `wave_order_evidence`, never as a top-level task key (`agent-hub check plan` rejects it):
+Brainstorm writes the rules at plan-write, in `design.md ## Decisions` or the spec delta:
 
 ```yaml
 business_rules:
@@ -39,7 +39,7 @@ business_rules:
 
 ## The case pair
 
-For each rule, in each task its `task_ids` names: at least one case with `polarity: valid` and one with `polarity: violating`, each carrying `rule_ref: RULE-n`. These are case keys, not kinds: `kind` stays in the enum of `refs/roles/planner/test-cases.md § Kinds` (valid is `happy`, or `edge` at the boundary; violating is `error`).
+For each rule, in each task its `task_ids` names: at least one case with `polarity: valid` and one with `polarity: violating`, each carrying `rule_ref: RULE-n`. These are case keys, not kinds: `kind` stays in the enum of `refs/roles/test/cases.md § Kinds` (valid is `happy`, or `edge` at the boundary; violating is `error`).
 
 - **Valid** — input the rule allows, accepted as the source says. A cross-field rule is tested at equality when its source allows equality; a source silent on equality is one more question.
 - **Violating** — input the rule forbids. Expected: the stated rejection, the message or error code the source fixes, and nothing written. A rejection message no source fixes is end-user copy, so it is asked too.

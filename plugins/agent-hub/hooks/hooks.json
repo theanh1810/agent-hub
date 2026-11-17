@@ -31,16 +31,6 @@
         ]
       },
       {
-        "matcher": "startup|clear|compact",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/rules_inject.py\" SessionStart 3",
-            "timeout": 10
-          }
-        ]
-      },
-      {
         "matcher": "clear",
         "hooks": [
           {
@@ -73,26 +63,6 @@
             "timeout": 10
           }
         ]
-      },
-      {
-        "matcher": "^agent-hub:",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/rules_inject.py\" SubagentStart 2",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "^agent-hub:",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/rules_inject.py\" SubagentStart 3",
-            "timeout": 10
-          }
-        ]
       }
     ],
     "PreToolUse": [
@@ -114,6 +84,18 @@
             "type": "command",
             "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/read_guard.py\"",
             "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/format_on_edit.py\"",
+            "timeout": 30
           }
         ]
       }

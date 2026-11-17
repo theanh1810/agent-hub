@@ -1,9 +1,9 @@
 # Validation levels
 
-1. Focused unit or command, with the tool `refs/roles/planner/test-cases.md` § Toolset per layer names for the layer.
+1. Focused unit or command, with the tool `refs/roles/test/cases.md` § Toolset per layer names for the layer.
 2. Lint, typecheck, build.
 3. API smoke (`curl` + token), L3 sanity.
-4. Browser UI smoke with `mcp__plugin_playwright_playwright__*`, headless on an in-memory profile (`agents/test.md` § Tools): `browser_navigate`, `browser_snapshot` (scoped per step, full for the a11y pass), `browser_take_screenshot`, `browser_console_messages`, `browser_network_requests`, `browser_evaluate` (Web Vitals), `browser_resize`. Lighthouse: `rtk npx lighthouse <url> --output=json --quiet`, parse the JSON. Evidence dumps take an absolute `filename` into `.cm-tmp/{task_id}/` (`refs/roles/test/browser-lifecycle.md` § Keeping output small).
+4. Browser UI smoke with `mcp__plugin_playwright_playwright__*`, headless on an in-memory profile (`agents/test.md` § Tools): `browser_navigate`, `browser_snapshot` (scoped per step, full for the a11y pass), `browser_take_screenshot`, `browser_console_messages`, `browser_network_requests`, `browser_evaluate` (Web Vitals), `browser_resize`. Lighthouse: `npx lighthouse <url> --output=json --quiet`, parse the JSON. Evidence dumps take an absolute `filename` into `.cm-tmp/{task_id}/` (`refs/roles/test/browser-lifecycle.md` § Keeping output small).
 5. Mobile flow (Detox, Maestro, or simulator).
 
 # Self-critique
@@ -14,7 +14,7 @@
 - Responsive: no overflow at any viewport in the § Evidence storage list.
 - Mobile: launch <3 s, no crash, stable memory.
 - Network symptom classes to report: CORS, a missing request, a timeout, payload size (addy browser-testing SKILL.md:140-182).
-- Coverage: every AC has at least one case across L1-L4, recorded in `ac_coverage[]`; a gap goes to `missing_test_cases[]`.
+- Coverage: every covered scenario has at least one case across L1-L4, recorded in `ac_coverage[]`; a gap goes to `missing_test_cases[]`.
 
 # Constitutional
 

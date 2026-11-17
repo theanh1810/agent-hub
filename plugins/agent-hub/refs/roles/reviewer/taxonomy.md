@@ -4,13 +4,13 @@
 
 ---
 
-Checked on **every** pass, whatever the mode. The **fourteen** `##` anchors below are the cross-mode categories; the `category` enum in `agents/reviewer.md` § Output holds **twenty-seven** values (`tools/check ruleset (package repo only)::reviewer_categories_anchored` counts both from this file). Each anchor carries name, severity and trigger on one line, then criteria, signals and exclusions.
+Checked on **every** pass, whatever the mode. The **fourteen** `##` anchors below are the cross-mode categories; the `category` enum in `agents/reviewer.md` § Output holds **twenty-six** values (`python3 tools/check.py ruleset` (agent-hub repo only), check `reviewer_categories_anchored`, counts both from this file). Each anchor carries name, severity and trigger on one line, then criteria, signals and exclusions.
 
-The other **thirteen** are raised by a `review-checklist` section or a section of this file, which titles them in prose, not snake_case, so use the table below rather than grepping the enum. A value with no anchor is not a category; a finding fitting none of the twenty-seven needs a rule before a label. "Raised from" is not "checked in one mode only": `code_comments` and `commit_message` are read on every pass, and only `commit_message` narrows itself, to `mode=merge`. A category is mode-scoped only where its anchor names a mode section of `review-checklist`; § Universal checklist is every mode, so `spec_debt_missing` anchors there and is checked on every pass.
+The other **twelve** are raised by a `review-checklist` section or a section of this file, which titles them in prose, not snake_case, so use the table below rather than grepping the enum. A value with no anchor is not a category; a finding fitting none of the twenty-six needs a rule before a label. "Raised from" is not "checked in one mode only": `code_comments` and `commit_message` are read on every pass, and only `commit_message` narrows itself, to `mode=merge`. A category is mode-scoped only where its anchor names a mode section of `review-checklist`; § Universal checklist is every mode, so `spec_debt_missing` anchors there and is checked on every pass.
 
 | Enum value | Raised from |
 |---|---|
-| `security` · `design` · `docs` · `prd_compliance` | `review-checklist` § security · § design (UI) · § docs · § task (compliance) |
+| `security` · `design` · `prd_compliance` | `review-checklist` § security · § design (UI) · § task (compliance) |
 | `correctness` · `dead_code` · `reuse_miss` · `perf` · `resource_leak` · `readability` | `review-checklist` § merge → Phase B step 4, bullets **Correctness** · **Dead/orphan code** · **Reuse miss** · **Perf** · **Resource** · **Readability** |
 | `code_comments` | this file, § Comment policy |
 | `commit_message` | `refs/roles/reviewer/merge-policy.md § Commit policy`, read on `mode=merge` |
@@ -18,9 +18,9 @@ The other **thirteen** are raised by a `review-checklist` section or a section o
 
 The severity in each heading is that section's; `agents/reviewer.md § Severity` maps it to a verdict.
 
-## `handoff_incomplete` — blocking — the upstream agent's output lacks the top-level `handoff`, or one of the six sub-fields `CLAUDE.md` §11 defines
+## `handoff_incomplete` — blocking — the upstream agent's output lacks the top-level `handoff`, or one of the six sub-fields `rules/core.md § Handoff contract` defines
 
-Read the names in `CLAUDE.md` §11. Blocks the wave-close; main re-spawns the agent with the missing fields named. Skip for orchestrator routing JSON and a gate status such as `needs_user_input`.
+Read the names in `rules/core.md § Handoff contract`. Blocks the wave-close; main re-spawns the agent with the missing fields named. Skip for a gate status such as `needs_user_input`.
 
 ## `pattern_violation` — blocking — implement edited ≥10 lines of real logic and cited no `pattern_reference`, or one that does not exist, or one that is unrelated
 
@@ -46,7 +46,7 @@ The discipline outranks the neighbour: a neighbour dense with comments does not 
 
 The handoff must answer the five questions of `_discipline.md` § The check before the commit; missing answers are `handoff_incomplete`.
 
-## `code_standards` — 🟠 major, 🔴 blocking on implement's Forbidden list — `agents/implement.md` § Priorities, § Craft and § Forbidden, tested by **"where did the task ask for this line?"**
+## `code_standards` — 🟠 major, 🔴 blocking on implement's Forbidden list — `refs/roles/implement/craft.md` § Priorities and § Craft, and `agents/implement.md` § Forbidden, tested by **"where did the task ask for this line?"**
 
 Read the task's `what`, `purpose` and `files[].why` first; unanswerable is a finding. Blocking when the diff contains anything from implement's Forbidden list:
 
@@ -68,7 +68,7 @@ Major: complexity >12, nesting >3, more than 4 parameters, a boolean parameter t
 ## `plan_fidelity` — 🔴 blocking — a file in the diff that is not in `task.files[]`, a plan task committed alone instead of with its wave, two waves in one commit, or a `review_checkpoint.focus[]` the diff cannot answer
 
 1. **Out of scope**: a file in the diff not in `task.files[]` and not declared in the handoff as rename fan-out or a compile fix. Name the path.
-2. **Batched tasks**: in a plan, a task committed alone instead of with its wave, or two waves in one commit (a fix after merge review is neither: `skills/review-checklist/references/merge.md` Phase B step 8); or a task diff, read as `refs/roles/implement/close-task.md` § Wave commit says while its wave is uncommitted, containing another task's work.
+2. **Batched tasks**: in a plan, a task committed alone instead of with its wave, or two waves in one commit (a fix after merge review is neither: `skills/review-checklist/references/merge.md` Phase B step 8); or a task diff, read while its wave is uncommitted (`refs/gates.md § Gate procedures`), containing another task's work.
 3. **`review_checkpoint.focus[]` not checkable from the diff**: the task or the checkpoint is wrong.
 
 ## `spec_drift` — 🔴 critical, blocking — the code implements a business rule no AC covers, or contradicts one that exists. Propose both routes and **choose neither**: it is a business decision, so it goes to the user
@@ -85,13 +85,13 @@ Four strong signals: a new field, column or business enum value · a new route, 
 
 Violations of `rules/SDD.md` §4: no quick-info table · a technical term with no glossary entry · Given/When/Then wording that does not follow the spec language · class or function names outside `## Technical notes` · an AC with no id · an unmeasurable sentence ("handle it fast", "better UX") · no `## History`. A brownfield spec may be ugly.
 
-## `result_write_back` — 🟠 major — `CLAUDE.md` §20: `status: done` with `result: null`, a `result` with no `changes[]` on a task that touched code, a `changes[]` entry with an empty `cost`, or a status disagreeing between the task record and `plan.<lang>.md`, or a finished task missing a `result.ac_check` entry for one of its acceptance criteria, or holding `met: true` with no `evidence`
+## `result_write_back` — 🟠 major — `refs/closeout.md § Recording What a Change Did`: `status: done` with `result: null`, a `result` with no `changes[]` on a task that touched code, a `changes[]` entry with an empty `cost`, or a status disagreeing between the task record and `plan.<lang>.md`, or a finished task missing a `result.ac_check` entry for one of its acceptance criteria, or holding `met: true` with no `evidence`
 
-A task at `status: done` with `result: null` · a `result` missing `changes[]` on a task that touched code · an empty `cost` · a status disagreeing between the task record (`refs/plan-files.md`) and `plan.<lang>.md` outside a wave whose `wave_commit` has not run (D20) · a finished task (`reviewing` or `done`) missing an `ac_check` entry for an acceptance criterion, or `met: true` with no `evidence`. Per `CLAUDE.md` §20 a result with commits and file names but no before/after is a receipt; an empty `cost` means the trade-off was never considered.
+A task ticked in `tasks.md` whose `Done when:` no command in the handoff shows met · a meaningful change whose handoff has no before/after or an empty cost. Per `refs/closeout.md § What every meaningful change answers` a result with commits and file names but no before/after is a receipt; an empty cost means the trade-off was never considered.
 
 An `ac_check` entry whose `met: true` the diff contradicts (the cited line does not hold the change, or a `tc_id` has no exit-0 row in `result.commands[]`), and an entry with `met: false`, are filed under `prd_compliance` naming the AC id at 🟠 or above: only 🟡 passes the final gate (`agents/reviewer.md` § Severity).
 
-## `closeout_incomplete` — 🟠 major, one case 🔴 — `CLAUDE.md` §21: the run produced a diff and the handoff has no `closeout:` block, or a field in it is missing or `false`. `plan_written_back: false` **with `status: done`** is the 🔴, and the push hook is not evidence for the other four steps
+## `closeout_incomplete` — 🟠 major, one case 🔴 — `refs/closeout.md § The five steps, in this order`: the run produced a diff and the handoff has no `closeout:` block, or a field in it is missing or `false`. `plan_written_back: false` **with `status: done`** is the 🔴, and the push hook is not evidence for the other four steps
 
 | Field | What a bad value means |
 |---|---|
@@ -99,19 +99,19 @@ An `ac_check` entry whose `met: true` the diff contradicts (the cited line does 
 | `diff_matches_plan: false` | Files changed that no task named: scope creep or an unrecorded decision. Read the listed paths first |
 | `plan_written_back: false` **with `status: done`** | **🔴 blocking.** The plan claims work it holds no record of; the one case that blocks alone (see `result_write_back`) |
 | `spec_synced` empty while `spec_required: true` | The UC still describes old behaviour; overlaps `spec_drift`, report the closer fit, not both |
-| `mem0` | `[]` with a stated reason is fine. `[]` with no reason, or more than three entries, is the finding |
+| `memory` | `[]` with a stated reason is fine. `[]` with no reason, or more than three entries, is the finding |
 | `cleanup` | Covered by `artifact_litter`: report it there; do not double-report |
 
 No push hook exists (step 1 is the only reindex): a handoff citing a hook for any closeout step is the finding.
 
-## `artifact_litter` — 🟠 major — the last net for `CLAUDE.md` §19, four signals, read against `refs/artifact-layout.md § Where writing is allowed` rather than judged from memory. Also that `.cm-tmp/` and any `~/.claude-backups/{task_id}` were cleaned
+## `artifact_litter` — 🟠 major — the last net for `refs/artifact-layout.md`, four signals, read against `refs/artifact-layout.md § Where writing is allowed` rather than judged from memory. Also that `.cm-tmp/` and any `~/.claude-backups/{plan_id}/{task_id}` were cleaned
 
-1. A new file outside the §19.1 table (read the table).
-2. An image, log or dump under `docs/changes/**`, at a **sub-repo root**, or at `{workspace_root}` outside the folders §19.1 lists. Two different places: the first is inside the code, the second one level above.
+1. A new file outside the `refs/artifact-layout.md § Where writing is allowed` table (read the table).
+2. An image, log or dump under `docs/changes/**`, at a **sub-repo root**, or at `{workspace_root}` outside the folders that table lists. Two different places: the first is inside the code, the second one level above.
 3. A filename containing `$`, `{`, `}`, or shaped like `test-N` / `screenshot-N`.
-4. A **new** `plan_id`, or the `{slug}` of `docs/brainstorm/` or `docs/changes/adhoc/`, with no repo prefix (§19.0 *Paths stay flat*). Existing `plan_id`s are never renamed: flagging one is a false positive.
+4. A **new** `plan_id`, or the `{slug}` of `docs/brainstorm/` or `docs/changes/adhoc/`, with no repo prefix (`refs/artifact-layout.md § Where the workspace root is`, *Paths stay flat*). Existing `plan_id`s are never renamed: flagging one is a false positive.
 
-Also check `.cm-tmp/` and `~/.claude-backups/{task_id}` (§19.2) were cleaned and the handoff has its `cleanup:` line. In a plan's closeout or merge review, a `.cm-tmp/{task_id}` (or `.cm-tmp/{plan_id}`) of the closing plan still present and not named as kept is this finding (the *Closeout sweep* of `refs/artifact-layout.md` § The cleanup gate missed it); the folder this review writes, and any folder of a run with no plan (the `cmtmp_sweep` spawn deletes it: `refs/roles/orchestrator/gates.md`), are not.
+Also check `.cm-tmp/` and `~/.claude-backups/{plan_id}/{task_id}` (`refs/artifact-layout.md § Ephemeral output`) were cleaned and the handoff has its `cleanup:` line. In a plan's closeout or merge review, a `.cm-tmp/{task_id}` (or `.cm-tmp/{plan_id}`) of the closing plan still present and not named as kept is this finding (the *Closeout sweep* of `refs/artifact-layout.md` § The cleanup gate missed it); the folder this review writes, and any folder of a run with no plan (main thread sweeps it: `refs/artifact-layout.md § The cleanup gate`), are not.
 
 ## `redundant_read` — minor — more than two `Read` calls on one file in a session with no `Edit` between them. Warn only, log the waste; auditor tracks the trend
 
@@ -133,7 +133,7 @@ Prefer the remedy that removes moving pieces over one that spreads the same comp
 
 ## Eight dimensions — the deep review mapped onto the categories above, not a second checklist
 
-Each dimension is looked at once. Column 2 names the category or checklist line already covering each bullet; a bullet nothing covers is the one new line in its row, filed under the closest category. Severity stays 🔴🟠🟡 (`CLAUDE.md` §16). A dimension examined with nothing to report is an absence claim listing what was checked; one that does not apply is `N/A: <reason>`, never omitted (on a ruleset, docs or config-only change D and E are `N/A`).
+Each dimension is looked at once. Column 2 names the category or checklist line already covering each bullet; a bullet nothing covers is the one new line in its row, filed under the closest category. Severity stays 🔴🟠🟡 (`refs/review-trail.md § Severity tags, learning mode, and the dashboard`). A dimension examined with nothing to report is an absence claim listing what was checked; one that does not apply is `N/A: <reason>`, never omitted (on a ruleset, docs or config-only change D and E are `N/A`).
 
 | Dimension and its bullets | Already covered by | Applies when |
 |---|---|---|

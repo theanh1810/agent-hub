@@ -1,4 +1,0 @@
-interface:
-  display_name: "Claude Workflow"
-  short_description: "Shared spec, plan, review and test workflow"
-  default_prompt: "Use $claude-workflow to investigate and complete this engineering task with the shared spec, plan and verification workflow."

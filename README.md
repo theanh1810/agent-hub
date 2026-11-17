@@ -1,6 +1,6 @@
 # agentHub
 
-A multi-agent workflow for Claude Code. An orchestrator routes each request to specialist agents (brainstorm, planner, implement, reviewer, test, designer, devops) with spec, plan and review gates between them.
+A multi-agent workflow for Claude Code. The main thread routes each request by a lane table to seven specialist agents: brainstorm, scout, designer, implement, reviewer, test and devops. A short core of four principles governs every lane. Larger changes are planned as OpenSpec change folders written by brainstorm, with a detailed Vietnamese plan document, and checked by machine before any code is written. A run ends with one reviewer pass.
 
 ## Install
 
@@ -24,7 +24,7 @@ Each optional plugin installs the same way: `/plugin install <name>@agent-hub`.
 | Plugin | What it adds |
 |---|---|
 | `agent-hub-auditor` | `/audit`: scores what the agents did in a time window and writes a report under `docs/audits/` |
-| `agent-hub-integrations` | the `lark-task` skill, MCP launcher scripts, Codex and ChatGPT templates. `agent-hub-codex convert` finds the core plugin installed beside it; otherwise set `AGENT_HUB_RULESET` to the core plugin folder |
+| `agent-hub-integrations` | the `lark-task` skill and MCP launcher scripts |
 | `agent-hub-local-services` | the Docker preflight hook and the local-services reference |
 
 Optional tools, and what happens without them:
@@ -32,14 +32,14 @@ Optional tools, and what happens without them:
 | Tool | Without it |
 |---|---|
 | GitNexus (code graph) | agents fall back to grep and say so |
-| mem0 | no cross-project memory; the project memory file still works |
+| claude-mem (the memory store) | no cross-project memory; the project memory file still works |
 | Context7 | library questions are answered from the repository and its docs |
 | Playwright plugin | the test agent cannot drive a browser; it reports which cases it could not run |
-| RTK (output filter) | terminal output is not shortened |
+| context-mode (output filter; optional, user-installed, see `plugins/agent-hub/refs/toolset.md`) | terminal output is not shortened |
 
 ## Reply language
 
-At install you choose the language the agents use to talk to you: replies, questions, and the plan summary file. The default is English (`en`); any ISO 639-1 code works, for example `vi` or `ja`. With English the plan summary file is not written. The files the agents read stay in English whatever you choose.
+At install you choose the language the agents use to talk to you: replies and questions. The default is English (`en`); any ISO 639-1 code works, for example `vi` or `ja`. The files the agents read stay in English whatever you choose.
 
 ## Read guard
 
@@ -56,7 +56,7 @@ The plugin does not touch your permissions, model, environment variables, status
 /plugin marketplace remove agent-hub
 ```
 
-Repeat the first command for each optional plugin you installed. Files the agents wrote into your projects (`docs/`, `specs/`) are yours and stay.
+Repeat the first command for each optional plugin you installed. Files the agents wrote into your projects (`docs/`, `openspec/`) are yours and stay.
 
 ## Licence
 
@@ -64,7 +64,7 @@ MIT with the Commons Clause: you may use and modify it, you may not sell it. The
 
 ## Credits
 
-Ideas adopted from the projects below were rewritten in this package's own words; no text was copied. Links are in `THIRD_PARTY_NOTICES.md`.
+Some texts from the projects below are carried verbatim with attribution, and other ideas were rewritten in this package's own words. Each carried passage, its pinned source and its licence are listed in `THIRD_PARTY_NOTICES.md` and `tools/upstream/manifest.yaml`.
 
 - [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills)
 - [leonxlnx/taste-skill](https://github.com/leonxlnx/taste-skill)

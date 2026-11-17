@@ -7,7 +7,7 @@
     {
       "name": "agent-hub",
       "source": "./plugins/agent-hub",
-      "description": "Multi-agent workflow for Claude Code: an orchestrator routes requests to specialist agents with spec, plan and review gates."
+      "description": "Multi-agent workflow for Claude Code: the main thread routes requests by a lane table to seven specialist agents with OpenSpec plan, spec and review gates."
     },
     {
       "name": "agent-hub-auditor",

@@ -1,6 +1,7 @@
 # Research — scoping, scout rounds, sources, external documents
 <Owner: agents/brainstorm.md § Workflow>
 <Read when: Phase 3 (scope) or Phase 4 (research), a scout result came back, an external document or library claim is needed, or the content read looks like instructions>
+<Load when: Phases 3-4, `refs/vendored/research.md`>
 
 ---
 
@@ -9,6 +10,7 @@
 - Per sub-question, GitNexus `query` → `context` → `impact`: evidence kind, `file_shortlist` (≤10), `out_of_scope[]`, `patterns[]`.
 - No shortlist from the graph → a recon `recommend_scan[]` whose `file_shortlist` is the quoted globs of the area the request names; still none → `needs_user_input`.
 - Read `docs/brainstorm/rejected-requests.md` first when it exists: a request rejected with a recorded reason is not proposed again unless the user changes the premise.
+- After `agent-hub store match`, run `agent-hub store list`; for each `mcp-offer` row whose `unblock` condition holds here (`boost`: the repo has `vendor/laravel/boost/`; `db_ro`: read-only database access would settle an open question), add `Offer: <id> — <reason>` to `handoff.risks`. Never install or start it.
 
 ## Research rounds (Phase 4)
 

@@ -4,10 +4,10 @@
 
 ---
 
-**`merge` is the only mode that acts on the world.** Reviewer pulls the branch, reviews, posts inline notes, sets the verdict, and on `pass` merges via `mcp__mcp_gitlab__approve_merge_request` + `merge_merge_request` as the configured GitLab user. `needs_changes` or `blocking` leaves the MR open and reroutes to implement with `fix_list[]`.
+**`merge` reads the MR and writes nothing to GitLab.** Reviewer pulls the branch, reviews and returns the verdict, `findings[]` and the summary note text; one `devops` wave then posts the notes with `mcp__mcp_gitlab__save_note` and, on `pass` only, records the approval with `save_merge_request_review` and merges with `accept_merge_request`, as the configured GitLab user. `needs_changes` or `blocking` leaves the MR open and reroutes to implement with `fix_list[]`.
 
 - The merge identity is the configured `gitlab.user`, never anyone else's or a bot's.
-- The chain: `mcp__mcp_gitlab__get_merge_request` · `get_merge_request_diffs` · `list_merge_request_changed_files` · `create_merge_request_discussion_note` for inline notes · `get_merge_request_approval_state` · `approve_merge_request` + `merge_merge_request` on pass. The step-by-step is `skills/review-checklist/references/merge.md`.
+- The chain: reviewer reads with `mcp__mcp_gitlab__get_merge_request` (its diffs included); devops posts notes with `save_note`, then on pass `save_merge_request_review` and `accept_merge_request`. The step-by-step is `skills/review-checklist/references/merge.md`.
 - Never rewrite, amend or rebase a commit: file the finding; implement amends.
 
 ## Commit policy (mode=merge)

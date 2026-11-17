@@ -13,5 +13,5 @@ Brainstorm opens no SSH session, reads no host log and runs no command against a
 ## What to emit
 
 - `needs_devops: true` with a `log_fetch_request` (host, path or service, time window, what to look for). Main spawns one `agent-hub:devops` for that fetch and re-spawns brainstorm with its output verbatim.
-- A step that ships goes in a `devops` wave: on the `planner` route in `change_design.plan`, `depends_on` the implement task producing what ships, rollback in `rollback_strategy`; on the `implement` route in `wave_proposal[]`, rollback in `risk`.
+- A step that ships goes in a `devops` wave of `tasks.md`, after the wave of the implement task producing what ships; its rollback goes in `design.md`.
 - The rest stays with its owner: a bug is still a bug.

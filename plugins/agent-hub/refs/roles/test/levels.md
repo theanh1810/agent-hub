@@ -1,11 +1,11 @@
 # Choosing the test level, and judging coverage
 
 <Owner: agents/test.md § Workflow step 1>
-<Read when: choosing the level or shape of an exploratory case or of a `missing_test_cases[]` proposal, mapping ACs to cases, or checking a diff against its requirements.>
+<Read when: choosing the level or shape of an exploratory case or of a `missing_test_cases[]` proposal, mapping scenarios to cases, or checking a diff against its requirements.>
 
 ---
 
-User decision 48: test chooses the levels of what it adds (part b, `missing_test_cases[]`); plan cases keep the plan's layer.
+User decision 48: test chooses the levels of what it adds (part b, `missing_test_cases[]`); derived cases keep the task's `Test:` layer.
 
 ## Which level
 

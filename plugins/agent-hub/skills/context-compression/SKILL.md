@@ -1,21 +1,17 @@
 ---
 name: context-compression
-description: Use when an agent's handoff or memory file is verbose, the context window is filling up, tool output is bloated, or before deciding what may and may not be compressed. Gives the verdict on what may be shortened and what stays verbatim. Triggers on "compress context", "caveman", "rtk", "shrink output", "context pressure".
+description: Use when an agent's handoff or memory file is verbose, the context window is filling up, tool output is bloated, or before deciding what may and may not be compressed. Gives the verdict on what may be shortened and what stays verbatim. Triggers on "compress context", "caveman", "context-mode", "shrink output", "context pressure".
 user-invocable: false
 allowed-tools:
   - Read
   - Grep
   - Glob
-  - Bash(rtk --version)
-  - Bash(rtk gain)
-  - Bash(rtk git status *)
-  - Bash(rtk git log *)
 model: inherit
 ---
 
 # Context Compression
 
-Compression (Caveman, RTK) saves tokens. Keep every identifier the next agent needs and check a fact against the original, since compression is never a source of truth.
+Compression (Caveman, context-mode) saves tokens. Keep every identifier the next agent needs and check a fact against the original, since compression is never a source of truth.
 
 ## When to use
 
@@ -24,13 +20,13 @@ Context pressure rises, or a handoff, memory file or tool output is verbose. Eve
 ## Steps
 
 1. **Filter, then compress**: drop what does not earn its tokens first; compressing junk yields small junk.
-2. Run `skills/context-compression/references/per-agent.md`, read before the first tool turn: drop and keep lists, per-agent drop ratio, fill-level table, RTK rules, Caveman variants, memory hygiene.
+2. Run `skills/context-compression/references/per-agent.md`, read before the first tool turn: drop and keep lists, per-agent drop ratio, fill-level table, context-mode rules, Caveman variants, memory hygiene.
 3. Prefer a script to embedded code: a script costs its output, embedded code costs every load.
 4. A sprawling document is split by layer: reference behind a pointer, branches in separate files.
 
 ## Hard rules (apply to all modes)
 
-This section is the ruleset's only never-compress list. `CLAUDE.md` §7 and §22 point here and keep no copy.
+This section is the ruleset's only never-compress list. `refs/context-policy.md § Tool Policy` and `refs/context-policy.md § Context window` point here and keep no copy.
 
 NEVER compress:
 
@@ -43,11 +39,15 @@ NEVER compress:
 - a `file:line` citation, a validation command, or its expected result
 - `**/errors.yaml`, byte-exact, for brainstorm's error-batch pass
 
-NEVER pair a compressor with the wrong input: RTK on prose, or Caveman over raw output already sandboxed to a file.
+NEVER pair a compressor with the wrong input: context-mode on prose, or Caveman over raw output already sandboxed to a file.
 
 ALWAYS preserve file paths, line refs, symbols; API, socket and route names; request/response field names; acceptance criteria, validation commands and expected results; root-cause identifiers, blockers, `plan_id` / `task_id`.
 
 Compression that introduces ambiguity in a required field: revert that field to normal prose.
+
+## Duplicate rows
+
+On demand only: `awk '!seen[$0]++'` drops repeated lines and keeps their order; `sort | uniq -c | sort -rn` counts them. Never run either on text quoted as evidence or a citation.
 
 ## Red flags
 

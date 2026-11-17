@@ -16,7 +16,7 @@ Each block is walked once: drop, keep verbatim, compress prose, or handle raw ou
 - **Hedge runs** ("I think", "perhaps", "let me check again"): replace with assertion or fact.
 - **Intermediate failed attempts**: keep the final working version plus one line "tried X, Y; both failed because Z".
 - **Tracebacks beyond the root frame**: keep first 5 frames and bottom 2, drop the middle.
-- **Build noise**: duplicate dependency lines, progress bars, ANSI codes (RTK handles most; strip the rest).
+- **Build noise**: duplicate dependency lines, progress bars, ANSI codes (context-mode handles most; strip the rest).
 - **Empty section headers.**
 - **History irrelevant to the current wave.**
 
@@ -37,7 +37,7 @@ for each block in context:
   if block in Drop list → remove
   elif block in Keep list → keep verbatim, NEVER compress
   elif block is prose narration → mark for Caveman lite/full per fill level
-  elif block is raw tool output → mark for RTK / sandbox-to-file
+  elif block is raw tool output → mark for context-mode / sandbox-to-file
   elif block is duplicate of newer block → remove older
   else → keep, evaluate next pass
 ```
@@ -46,7 +46,6 @@ for each block in context:
 
 | Agent | Expected drop ratio |
 |---|---|
-| orchestrator | 40-60% — routing chatter is noise |
 | brainstorm | 20-30% — narration drops, findings stay |
 | scout | 30-40% — only patterns + file:line survive |
 | implement | 30-50% — drop "thinking aloud", keep diff + test result |
@@ -62,7 +61,7 @@ A long block that filtering drops by <10% is unusual: check it is not junk kept 
 
 | Context | Action |
 |---|---|
-| Long `brainstorm` / `test` log narration | RTK on raw output; Caveman `lite` on prose summary |
+| Long `brainstorm` / `test` log narration | context-mode on raw output; Caveman `lite` on prose summary |
 | Memory file pre-save (`~/.claude/memory/**/*.md`) | `caveman-compress <file>` (writes `*.original.md` backup) |
 | Bloated MCP catalog descriptions | `caveman-shrink` (catalog only, never requests/responses) |
 | Context >50% / >70% / >85% window | § Auto compression below |
@@ -74,19 +73,19 @@ At the start of every tool turn: filter (Step 1), check context fill, pick a mod
 
 | Fill | Action |
 |---|---|
-| <50% | filter only; no Caveman/RTK |
-| 50-70% | filter + Caveman `lite` on internal narration + RTK-wrap `git log/status`, build/test/lint logs, kubectl/docker logs |
-| 70-85% | filter aggressive (+10 pts drop ratio) + Caveman `full` on prose + sandbox all raw outputs to `{workspace_root}/.cm-tmp/{task_id}/<job>.out` (§19.2) and cite the path; never inline >30 lines; drop the prior agent's full handoff, keep its summary line + path |
-| >85% | Emergency closeout: filter to the bare keep-list; write the handoff summary into the task's `result` in its task record (§20, `refs/plan-files.md`), the mirror carrying `status` and the `Result` block rebuilt from it (`refs/closeout.md § The result in the mirror`); `{plan_dir}/` holds no file beyond the plan files (§19.1); raw output stays in `.cm-tmp/{task_id}/`; save to project memory (context-memory §Project memory); return a short status and recommend a fresh session. `test` instead returns `in_progress` with `progress.yaml` and `remaining_test_case_ids[]` (`refs/roles/test/resume.md`) and writes no plan |
+| <50% | filter only; no Caveman/context-mode |
+| 50-70% | filter + Caveman `lite` on internal narration + compress (run bare) `git log/status`, build/test/lint logs, kubectl/docker logs |
+| 70-85% | filter aggressive (+10 pts drop ratio) + Caveman `full` on prose + sandbox all raw outputs to `{workspace_root}/.cm-tmp/{task_id}/<job>.out` (`refs/artifact-layout.md § Ephemeral output`) and cite the path; never inline >30 lines; drop the prior agent's full handoff, keep its summary line + path |
+| >85% | Emergency closeout: filter to the bare keep-list; tick the task's box in `tasks.md` and write the handoff summary (`refs/closeout.md § Recording What a Change Did`); `{plan_dir}/` holds no file beyond the plan files (`refs/artifact-layout.md § Where writing is allowed`); raw output stays in `.cm-tmp/{task_id}/`; save to project memory (context-memory §Project memory); return a short status and recommend a fresh session. `test` instead returns `in_progress` with `progress.yaml` and `remaining_test_case_ids[]` (`refs/roles/test/resume.md`) and writes no plan |
 
 Fill is each agent's own reading of its window; nothing upstream reports it, so "context was fine" with no filter pass is a guess. Not optional past 70%.
 
-## RTK quick rules
+## context-mode quick rules
 
-- Verify install: `rtk --version` and `rtk gain`. `gain` failing while `--version` works means a name collision (RTK = "Rust Token Killer").
-- `grep`, `rg`, `cat`, `find`, `ls` are excluded from the hook **on purpose**: summarising a file under inspection changes conclusions, not just token count. Never route a file read or search through rtk. `head` / `tail` are still rewritten: use `sed -n 'A,Bp'`. Measurements: `RTK.md` § What is NOT rewritten.
-- `git diff` fails two ways under the hook and only one looks like a failure; confirm the whole diff is in front of you before gating it (`RTK.md` § `git diff` is unreliable).
-- Wrap verbose commands: `rtk git status|log`, `rtk test <cmd>`, `rtk lint`, `rtk tsc`, `rtk next build`, `rtk docker logs`, `rtk kubectl logs`, `rtk curl`.
+- Verify install: `context-mode doctor`.
+- `grep`, `rg`, `cat`, `find`, `ls` are excluded from the hook **on purpose**: summarising a file under inspection changes conclusions, not just token count. Never route a file read or search through context-mode. `head` / `tail` are still rewritten: use `sed -n 'A,Bp'`. Measurements: `refs/toolset.md § context-mode local patch`.
+- `git diff` fails two ways under the hook and only one looks like a failure; confirm the whole diff is in front of you before gating it (`refs/toolset.md § context-mode local patch`).
+- Run commands bare (`git status`, `git log`, tests, `lint`, `tsc`, builds, `docker logs`, `kubectl logs`, `curl`): context-mode compresses large Bash and MCP output in the main thread by its PostToolUse hook; subagents pass through (R19). context-mode has no wrapper subcommand (cli.mjs ALL_COMMANDS: setup, doctor, upgrade, server, mcp, hook, help).
 - Use `tee` or the raw output path only if compressed output hides needed details.
 - NEVER hide the first root-cause error.
 
@@ -96,7 +95,7 @@ Definitions: the `caveman` plugin skill § Intensity. This skill decides only wh
 
 ## What each agent must never trim
 
-Each `agents/<agent>.md` carries that role's never-trim list beside its pointer to this skill (§ Artifact layout for every agent, § Boundaries & safety for `orchestrator`); that list is the authority and this skill keeps no copy.
+Each `agents/<agent>.md` carries that role's never-trim list beside its pointer to this skill (§ Artifact layout for every agent); that list is the authority and this skill keeps no copy.
 
 ## Memory hygiene
 

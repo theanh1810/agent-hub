@@ -1,14 +1,15 @@
 ---
 name: context-memory
-description: Use when an agent must recall prior project decisions or validated root causes, record a durable outcome at closeout, or decide whether a fact belongs in mem0 or the project memory file. Gives the answer on which store holds a fact and what a closeout saves. Triggers on "remember", "recall", "save lesson", "mem0", "prior decision", "what was decided about".
+description: Use when an agent must recall prior project decisions or validated root causes, record a durable outcome at closeout, or decide whether a fact belongs in claude-mem or the project memory file. Gives the answer on which store holds a fact and what a closeout saves. Triggers on "remember", "recall", "save lesson", "claude-mem", "prior decision", "what was decided about".
 user-invocable: false
 allowed-tools:
   - Read
   - Grep
   - Glob
-  - mcp__mcp_mem0__search_memories
-  - mcp__mcp_mem0__get_memory
-  - mcp__mcp_mem0__list_entities
+  - mcp__plugin_claude-mem_mcp-search__search
+  - mcp__plugin_claude-mem_mcp-search__timeline
+  - mcp__plugin_claude-mem_mcp-search__get_observations
+  - mcp__plugin_claude-mem_mcp-search__save_memory
 model: inherit
 ---
 
@@ -16,10 +17,10 @@ model: inherit
 
 The session is working memory and dies with it. Two stores outlive it and are not interchangeable:
 
-- **mem0**: facts true in any project.
+- **claude-mem**: facts true in any project.
 - **the project memory file**: what is true about one workspace (server, deploy command, approved decisions, recent work).
 
-Which store, never-store list, mem0 read, shape and types: `skills/context-memory/references/format.md`, read before the first read or write. Dedup, lesson counter, timing: `skills/context-memory/references/dedup.md`, read before any `add_memory`.
+Which store, never-store list, claude-mem read, shape and types: `skills/context-memory/references/format.md`, read before the first read or write. Dedup, lesson counter, timing: `skills/context-memory/references/dedup.md`, read before any claude-mem save.
 
 ## When to use
 
@@ -27,14 +28,14 @@ At bootstrap (recall), at closeout (save a durable outcome), and whenever a fact
 
 ## Route a fact
 
-1. Useful in a different repo a month from now? mem0. Only here: the project memory file.
-2. Cannot finish "this is still true after the plan is archived"? It is not memory; it is a plan `result`.
-3. Task outcome: the `result` block of its task entry inline in `plan.yaml`. Test evidence: `{plan_dir}/evidence/` (only when images must outlive the run). Both die with the plan.
-4. A lesson that helps only one role do its job (a mistake it repeats, a check that caught an error, a search order that worked): that agent's memory. User and architecture decisions stay in mem0 or the project memory file; one project's facts in the project memory file; tool and environment traps in skill `## Gotchas`; a lesson several roles need in mem0. The never-store list below applies to agent memory.
+1. Useful in a different repo a month from now? claude-mem. Only here: the project memory file.
+2. Cannot finish "this is still true after the plan is archived"? It is not memory; it is a task outcome in the change folder.
+3. Task outcome: the change folder (`tasks.md`, `reviews/`). Test evidence: `{plan_dir}/evidence/` (only when images must outlive the run). Both die with the plan.
+4. A lesson that helps only one role do its job (a mistake it repeats, a check that caught an error, a search order that worked): that agent's memory. User and architecture decisions stay in claude-mem or the project memory file; one project's facts in the project memory file; tool and environment traps in skill `## Gotchas`; a lesson several roles need in claude-mem. The never-store list below applies to agent memory.
 
 ## Project memory file
 
-An agent in a fresh session recalls the workspace without re-asking. It never leaves the workspace; mem0 never holds what belongs here.
+An agent in a fresh session recalls the workspace without re-asking. It never leaves the workspace; claude-mem never holds what belongs here.
 
 ### Discovery order (HARD) — the only statement of it
 
@@ -75,6 +76,7 @@ Decision notes are a ledger: every claim carries a date, a claim about code carr
 ## Glossary
 
 Keep project terms in one shared glossary (one per context) that test names and UI labels follow. A contradicting term is raised at once; an ambiguous one gets a proposed canonical name; a claim about code behaviour is checked against the code; a settled term is written immediately; no implementation detail.
+The method is `refs/vendored/domain-modeling.md`; the file is the project glossary of `refs/artifact-layout.md` (`openspec/glossary.md`, else `docs/glossary.md`), format `refs/vendored/glossary-format.md`.
 > "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
 
 ## Rejected requests
@@ -83,15 +85,15 @@ A declined feature request goes to `docs/brainstorm/rejected-requests.md`, one s
 
 ## Key rules
 
-- mem0 is not a source of truth: cross-check with the graph and a file read before relying on it.
-- Never delete mem0 without the user's explicit request; a wrong memory is corrected or dropped, not acted on.
-- mem0 down: the lesson is not counted and the closeout block says so.
+- claude-mem is not a source of truth: cross-check with the graph and a file read before relying on it.
+- Never delete claude-mem without the user's explicit request (devops, worker DELETE /api/observation/:id for that exact id; no agent deletes on its own, R33); a wrong memory is corrected by a new save stating `supersedes #<old id>` and the reason, not acted on.
+- claude-mem down: the lesson is not counted and the closeout block says so.
 - Cross-project reference material lives in `~/.claude/memory/global/`, not as per-fact memories.
 
 ## Red flags
 
 | Thought | Reality |
 |---|---|
-| "Save the plan path to mem0" | The plan is archived, the memory outlives it, the link dies. |
+| "Save the plan path to claude-mem" | The plan is archived, the memory outlives it, the link dies. |
 | "A second memory is safer" | Search first; the same project + type + subject is an update. |
 | "This is true today, so record it" | Without a date it reads as permanent truth next month. |

@@ -45,6 +45,16 @@ Not for choosing a pattern, library or flow (§ Decisions made elsewhere).
 - Press state never shifts layout; press, focus, disabled keep contrast in light and dark; measure overlays on the real background.
 - Layout primitives and React mechanics follow the file `UI_RULES.md` assigns each.
 
+## Precedence tiers
+
+Three sources can speak on one UI question; the higher tier wins on conflict.
+
+1. This skill with `UI_RULES.md` (rule).
+2. `frontend-design` (reference).
+3. `ui-ux-pro-max` (reference, lowest).
+
+Which agent reads which: `refs/toolset.md` § Stack skills.
+
 ## Floors, in review order
 
 Earlier categories outrank later ones: "Follow priority 1→10 to decide which category to focus on first".
@@ -62,7 +72,7 @@ Mobile: React Native StyleSheet patterns, provider-level theme, HIG / Material, 
 
 ## Design library
 
-Vetted patterns from public systems (Apple HIG, Material 3, shadcn, Radix, Ant, Tailwind UI); consult before inventing UI. Global at `~/.claude/docs/design-library/{lib}/`, one copy for every product (`CLAUDE.md` §19.1), never per repo.
+Vetted patterns from public systems (Apple HIG, Material 3, shadcn, Radix, Ant, Tailwind UI); consult before inventing UI. Global at `~/.claude/docs/design-library/{lib}/`, one copy for every product (`refs/artifact-layout.md § Where writing is allowed`), never per repo.
 
 A design-library fetch is not run by the designer: the designer returns `needs_devops` with the exact command (`npx getdesign@latest add apple`, also material, shadcn, tailwind), run from `~/.claude/docs/design-library`; devops runs it after the user approves; the designer reads the fetched files from the path devops returns.
 
