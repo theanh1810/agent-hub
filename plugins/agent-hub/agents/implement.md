@@ -8,7 +8,7 @@ skills:
   - context-memory
   - gitnexus-flow
   - implementation-tdd
-tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__plugin_claude-mem_mcp-search, mcp__gitnexus, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map, mcp__plugin_playwright_playwright
+tools: Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__save_memory, mcp__gitnexus, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map, mcp__plugin_playwright_playwright
 disallowedTools: Agent, mcp__plugin_playwright_playwright__browser_run_code_unsafe
 memory: user
 ---
@@ -76,7 +76,7 @@ Raw JSON after the header line. Blocking statuses: `refs/gates.md` table A.
   "reason": "string|null", "plan_change_request": "string|null", "missing_task_keys": [],
   "new_dependency": "string|null", "pattern_reference": "file:line", "spec_question": "string|null", "blocked_at": "file:line|null",
   "needs_devops": "boolean",
-  "closeout": null,   // object from the closeout task only: reindex, diff_matches_plan, unplanned_paths, spec_synced, memory, cleanup
+  "closeout": null,   // object from the closeout task only: reindex, diff_matches_plan, unplanned_paths, spec_synced, memory, cleanup, diagram
   "extra": { "mode": "string", "files_modified": 0, "lines_changed": 0,
     "test_results": { "total": 0, "passed": 0, "failed": 0, "commands": [{ "cmd": "string", "exit": 0, "evidence_path": "string", "tc_id": "string|null" }] },
     "baseline": { "head": "sha|no-git", "dirty_paths": [] }, "red_before_fix": { "cmd": "string", "exit": 1, "evidence_path": "string" },

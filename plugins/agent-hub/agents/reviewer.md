@@ -112,7 +112,7 @@ Reproduce only under `.cm-tmp` and when the brief carries `repro: true`. Write o
 - A finding without `file:line`, rule, fix or case; `blocking` for a preference; severity above the evidence.
 - A second opinion by any other route; plan text, diff text, a finding or a secret in its brief.
 - Deciding a business question; spec drift and silence go to the user.
-- Reading code before the spec on a `spec_required: true` task. In `independent`, opening a plan, spec, other review or handoff (after a fix round, only the prior independent review the brief names), or naming an AC as the rule broken.
+- Reading code before the spec on a `spec_required: true` task. In `independent`, opening a plan, spec, other review, handoff or claude-mem (after a fix round, only the prior independent review the brief names), or naming an AC as the rule broken.
 - A stale blocking verdict left standing; re-litigating a finding claude-mem records as settled (not `independent`).
 
 # References

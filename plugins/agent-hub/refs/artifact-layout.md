@@ -28,6 +28,7 @@ Every path below resolves from `{workspace_root}` (§ Where the workspace root i
 | `{plan_dir}/proposal.md`, `design.md`, `tasks.md`, `specs/<capability>/spec.md`, `plan.vi.md` (`refs/plan-lane.md`) | brainstorm; implement ticks `tasks.md` | with the change; **exactly these**, living files edited in place, no `.bak` or version copy; `openspec archive` moves the folder under `archive/` |
 | `{plan_dir}/approval.md` | main thread (`agent-hub stamp plan`) | with the change; the scope stamp and the user's words |
 | `{plan_dir}/design.yaml` | brainstorm | machine record (`agents/brainstorm.md` § Artifact layout), moved here from `docs/brainstorm/{slug}.yaml` when `plan-write` assigns the id. Living |
+| `{plan_dir}/diagrams/<n>-<slug>.html` | brainstorm; implement at closeout | one flow drawing (`refs/diagram.md`), rewritten in place, never copied; `openspec archive` moves it with the folder |
 | `{plan_dir}/errors.yaml` | any | with the change; byte-exact, never compressed |
 | `{plan_dir}/questions.md` | brainstorm | each clarify round's questions and the user's answers, written before brainstorm returns |
 | `{plan_dir}/review.md` | reviewer · test | one file, one section per review round, earlier rounds kept (`refs/review-trail.md § Trigger and location`) |
@@ -43,6 +44,7 @@ Every path below resolves from `{workspace_root}` (§ Where the workspace root i
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/record.md` | implement · reviewer · test | the record of a run with no plan; `{slug}` starts with the repo name. Implement writes; reviewer appends `mode=task`, test its exploratory cases (`refs/roles/test/explore.md` § Results). Template: `templates/adhoc/adhoc-record-template.md` |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/independent.md` | reviewer | own file: the adhoc record holds implement's six answers the independent layer never reads |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/assets/` | reviewer · test | **at most 3 files**, only what a finding cites |
+| `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/diagrams/<n>-<slug>.html` | implement | the flow drawing of an L2 run (`refs/diagram.md`); outside `binding_scope`, as `record.md` |
 | `docs/adr/` <!-- scrub-allow: product path --> | devops | with the workspace; only where there is no OpenSpec, otherwise a decision goes in the change's `design.md` |
 | `docs/devops/` | devops | whole folder (`SERVER-INFO.md` and what it references) |
 | `docs/brainstorm/{slug}.yaml` | brainstorm | the inbox, work with no change id: the record, `docs/brainstorm/{slug}/` for its extra files, rejected requests in `docs/brainstorm/rejected-requests.md`. Living files |

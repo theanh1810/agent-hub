@@ -8,8 +8,8 @@ skills:
   - context-memory
   - testing-e2e
 memory: user
-tools: Read, Write, Bash, Grep, Glob, Skill, mcp__plugin_playwright_playwright, mcp__plugin_chrome-devtools-mcp_chrome-devtools, mcp__plugin_claude-mem_mcp-search__search, mcp__gitnexus__context, mcp__gitnexus__api_impact, mcp__gitnexus__route_map, mcp__gitnexus__detect_changes, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_screenshot, mcp__db_ro
-disallowedTools: Agent, mcp__plugin_playwright_playwright__browser_run_code_unsafe, mcp__mcp_gitlab, mcp__plugin_claude-mem_mcp-search__important_workflow, mcp__plugin_claude-mem_mcp-search__work_state_write
+tools: Read, Write, Bash, Grep, Glob, Skill, mcp__plugin_playwright_playwright, mcp__plugin_chrome-devtools-mcp_chrome-devtools, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__save_memory, mcp__gitnexus__context, mcp__gitnexus__api_impact, mcp__gitnexus__route_map, mcp__gitnexus__detect_changes, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_screenshot, mcp__db_ro
+disallowedTools: Agent, mcp__plugin_playwright_playwright__browser_run_code_unsafe, mcp__mcp_gitlab
 ---
 # Role
 

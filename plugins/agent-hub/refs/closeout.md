@@ -55,7 +55,7 @@ The only statement of the order. Nothing a reviewer or a fix round may still rea
 
 L3:
 1. **implement**, one spawn per wave, no stop between waves: per task, the pre-edit backup (no git), the edit, checks, freeze, tick, commit, then `.cm-tmp/{task_id}` deleted; the backup stays. A checkpoint the design names runs `test mode=script` after its wave.
-2. **implement**, one `mode=simplify` spawn: simplify over the whole run's change (`refs/roles/implement/close-task.md § Simplify`), the tests again, then closeout steps 1-5; step 5 deletes only this spawn's task folders.
+2. **implement**, one `mode=simplify` spawn: simplify over the whole run's change (`refs/roles/implement/close-task.md § Simplify`), the tests again, then closeout steps 1-5, the flow drawing checked against the code before step 5 (`refs/diagram.md`); step 5 deletes only this spawn's task folders.
 3. **same spawn**, last command of step 2: the review packet. The base of each path is `git show <target branch>:<path>` of the git work tree holding it (the workspace root, or the sub-repo the path lives in); in no git tree, the pre-edit backup `~/.claude-backups/{plan_id}/<first task id>/<path>`; neither: a `NO BASE` row (exit 1, filed 🟠 by the reviewer). With no change folder the main thread runs `agent-hub review-packet docs/changes/adhoc/<date>-<slug> --round 0 --files <path,path,...> --root <workspace root> --base-ref <ref> --diff-only-out <path>` (add `--task-id <id>` when the pre-edit backup folder is not `1`).
 4. **main thread** checks the `closeout` block (§ Verification and enforcement).
 5. **main thread**, one message: `reviewer mode=independent` with the diff-only file as `plan_snapshot`, and `test`. Each deletes its own round folder once every finding or case has a result.
@@ -102,6 +102,7 @@ closeout:
   memory:         ["<slug>", "promote? <subject>"]  # or [] with memory_skip_reason
   memory_skip_reason: null
   cleanup:        "deleted 5 temp files (41 MB), kept 1 at .cm-tmp/W2-T3 (test needs_user_input) | worktrees: removed 3, kept 1 (uncommitted:2)"
+  diagram:        "openspec/changes/acme-login-lock/diagrams/1-luong-dang-nhap.html: updated"  # or "…: confirmed", "no flow change", "skipped: <reason>" (refs/diagram.md)
 ```
 
 - **Main thread** checks the block before the final gate: a missing or false field (a `ruleset_gate` short of N/N included) re-spawns implement for the closeout; `reviewer mode=task`, when a brief names it, files it as `category: closeout_incomplete`, 🟠.

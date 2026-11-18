@@ -16,7 +16,7 @@ Main thread sends the request straight to `implement` only when all four hold: (
 
 ## L2 small
 
-A feature or bug of at most 6 files with no contract or shared-symbol change: brainstorm, implement (`mode=simplify` as its last step), then `reviewer` and `test` in parallel over one frozen state, then the final gate (order and owners: `refs/closeout.md § End of a run`). No plan files and no approval gate unless brainstorm raises `approval_required`. A bug starts at brainstorm (root cause); implement applies the analysed fix and diagnoses nothing. After `Approve`, on the user's word, `devops` pushes the branch and opens the MR; the user merges.
+A feature or bug of at most 6 files with no contract or shared-symbol change: brainstorm, implement (`mode=simplify` as its last step), then `reviewer` and `test` in parallel over one frozen state, then the final gate (order and owners: `refs/closeout.md § End of a run`). No plan files and no approval gate unless brainstorm raises `approval_required`. A bug starts at brainstorm (root cause); implement applies the analysed fix and diagnoses nothing. After `Approve`, on the user's word, `devops` pushes the branch and opens the MR; the user merges. Which runs get a flow drawing: `refs/diagram.md § When`.
 
 ## L-cfg no-plan
 
