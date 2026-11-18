@@ -87,6 +87,7 @@ plugins/agent-hub/lib/yaml/serializer.py	PORT	plugins/agent-hub/lib/yaml/seriali
 plugins/agent-hub/lib/yaml/tokens.py	PORT	plugins/agent-hub/lib/yaml/tokens.py	A
 plugins/agent-hub/refs/artifact-layout.md	PORT+EDIT	plugins/agent-hub/refs/artifact-layout.md	F1
 plugins/agent-hub/refs/bootstrap.md	NEW	OLD skills/agent-bootstrap/SKILL.md	F1
+plugins/agent-hub/refs/diagram.md	NEW	J9 flow-drawing ruling	F1
 plugins/agent-hub/refs/business-rule-testing.md	PORT+EDIT	plugins/agent-hub/refs/business-rule-testing.md	F5
 plugins/agent-hub/refs/closeout.md	REWRITE	plugins/agent-hub/refs/closeout.md	F1
 plugins/agent-hub/refs/code-standards.md	PORT+EDIT	plugins/agent-hub/refs/code-standards.md	F1

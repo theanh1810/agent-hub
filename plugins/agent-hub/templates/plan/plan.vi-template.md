@@ -2,6 +2,8 @@
 
 Tài liệu này viết cho người duyệt, bằng tiếng Việt. Mỗi task một khối `### <mã> <tiêu đề>`, mã trùng với `tasks.md`. Khối nào cũng kết thúc bằng mục `#### Dữ liệu và màn hình bị ảnh hưởng` ("Không có" khi không có gì).
 
+Bản vẽ: {{diagrams/1-<slug>.html — luồng trước và sau thay đổi, mở bằng trình duyệt; hoặc "không có luồng thay đổi — <lý do>" / "bỏ qua — <lý do>"}}
+
 ### 1.1 {{tiêu đề task}}
 
 #### Việc làm và lý do

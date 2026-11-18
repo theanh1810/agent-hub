@@ -461,3 +461,18 @@
   status: offer
   reason: an MCP server is always an offer to the user; never installed or started by an agent
   unblock: offer it to the user when read-only database access would settle a question
+- id: rea
+  kind: mcp-offer
+  origin: morluto/rea
+  licence: MIT
+  files: []
+  signal:
+    files: []
+    deps: []
+    task: the user asks to reverse-engineer or inspect a third-party app or binary
+  roles: [brainstorm]
+  side_effects: none
+  guard: 'MCP server for reverse engineering apps and binaries (255 tools), pin rea-agents@6.9.0. Register only on the user saying yes for that task, by hand: `claude mcp add --scope user --transport stdio rea -e REA_MCP_OUTPUT_SCHEMA_PROFILE=off -- npx -y rea-agents@6.9.0 mcp`, with `REA_MCP_TOOL_FAMILIES` limited to the families the task needs; remove it after the task. Never run `rea-agents setup`. The first start downloads a native frida binary. Its tools run the analysed target on the host with no general sandbox.'
+  status: offer
+  reason: an MCP server is always an offer to the user; never installed or started by an agent
+  unblock: 'offer it to the user when the task is to reverse-engineer or inspect a third-party app or binary (rea-agents@6.9.0, MIT; registration steps and risks: the row guard in store/catalog.yaml)'

@@ -19,6 +19,8 @@
 
 The section names above are canonical; main thread shows them in the reply language. Omit empty sections except `Summary`. Plan-only tasks add the change folder path, the path of `plan.vi.md`, the wave list, and what awaits approval.
 
+The flow drawing (`refs/diagram.md`) is named under `Summary` by its absolute path, with whether closeout confirmed or updated it; a skipped one by its reason.
+
 **Self-check points.** A final carrying an estimate or an assumption ends with 2-3 points the user should check, each naming one concrete number or assumption; once per conversation, skipped when the user said they will check or asked for the check. A generic "please verify" defeats the purpose.
 
 **When the user says they do not understand**, re-tell it short: a little more context, simple sentences, the project's vocabulary, never the previous sentence repeated. **Name a task or item by its title, never a bare id, number or slug**.

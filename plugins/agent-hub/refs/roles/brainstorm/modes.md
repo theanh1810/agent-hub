@@ -20,7 +20,7 @@ Scout does every search and every read of source for brainstorm (`refs/roles/bra
 
 **Inputs.** The cited root cause, the chosen candidate with its scores, `binding_scope`, `user_decisions_verbatim[]`, the glossary, the live specs the change touches, and the scout results.
 
-**Writes** (files and shapes: `refs/plan-lane.md`): `proposal.md`, `design.md`, `tasks.md`, the spec deltas, `plan.vi.md`, and the machine record `design.yaml`. When it assigns the change id, it moves the inbox record `docs/brainstorm/{slug}.yaml` and the files of `docs/brainstorm/{slug}/` into the change folder, one `mv` each, content unchanged. The record holds `flows:` (also written into `plan.vi.md`), `causal_chain[]` and `affected_surfaces[]`; test and reviewer read them there (`refs/roles/test/two-pass.md`).
+**Writes** (files and shapes: `refs/plan-lane.md`): `proposal.md`, `design.md`, `tasks.md`, the spec deltas, `plan.vi.md`, the flow drawing (`refs/diagram.md`), and the machine record `design.yaml`. When it assigns the change id, it moves the inbox record `docs/brainstorm/{slug}.yaml` and the files of `docs/brainstorm/{slug}/` into the change folder, one `mv` each, content unchanged. The record holds `flows:` (also written into `plan.vi.md`), `causal_chain[]` and `affected_surfaces[]`; test and reviewer read them there (`refs/roles/test/two-pass.md`).
 
 **Decides, never leaves to implement:**
 - task split: vertical slices through every layer, sized by `refs/plan-lane.md § tasks.md shape`; each wave edge backed by an `impact` result; independent subsystems are one plan in parts, never several plans;

@@ -8,7 +8,7 @@ The plan of an L3 change is an OpenSpec change folder plus one Vietnamese docume
 
 ## Where the files live
 
-Every file below sits in the change folder `openspec/changes/<change>/`; OpenSpec ignores the extra files (`plan.vi.md`, `approval.md`, `errors.yaml`, `questions.md`, `review.md`, `reviews/`, `design.yaml`). `openspec new change <change>` creates `.openspec.yaml` (and at times a `README.md`); a change with no behaviour delta sets `skip_specs: true` in `.openspec.yaml`, every other change holds at least one delta. Every `openspec` command runs with `OPENSPEC_TELEMETRY=0` in its environment. Code keeps each location in one named constant in `scripts/plan_paths.py`; this section is the only place text states them, and every other file points here.
+Every file below sits in the change folder `openspec/changes/<change>/`; OpenSpec ignores the extra files (`plan.vi.md`, `approval.md`, `errors.yaml`, `questions.md`, `review.md`, `reviews/`, `design.yaml`, `diagrams/`). `openspec new change <change>` creates `.openspec.yaml` (and at times a `README.md`); a change with no behaviour delta sets `skip_specs: true` in `.openspec.yaml`, every other change holds at least one delta. Every `openspec` command runs with `OPENSPEC_TELEMETRY=0` in its environment. Code keeps each location in one named constant in `scripts/plan_paths.py`; this section is the only place text states them, and every other file points here.
 
 | File | Language | Writer | Holds |
 |---|---|---|---|
@@ -20,6 +20,7 @@ Every file below sits in the change folder `openspec/changes/<change>/`; OpenSpe
 | `approval.md` | English | main thread, by `agent-hub stamp plan` | stamp and the user's words |
 | `errors.yaml`, `questions.md`, `review.md`, `reviews/annex-<n>.md` | English | per `refs/roles/brainstorm/error-batch.md`, `refs/roles/brainstorm/intake.md`, the reviewer and test, main thread | rounds, open questions, review rounds, second-opinion annexes |
 | `design.yaml` | English | brainstorm | machine record |
+| `diagrams/<n>-<slug>.html` | Vietnamese labels | brainstorm; implement at closeout | the flow drawing (`refs/diagram.md`) |
 
 Outside the change folder: live specs `openspec/specs/<capability>/spec.md`; glossary `openspec/glossary.md`; spec debt `openspec/_debt.md`; the scope list `openspec/scope.md` (§ Spec debt names its use). A workspace without `openspec/` keeps `docs/glossary.md` and `docs/spec-debt.md`.
 
@@ -53,6 +54,8 @@ This file is Vietnamese and richer than `tasks.md`; it is not a mirror of it. Th
 One block per task, headed `### <n>.<m> <tiêu đề>`, in the task-id order of `tasks.md`. Each block holds: what will be done and why, before and after in words, the files touched, how it is tested, the risks, what stays out of scope. Each block ends with the heading `#### Dữ liệu và màn hình bị ảnh hưởng`, listing tables, columns, stored files, API fields and screens the task changes; write `Không có` when none.
 
 Use the project glossary's terms. Keep field names, endpoints, statuses and file names in English.
+
+Above the first task block, one line `Bản vẽ: <path>`, `Bản vẽ: không có luồng thay đổi — <lý do>` or `Bản vẽ: bỏ qua — <lý do>` (`refs/diagram.md`).
 
 ## Checks before the gate
 

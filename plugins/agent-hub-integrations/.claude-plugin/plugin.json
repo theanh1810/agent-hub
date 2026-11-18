@@ -1,7 +1,7 @@
 {
   "name": "agent-hub-integrations",
   "displayName": "agentHub Integrations",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Optional integrations for agentHub: the lark-task skill, MCP launcher scripts and Codex/ChatGPT templates.",
   "license": "MIT + Commons Clause 1.0",
   "dependencies": ["agent-hub"]

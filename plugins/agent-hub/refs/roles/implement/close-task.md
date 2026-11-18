@@ -51,7 +51,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 At the task's start write `date -u +%Y-%m-%dT%H:%M:%SZ` to `.cm-tmp/{task_id}/run-started-at` unless it exists; `## Validation` takes start and finish from it and the clock.
 
-- **Tick** the task's checkbox in `tasks.md` only when its `Done when:` is met by a command whose real exit code you read; otherwise leave it open and say why in `## Risks`. This is the only plan file a task edits. `plan.vi.md`, `design.md` and the spec deltas stay brainstorm's.
+- **Tick** the task's checkbox in `tasks.md` only when its `Done when:` is met by a command whose real exit code you read; otherwise leave it open and say why in `## Risks`. This is the only plan file a task edits. `plan.vi.md`, `design.md` and the spec deltas stay brainstorm's; only the closeout's drawing step rewrites `diagrams/`.
 - **Handoff** carries the result: files changed with a note each, commands run with exit codes and counts (red and green phases for a TDD task), deviations, the shortcut list, and per meaningful change what, where (`file:line`), before, after, the mechanism, what the user sees or what else is touched, and the cost paid (never empty).
 - A bug fix or hotfix with no change folder: write the adhoc record from `templates/adhoc/adhoc-record-template.md` (path: `refs/artifact-layout.md` § Where writing is allowed); that one record is exempt from `binding_scope`.
 - **Closure invariant.** Return `completed` only when every task is ticked or carries its reason and the handoff states the commit.
@@ -66,7 +66,7 @@ Closeout timing, owner and inline case: `refs/closeout.md` (top, and § End of a
 4. **Spec** when `spec_required: true`: `refs/closeout.md` step 4; implement writes nothing under `openspec/`.
 5. **claude-mem, then cleanup.** `mcp__plugin_claude-mem_mcp-search__search` first; a near duplicate is not saved again, a changed fact is a new save beginning `supersedes #<old id>: <reason>`. At most three new entries, only a test-confirmed root cause, a reusable pattern with `file:line`, or a pitfall that cost a real error loop. `memory: []` with a reason is correct.
 
-Then the `closeout` block in the handoff, with `ruleset_gate`.
+Before step 5, the drawing step of `refs/diagram.md` (L3: confirm or update; L2: draw). Then the `closeout` block in the handoff, with `ruleset_gate` and `diagram`.
 
 ## Cleanup
 

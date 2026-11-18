@@ -109,7 +109,7 @@ A non-empty `recommend_scan[]` returns `completed` with `recommended_next: null`
 | a bug to root-cause, `needs_repro`, implement's `root_cause_unconfirmed` | `refs/roles/brainstorm/root-cause.md` |
 | about to emit `candidates[]`, a module shape, removing an old system | `refs/roles/brainstorm/solution-bar.md` |
 | `mode=error-batch`, verifying a review finding | `refs/roles/brainstorm/error-batch.md`; `refs/vendored/receiving-code-review.md` |
-| `mode=plan-write` or `spec-convert`, L3, a spec delta | `refs/plan-lane.md`; `rules/SDD.md`; `refs/vendored/domain-modeling.md` (a new or conflicting term) |
+| `mode=plan-write` or `spec-convert`, L3, a spec delta | `refs/plan-lane.md`; `refs/diagram.md` (plan-write); `rules/SDD.md`; `refs/vendored/domain-modeling.md` (a new or conflicting term) |
 | the evidence lives on a host · feasibility open | `refs/roles/brainstorm/devops-boundary.md` · `refs/vendored/prototype.md` |
 | a repeated symptom, an incident, an architecture trade-off, L-cfg agent design | `refs/roles/brainstorm/thinking.md`, then one store text |
 | writing or naming any file | `refs/artifact-layout.md` |

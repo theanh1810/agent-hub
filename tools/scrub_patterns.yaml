@@ -28,6 +28,7 @@ allow_paths:
   - plugins/agent-hub/templates/plan/plan.vi-template.md
   - plugins/agent-hub/refs/plan-lane.md
   - plugins/agent-hub/refs/closeout.md
+  - plugins/agent-hub/refs/diagram.md
   - tests/scripts/test_plan_check.py
   - tools/v2-dropped.tsv
 # Binary files that may stay unscanned (glob on the repo-relative path).
