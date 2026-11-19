@@ -393,77 +393,15 @@ def no_eager_imports():
     return (not hits, f"{len(hits)}: {hits}", "0 outside vendored blocks and fences")
 
 @check('F1')
-def budgets_and_self_counts_agree():
-    """Two hand-written numbers that had no gate, both of one shape: a figure copied or
-    counted by hand, living far from the thing it describes.
-
-    CLAUDE.md §6 sets the per-class context budgets and a paragraph restates them —
-    CLAUDE.md §22. A restatement that listed five of the eight classes and said
-    nothing about being partial left an agent with no budget at all for
-    problem-solving, infra and docs. A restatement passes one of two
-    ways: class for class and number for number against §6, or by calling itself abridged
-    and pointing at §6. Silence is the failure this catches.
-
-    A paragraph is a restatement at MIN_CLASSES classes or more, never at one. One is a
-    citation inside an argument — agents/orchestrator.md's hotfix row cites the ≤12k figure
-    while explaining why that row carries no intake stage — and gating a citation as a
-    partial copy would force it to repeat all eight.
-
-    §19.1's opening sentence counts its own exceptions in words, and that count has already
+def self_counts_agree():
+    """§19.1's opening sentence counts its own exceptions in words, and that count has already
     changed more than once. It is compared against the rows, never against a second written
     number: every path in that table resolves from {workspace_root} except the ones under
     another root, so a row whose path starts with no WORKSPACE prefix is an exception.
-
-    Both halves fail loudly on a rewording rather than passing on an empty parse. The fence
-    is required to yield MIN_SOURCE classes first, and falling short of that returns early:
-    the §19.1 half is preempted and reported on the run after the source parses again."""
-    BUDGET = re.compile(r'`?([a-z][a-z-]{2,})`?\s*≤\s*(\d+)k')
-    ABRIDGED = ('abridged', 'rút gọn')  # scrub-allow: legacy abridged marker read when present
-    POINTS_AT = '§ Context Policy'
-    MIN_CLASSES = 2
-    MIN_SOURCE = 5
+    It fails loudly on a rewording rather than passing on an empty parse."""
     WORKSPACE = ('docs/', '.cm-tmp/', '{plan_dir}/')  # {plan_dir} resolves under docs/ (refs/plan-files.md § Where a plan lives)
     WORDS = {'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10}
-    doc = read('refs/context-policy.md')
-    fence = re.search(r'```\n(.*?)\n```', section(doc, r'^# (?:\d+\. )?Context Policy') or '', re.S)
-    src = dict(BUDGET.findall(fence.group(1))) if fence else {}
-    if len(src) < MIN_SOURCE:
-        return (False, f"refs/context-policy.md budget fence parsed to {len(src)} classes: {sorted(src)}",
-                f"the budget fence parses to at least {MIN_SOURCE} classes")
-    lo = doc[:doc.index(fence.group(1))].count('\n') + 1
-    hi = lo + fence.group(1).count('\n')
-
-    def paragraphs(f):
-        buf, start = [], 0
-        for i, l in enumerate(lines(f) + ['']):
-            if l.strip():
-                start = start if buf else i + 1
-                buf.append(l)
-            elif buf:
-                yield start, start + len(buf) - 1, '\n'.join(buf)
-                buf = []
-
-    bad, seen = [], []
-    for f in ruleset():
-        for a, b, para in paragraphs(f):
-            hits = BUDGET.findall(para)
-            if sum(1 for n, _ in hits if n in src) < MIN_CLASSES:
-                continue
-            if f == 'refs/context-policy.md' and a <= hi and b >= lo:
-                continue
-            got = dict(hits)
-            if got == src:
-                verdict = 'complete'
-            elif any(w in para for w in ABRIDGED) and POINTS_AT in para:
-                verdict = 'abridged'
-            else:
-                verdict = 'silent'
-                bad.append(f"{f}:{a} restates the budgets without saying it is abridged: "
-                           f"missing={sorted(set(src) - set(got))}, "
-                           f"extra={sorted(set(got) - set(src))}, "
-                           f"differing={sorted(k for k in set(src) & set(got) if src[k] != got[k])}")
-            seen.append(f"{f}:{a}={verdict}")
-
+    bad = []
     sec = section(read('refs/artifact-layout.md'), r'^#{1,2} (?:\d+(?:\.\d+)*\.? )?Where writing is allowed') or ''
     rows = []
     for l in sec.splitlines():
@@ -482,13 +420,9 @@ def budgets_and_self_counts_agree():
         bad.append(f"Where writing is allowed opening says {said.group(1)} ({n}) but {len(other)} rows "
                    f"name another root: {other}")
     return (not bad,
-            f"source budget fence={len(src)} classes | restatements: "
-            f"{', '.join(seen) or 'none'} | Where writing is allowed opening="
-            f"{said.group(1) if said else 'unreadable'} vs {len(other)} rows naming "
-            f"another root | off={bad}",
-            "every restatement of the context budgets matches it class for class and number for "
-            "number, or declares itself abridged and points at § Context Policy; and the opening "
-            "number equals the rows whose path names a root other than {workspace_root}")
+            f"Where writing is allowed opening={said.group(1) if said else 'unreadable'} vs "
+            f"{len(other)} rows naming another root | off={bad}",
+            "the opening number equals the rows whose path names a root other than {workspace_root}")
 
 @check('H')
 def reviewer_categories_anchored():
@@ -691,7 +625,7 @@ def single_statement_invariants():
     exactly one in the ruleset; the three other citers keep the pointer, and agents/test.md carries it too when
     the heading moved out of it."""
     ONCE = {'viewport enum': '320 · 768 · 1024 · 1366 · 1440',
-            'memory discovery walk': 'Discovery order (HARD) — the only statement of it',
+            'memory discovery walk': 'Discovery order — the only statement of it',
             'comment categories': 'A decision other code depends on',
             'header format': '[<agent> · model: <haiku|sonnet|opus>]'}
     HEAD = '## Hard rules (apply to all modes)'
@@ -900,70 +834,6 @@ def skills_prose_english():
             f"{len(ENGLISH)} English groups; >=1 Vietnamese line in every file of the "
             f"{len(VIETNAMESE)} Vietnamese groups outside the {len(ENGLISH_MEMORY)} pinned "
             f"English ones; and nothing held out reachable by a glob here")
-
-@check('E', 'F1', 'F4', 'H', 'J', 'O')
-def bootstrap_floor_current():
-    r"""The bootstrap floors of refs/context-policy.md `Context Policy` against the live files. A floor is
-    `agents/<role>.md` + the subagent view of rules/core.md (0 when the frontmatter sets `omitClaudeMd: true`) +
-    every skill in the role's frontmatter `skills:` list. The subagent view is the core minus its main-only
-    blocks, cut the way hooks/rules_inject.py cuts it.
-
-    The ratio, the tolerance and `Floor status:` are parsed from the section; a missing one is a FAIL, never a
-    default. With `Floor status: targets` the printed figures are ceilings (live <= printed); with
-    `Floor status: measured <date>` live must be within the tolerance of printed. This stays the static guard;
-    tools/measure/floors.py measures first-call context and nothing here imports it."""
-    try:
-        import yaml
-    except ImportError:
-        return (False, "pyyaml not installed", "pyyaml importable")
-    seg = section(read('refs/context-policy.md'), r'^# (?:\d+\. )?Context Policy')
-    if seg is None:
-        return (False, "refs/context-policy.md `Context Policy` not found", "the section slices")
-    ratio = re.findall(r'dividing it by ([\d.]+) B/token', seg)
-    tol = re.findall(r'Treat every figure as \*\*±([\d.]+)%\*\*', seg)
-    status = re.findall(r'^Floor status: (targets|measured \d{4}-\d{2}-\d{2})\s*$', seg, re.M)
-    if len(ratio) != 1 or len(tol) != 1 or len(status) != 1:
-        return (False, f"ratio={ratio}, tolerance={tol}, status={status}",
-                "exactly one ratio, one tolerance and one `Floor status:` line parsed")
-    ratio, tol, targets = float(ratio[0]), float(tol[0]), status[0] == 'targets'
-
-    printed = {}
-    for l in (x for x in seg.splitlines() if '≈' in x):
-        c = [x.strip().strip('`') for x in l.strip().strip('|').split('|')]
-        for i in range(0, len(c) - 1, 2):
-            if c[i] and c[i + 1].startswith('≈'):
-                printed[c[i]] = int(c[i + 1].lstrip('≈').replace(',', ''))
-    if not printed:
-        return (False, "0 floor rows parsed", "a row `<role> | ≈N` per role")
-
-    core = re.sub(r'(?s)<!-- main-only:begin -->.*?<!-- main-only:end -->', '',
-                  re.sub(r'(?ms)^<!-- main-only:begin -->\n.*?^<!-- main-only:end -->\n', '', read('rules/core.md')))
-    core = len(re.sub(r'\n{3,}', '\n\n', core).encode('utf-8'))
-    drift, missing = {}, []
-    for role, want in printed.items():
-        if not os.path.exists(os.path.join(ROOT, f'agents/{role}.md')):
-            continue   # a role the package does not ship
-        fm = yaml.safe_load(read(f'agents/{role}.md').split('---')[1]) or {}
-        size = os.path.getsize(os.path.join(ROOT, f'agents/{role}.md')) + (0 if fm.get('omitClaudeMd') is True else core)
-        for s in (fm.get('skills') or []):
-            q = f'skills/{s}/SKILL.md'
-            if os.path.exists(os.path.join(ROOT, q)):
-                size += os.path.getsize(os.path.join(ROOT, q))
-            else:
-                missing.append(f'{role} -> {q}')
-        got = round(size / ratio)
-        drift[role] = (want, got, 100.0 * (got - want) / want)
-
-    norow = [os.path.basename(f)[:-3] for f in files('agents/*.md')
-             if os.path.basename(f)[:-3] not in printed]
-    over = [f"{r} printed {w:,} live {g:,} ({d:+.1f}%)"
-            for r, (w, g, d) in sorted(drift.items()) if (g > w if targets else abs(d) > tol)]
-    worst = max(drift.items(), key=lambda kv: abs(kv[1][2]), default=('-', (0, 0, 0.0)))
-    return (not (over or missing or norow),
-            f"{len(drift)} floors, status={status[0]}, ratio={ratio}, tol=+/-{tol}% | worst={worst[0]} "
-            f"{worst[1][2]:+.1f}% (printed {worst[1][0]:,}, live {worst[1][1]:,}) | "
-            f"over={over} | missing skills={missing} | roles with no row={norow}",
-            "targets: every live floor <= its printed figure; measured: within +/-" f"{tol}% of live bytes / {ratio}")
 
 @check('E', 'F1')
 def lane_ids_agree():

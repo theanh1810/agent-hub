@@ -69,7 +69,7 @@ Use CSS grid (web only) for a true 2D layout (dashboard cards, gallery, calendar
 - Padding for component internals; margin only for inter-component spacing the parent controls via gap.
 - Forbidden: margin-collapse hacks; negative margins to "pull up" (use grid/flex alignment).
 
-## 6. z-index ladder (HARD)
+## 6. z-index ladder
 
 Named tokens, not bare numbers, defined in the theme config / Tailwind extend.
 

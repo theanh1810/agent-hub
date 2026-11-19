@@ -70,7 +70,7 @@ They are **coverage**: what the derived cases must reach; a gap is a `missing_te
 
 **UI ↔ API binding**, per step: click → which endpoint fires (cite step and endpoint); response field → which element renders it (`response.field` → selector or testID); error response → which UI error state (status → toast, banner, inline); a spinner between request and response; spam-click does not double-fire; an optimistic update reverts on 4xx/5xx.
 
-## Coverage rule (HARD)
+## Coverage rule
 
 - Every covered scenario and `Done when:` has at least one case across the four checks.
 - Every API endpoint touched by changed code has one case observing it (API watch) and one asserting its UI link (binding).

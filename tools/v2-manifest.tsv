@@ -64,7 +64,7 @@ plugins/agent-hub/hooks/format_on_edit.py	PORT	plugins/agent-hub/hooks/format_on
 plugins/agent-hub/hooks/git_guard.py	PORT	plugins/agent-hub/hooks/git_guard.py	A
 plugins/agent-hub/hooks/hooks.json	PORT+EDIT	plugins/agent-hub/hooks/hooks.json	E
 plugins/agent-hub/hooks/post_compact_pointer.py	PORT	plugins/agent-hub/hooks/post_compact_pointer.py	A
-plugins/agent-hub/hooks/read_guard.py	PORT	plugins/agent-hub/hooks/read_guard.py	A
+plugins/agent-hub/hooks/read_guard.py	PORT+EDIT	plugins/agent-hub/hooks/read_guard.py	A
 plugins/agent-hub/hooks/rules_inject.py	PORT+EDIT	plugins/agent-hub/hooks/rules_inject.py	E
 plugins/agent-hub/hooks/worktree_create.py	PORT	plugins/agent-hub/hooks/worktree_create.py	A
 plugins/agent-hub/hooks/worktree_remove.py	PORT	plugins/agent-hub/hooks/worktree_remove.py	A
@@ -126,7 +126,7 @@ plugins/agent-hub/refs/roles/reviewer/finding-bar.md	PORT+EDIT	plugins/agent-hub
 plugins/agent-hub/refs/roles/reviewer/merge-policy.md	PORT	plugins/agent-hub/refs/roles/reviewer/merge-policy.md	A
 plugins/agent-hub/refs/roles/reviewer/second-opinion.md	NEW	blueprint 3.6	P
 plugins/agent-hub/refs/roles/reviewer/sources.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/sources.md	F3
-plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	PORT	plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	A
+plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	A
 plugins/agent-hub/refs/roles/reviewer/taxonomy.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/taxonomy.md	F5
 plugins/agent-hub/refs/roles/scout/documents.md	PORT+EDIT	plugins/agent-hub/refs/roles/scout/documents.md	Q
 plugins/agent-hub/refs/roles/test/browser-lifecycle.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/browser-lifecycle.md	F6
@@ -166,9 +166,9 @@ plugins/agent-hub/refs/vendored/verification-before-completion.md	NEW	R/src/H8,H
 plugins/agent-hub/refs/vendored/writing-for-agents.md	NEW	R/src/H8,H9,H11	J
 plugins/agent-hub/refs/vendored/writing-good-tests.md	NEW	tools/upstream obra-superpowers	J
 plugins/agent-hub/rules/SDD.md	REWRITE	plugins/agent-hub/rules/SDD.md	I
-plugins/agent-hub/rules/UI_RULES.md	PORT	plugins/agent-hub/rules/UI_RULES.md	A
+plugins/agent-hub/rules/UI_RULES.md	PORT+EDIT	plugins/agent-hub/rules/UI_RULES.md	A
 plugins/agent-hub/rules/code-style/README.md	PORT+EDIT	plugins/agent-hub/rules/code-style/README.md	F5
-plugins/agent-hub/rules/code-style/_discipline.md	PORT	plugins/agent-hub/rules/code-style/_discipline.md	A
+plugins/agent-hub/rules/code-style/_discipline.md	PORT+EDIT	plugins/agent-hub/rules/code-style/_discipline.md	A
 plugins/agent-hub/rules/code-style/javascript.md	PORT	plugins/agent-hub/rules/code-style/javascript.md	A
 plugins/agent-hub/rules/code-style/python.md	PORT	plugins/agent-hub/rules/code-style/python.md	A
 plugins/agent-hub/rules/code-style/react.md	PORT+EDIT	plugins/agent-hub/rules/code-style/react.md	F5
@@ -309,7 +309,7 @@ tests/auditor/test_error_stats.py	PORT	tests/auditor/test_error_stats.py	A
 tests/conftest.py	PORT	tests/conftest.py	A
 tests/hooks/test_format_on_edit.py	PORT	tests/hooks/test_format_on_edit.py	A
 tests/hooks/test_git_guard.py	PORT	tests/hooks/test_git_guard.py	A
-tests/hooks/test_read_guard.py	PORT	tests/hooks/test_read_guard.py	A
+tests/hooks/test_read_guard.py	PORT+EDIT	tests/hooks/test_read_guard.py	A
 tests/hooks/test_rules_inject.py	PORT+EDIT	tests/hooks/test_rules_inject.py	E
 tests/hooks/test_session_hooks.py	PORT	tests/hooks/test_session_hooks.py	A
 tests/hooks/test_worktree_hooks.py	PORT	tests/hooks/test_worktree_hooks.py	A

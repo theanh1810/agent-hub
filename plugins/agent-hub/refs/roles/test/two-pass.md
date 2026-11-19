@@ -15,9 +15,9 @@ One run, in this order, one report, one gate. With a plan, the tasks in scope ar
 |---|---|---|
 | 1 Code tests | the repo's own test command (read from its manifest per the `unit` row of `refs/roles/test/cases.md § Toolset per layer`) plus the tests implement wrote for every `unit`, `integration`, `contract` case and every custom `security` case. Test re-runs them and never rewrites one; a red one goes to implement | stop and report; steps 2-3 are `skip` |
 | 2 Pass 1 | every `e2e` case (implement's Playwright spec first, then the eight stages of `refs/roles/test/journey.md`), the ZAP baseline scan of the `security` layer, every `script` case on the running local app | run step 3 anyway |
-| 3 Pass 2 | the business flows of § Where the flows come from, each in one session, start to end (`refs/roles/test/journey.md § Cross-task journey`) | report once over steps 2-3 (`refs/roles/test/reporting.md § Error batching (HARD)`) |
+| 3 Pass 2 | the business flows of § Where the flows come from, each in one session, start to end (`refs/roles/test/journey.md § Cross-task journey`) | report once over steps 2-3 (`refs/roles/test/reporting.md § Error batching`) |
 
-Step 1 is the independent run on the build that passed review; it does not replace implement's gate 6. Its failures go to `errors.yaml` per `reporting.md § Error batching (HARD)` item 1, with the exit code. Part (b) (`refs/roles/test/explore.md`) runs after the last applicable step unless step 1 is red; its red cases join the same report.
+Step 1 is the independent run on the build that passed review; it does not replace implement's gate 6. Its failures go to `errors.yaml` per `reporting.md § Error batching` item 1, with the exit code. Part (b) (`refs/roles/test/explore.md`) runs after the last applicable step unless step 1 is red; its red cases join the same report.
 
 ## Which steps run
 

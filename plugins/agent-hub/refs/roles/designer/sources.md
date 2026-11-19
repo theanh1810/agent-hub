@@ -4,7 +4,7 @@
 
 ---
 
-## When spawned (HARD)
+## When spawned
 
 Only main thread, only after brainstorm sets `needs_design: true`; designer reads only and calls no agent.
 
@@ -52,7 +52,7 @@ Any network fetch of an asset, font, icon set or design library goes through `de
 
 It follows the Stitch shape: theme · palette and roles · typography · components · layout · depth · do/don't · responsive · agent guide.
 
-Rules (HARD):
+Rules:
 
 1. **House style wins.** Existing tokens, theme or library are the standard; read a reference only with nothing to match or when the user names one.
 2. **Reference, never paste.** Take the reasoning (why this scale, contrast, elevation), not another brand's palette, type or names.

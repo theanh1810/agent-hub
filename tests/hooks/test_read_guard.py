@@ -19,7 +19,7 @@ PLUGIN = REPO / "plugins" / "agent-hub"
 
 def run(payload, args=(), env_extra=None, raw=None, script=SCRIPT):
     env = dict(os.environ)
-    env.pop("CLAUDE_PLUGIN_OPTION_READ_GUARD", None)
+    env["CLAUDE_PLUGIN_OPTION_READ_GUARD"] = "on"
     env.pop("CLAUDE_PLUGIN_OPTION_READ_GUARD_LINES", None)
     env.pop("CLAUDE_PLUGIN_OPTION_READ_GUARD_BYTES", None)
     env.update(env_extra or {})
@@ -112,6 +112,7 @@ class TestPass(GuardCase):
 class TestOptions(GuardCase):
     def test_tc4_switch_and_limits(self):
         self.assertSilent(run(read_payload(self.big), ["--switch", "off"]))
+        self.assertSilent(run(read_payload(self.big), env_extra={"CLAUDE_PLUGIN_OPTION_READ_GUARD": ""}))
         self.assertSilent(run(read_payload(self.big), env_extra={"CLAUDE_PLUGIN_OPTION_READ_GUARD": "off"}))
         sixty = self.tmp / "sixty.txt"
         write_lines(sixty, 60)
@@ -183,6 +184,7 @@ class TestBashCat(GuardCase):
 
     def test_cat_relative_without_cwd(self):
         proc = subprocess.run([sys.executable, str(SCRIPT)], cwd=self.tmp, capture_output=True, text=True,
+                              env={**os.environ, "CLAUDE_PLUGIN_OPTION_READ_GUARD": "on"},
                               input=json.dumps({"tool_name": "Bash", "tool_input": {"command": "cat big.txt"}}))
         reason_of(proc)
 
@@ -214,7 +216,7 @@ class TestLocal(unittest.TestCase):
         self.assertNotIn("statusMessage", pre[1]["hooks"][0])
         cfg = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["userConfig"]
         self.assertEqual({k: cfg[k]["default"] for k in ("read_guard", "read_guard_lines", "read_guard_bytes")},
-                         {"read_guard": "on", "read_guard_lines": "200", "read_guard_bytes": "16384"})
+                         {"read_guard": "off", "read_guard_lines": "200", "read_guard_bytes": "16384"})
         self.assertEqual(cfg["read_guard"]["title"], "Read guard")
         self.assertEqual(cfg["read_guard_lines"]["title"], "Read guard line limit")
         self.assertEqual(cfg["read_guard_bytes"]["title"], "Read guard size limit")

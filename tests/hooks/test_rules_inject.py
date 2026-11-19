@@ -101,7 +101,7 @@ class RealCore(unittest.TestCase):
     def test_four_principles_first_section_of_both_views(self):
         for view in (main_view(), sub_view()):
             heads = [l for l in view.splitlines() if l.startswith("## ")]
-            self.assertEqual(heads[0], "## Four principles (HARD)")
+            self.assertEqual(heads[0], "## Four principles")
         self.assertNotIn("## Coding principles", core_text())
 
     def test_both_views_fit_a_92_char_root(self):

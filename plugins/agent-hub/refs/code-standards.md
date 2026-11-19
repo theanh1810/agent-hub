@@ -29,7 +29,7 @@ Multi-step → a verify gate per step.
 
 Working signals: no unrequested change in the diff, nothing rewritten for overcomplication, questions come before the code, not after a mistake.
 
-**E. Comment rarely, and only where it matters (HARD).** The categories that justify a comment, the forbidden shapes and the rule that every comment in the diff is listed in the handoff are stated once in `rules/code-style/_discipline.md` §5; keep no copy. No count, no quota: a comment matching no category is a finding. A line needing a comment is usually a line to rewrite. Reviewer enforces via `category: code_comments`.
+**E. Comment rarely, and only where it matters.** The categories that justify a comment, the forbidden shapes and the rule that every comment in the diff is listed in the handoff are stated once in `rules/code-style/_discipline.md` §5; keep no copy. No count, no quota: a comment matching no category is a finding. A line needing a comment is usually a line to rewrite. Reviewer enforces via `category: code_comments`.
 
 # Code Standards (HARD — implement)
 
@@ -37,7 +37,7 @@ Before writing ≥10 new lines, cite `Pattern reference: <file:line>` from a nei
 
 The priority ladder, naming and shape rules: `refs/roles/implement/craft.md` § Priorities, § Craft; the forbidden list: `agents/implement.md` § Forbidden. Enforcement: `agents/reviewer.md`.
 
-**A written style, not a re-derived one (HARD).** `Pattern reference` alone let two sessions pick two neighbours in one module and produce two dialects. Before the first edit `implement` and `reviewer` read, in order:
+**A written style, not a re-derived one.** `Pattern reference` alone let two sessions pick two neighbours in one module and produce two dialects. Before the first edit `implement` and `reviewer` read, in order:
 
 | # | Source | When |
 |---|---|---|

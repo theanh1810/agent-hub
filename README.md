@@ -43,7 +43,7 @@ At install you choose the language the agents use to talk to you: replies and qu
 
 ## Read guard
 
-Reading a whole file longer than 200 lines or larger than 16 KiB, with the Read tool or a plain `cat`, is refused, and the agent reads it in parts with `offset` and `limit`. This keeps long files from filling the context window. Change the limits with the plugin options `read_guard_lines` and `read_guard_bytes`, or set `read_guard` to `off` to switch the guard off.
+The guard is off by default. Set the plugin option `read_guard` to `on` and reading a whole file longer than 200 lines or larger than 16 KiB, with the Read tool or a plain `cat`, is refused, and the agent reads it in parts with `offset` and `limit`. Change the limits with `read_guard_lines` and `read_guard_bytes`.
 
 ## Not managed
 

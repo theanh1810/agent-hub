@@ -5,7 +5,7 @@
 
 ---
 
-# Final Response (HARD)
+# Final Response
 
 **The reply language (`rules/core.md § Language`), always**, however technical the work; technical terms stay verbatim inside sentences of that language, glossed once where a non-coder would stumble. **Written from the handoff, not from recollection**: its input is what the workers returned plus what main thread read itself; a claim in neither does not belong.
 
@@ -25,13 +25,13 @@ The flow drawing (`refs/diagram.md`) is named under `Summary` by its absolute pa
 
 **When the user says they do not understand**, re-tell it short: a little more context, simple sentences, the project's vocabulary, never the previous sentence repeated. **Name a task or item by its title, never a bare id, number or slug**.
 
-**Fleet lessons awaiting approval.** A `closeout` block whose `memory` value lists `promote? <subject>` becomes one `AskUserQuestion` per subject (`refs/option-explanation.md`) under `Blocker / Approval`, with the drafted line, its target file and the three `seen` sources. Yes → main thread sends the one-line edit to `implement` on the fast lane (`refs/lanes.md § L1 fast`), which sets `stage: pattern` and `promoted_to`. No → `implement` records `declined: <date>`, the entry keeping `stage: candidate`, not asked again until a new sighting is counted. Each ledger change is one `agent-hub lesson` command (`skills/context-memory/references/dedup.md` § Lesson counter); main thread writes nothing to claude-mem, and nothing reaches a rule file before the yes.
+**Fleet lessons awaiting approval.** A `closeout` block whose `memory` value lists `promote? <subject>` becomes one `AskUserQuestion` per subject (`refs/option-explanation.md`) under `Blocker / Approval`, with the drafted line, its target file and the three `seen` sources. Yes → main thread makes the one-line edit itself on the fast lane (`refs/lanes.md § L1 fast`) and sets `stage: pattern` and `promoted_to`. No → main thread records `declined: <date>`, the entry keeping `stage: candidate`, not asked again until a new sighting is counted. Each ledger change is one `agent-hub lesson` command (`skills/context-memory/references/dedup.md` § Lesson counter); main thread writes nothing to claude-mem, and nothing reaches a rule file before the yes.
 
 **Closing line of a finished run.** A final whose run carries a `closeout` block (`refs/closeout.md` § Verification and enforcement) ends with this line, last and outside every section, in the reply language: `Type /clear to clear the context — the task summary reloads itself.` A final with no `closeout` block (a Q&A answer, or one stopping at a gate or question) never carries it. Only the user can run `/clear`; `hooks/clear_handoff.py` then restores that final's `Summary`.
 
 **Explain, do not just report.** Every meaningful change answers **what changed · why it had to · what is different now**. A technical term on first use gets a one-sentence gloss in the reply language with an everyday example (`refs/option-explanation.md`). State every trade-off, even unasked. Work undone, blocked or unverified goes plainly under `Validation` or `Blocker`.
 
-## Every claim carries its source (HARD)
+## Every claim carries its source
 
 | Claim | Evidence |
 |---|---|
@@ -50,9 +50,9 @@ The flow drawing (`refs/diagram.md`) is named under `Summary` by its absolute pa
 
 **Banned** (in the reply language, whatever the wording): "checked it thoroughly" · "runs fine" · "a few hundred ms or so" · "per best practice" · "usually", and "should", "probably", "seems", or cheer before checking. Checked → show the result; not checked → say so.
 
-**Say the set, then look once outside it (HARD).** A number is a claim about a set: name the set first (which tree, which pattern), then look once for the same thing *outside* it — split across a line break, hidden by markdown emphasis, in a copy of the file itself.
+**Say the set, then look once outside it.** A number is a claim about a set: name the set first (which tree, which pattern), then look once for the same thing *outside* it — split across a line break, hidden by markdown emphasis, in a copy of the file itself.
 
-**Fresh evidence before any done claim (HARD).** The worker that claims done identifies the command that proves it, runs it in full, reads the output, the exit code and the failure count, and only then claims (obra verification-before-completion SKILL.md:14-36). Main thread quotes the worker's evidence path and runs nothing itself. Premature satisfaction before the run ("great", "done", "should work") and hedge words are red flags (:50-72).
+**Fresh evidence before any done claim.** The worker that claims done identifies the command that proves it, runs it in full, reads the output, the exit code and the failure count, and only then claims (obra verification-before-completion SKILL.md:14-36). Main thread quotes the worker's evidence path and runs nothing itself. Premature satisfaction before the run ("great", "done", "should work") and hedge words are red flags (:50-72).
 
 Another agent's output is **not evidence** until cross-checked (agent said success → check the VCS diff). Quoting it names the source: "per `test`'s handoff: 216/216".
 

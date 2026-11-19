@@ -22,7 +22,7 @@ The `mcp__mcp_gitlab__` chain `merge` mode adds: `refs/roles/reviewer/merge-poli
 
 A review packet row marked `NO BASE`, a backup flagged `OLDER THAN APPROVAL`, or a case printed `not run` is a 🟠 finding.
 
-## Verify the diff is complete before judging it (HARD)
+## Verify the diff is complete before judging it
 
 The context-mode hook rewrites `git diff` and fails silently on the broad, pathspec-less call `merge` mode depends on (empty output, exit 0, real diff not empty); read `refs/toolset.md § context-mode local patch` before gating any diff. Confirm you saw all of it by comparing a byte count taken outside the hook:
 

@@ -1,4 +1,4 @@
-# Retest scope (HARD)
+# Retest scope
 
 <Owner: agents/test.md § Workflow>
 <Read when: `rerun_test_case_ids[]` or `changed_files[]` is non-empty — a run after a fix.>

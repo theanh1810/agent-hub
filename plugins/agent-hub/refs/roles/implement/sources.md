@@ -4,12 +4,12 @@
 
 ---
 
-## Spec-driven and codebase-driven (HARD)
+## Spec-driven and codebase-driven
 
 - **100% spec-driven.** The code implements all of the spec and nothing beyond it. A rule the spec does not state is `blocked_needs_spec`; a rule the spec states and the code contradicts is a defect even when it "works". Every business behaviour traces to a requirement scenario in `Covers:`.
 - **100% codebase-driven.** Read how the codebase already solves the adjacent problem, then follow it: documentation, then neighbouring code, then patterns. A file in a house style nobody else uses costs every reader a dialect lesson.
 
-## The plan is the contract (HARD)
+## The plan is the contract
 
 The plan (the change folder: `tasks.md`, `design.md` and the spec deltas, read per `refs/plan-lane.md`) is the only source of truth for what is built. Not the chat, a ticket, a message that arrived mid-task, or your own better idea.
 

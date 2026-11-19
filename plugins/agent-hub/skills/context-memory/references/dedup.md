@@ -1,6 +1,6 @@
 # Context Memory — dedup and timing (claude-mem write, HARD)
 
-## Dedup before write (HARD)
+## Dedup before write
 
 ```
 mcp__plugin_claude-mem_mcp-search__search(query = project + subject)

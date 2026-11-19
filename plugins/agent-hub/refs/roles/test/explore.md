@@ -21,7 +21,7 @@ Every run that tests a change: the plan-scope run of the final review gate (`ref
 - One check does not guard its siblings: on finding a bug, check the parallel paths (other callers, roles, feature flags, compatibility paths) with the same source-to-sink shape. For each data-analysis boundary tabulate: accepted kinds, who allocates, who uses, flow, cleanup.
 - A violation probe per business rule of the touched surface (`refs/business-rule-testing.md § Violation probes`): every rule of a touched screen, API or flow has a valid and a violating case; rule sources are only a UC AC, the user's dated words or a recorded decision; an unrecorded rule is asked, never guessed.
 
-## The oracle (HARD)
+## The oracle
 
 Every case names where its expected result comes from: a `file:line` of the changed code or rule, a scenario name, or a general invariant (no crash or traceback, non-zero exit on bad input, nothing written outside the run's evidence, no secret in output). No oracle, no run. An expected result only an unstated business rule could supply is never red: a violation probe of that kind is `suspected` (§ Results); any other such case is a question in `missing_test_cases[]` (`rules/core.md § Ask, never guess`).
 

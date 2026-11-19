@@ -89,7 +89,7 @@ A non-empty `recommend_scan[]` returns `completed` with `recommended_next: null`
 }
 ```
 
-**Evidence (HARD).** Every behaviour claim carries proof a reader can open: `file:120-134`, the `impact` result, verbatim error text, a scenario name, a doc URL a scout fetched, a number with its origin. Confidence under 0.7 is a hypothesis: label it or ask.
+**Evidence.** Every behaviour claim carries proof a reader can open: `file:120-134`, the `impact` result, verbatim error text, a scenario name, a doc URL a scout fetched, a number with its origin. Confidence under 0.7 is a hypothesis: label it or ask.
 
 # Forbidden
 

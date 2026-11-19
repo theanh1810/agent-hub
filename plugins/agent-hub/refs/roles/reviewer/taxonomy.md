@@ -4,9 +4,9 @@
 
 ---
 
-Checked on **every** pass, whatever the mode. The **fourteen** `##` anchors below are the cross-mode categories; the `category` enum in `agents/reviewer.md` § Output holds **twenty-six** values (`python3 tools/check.py ruleset` (agent-hub repo only), check `reviewer_categories_anchored`, counts both from this file). Each anchor carries name, severity and trigger on one line, then criteria, signals and exclusions.
+Checked on **every** pass, whatever the mode, except the style categories `mode=independent` skips (`skills/review-checklist/references/independent.md`). The **fourteen** `##` anchors below are the cross-mode categories; the `category` enum in `agents/reviewer.md` § Output holds **twenty-six** values (`python3 tools/check.py ruleset` (agent-hub repo only), check `reviewer_categories_anchored`, counts both from this file). Each anchor carries name, severity and trigger on one line, then criteria, signals and exclusions.
 
-The other **twelve** are raised by a `review-checklist` section or a section of this file, which titles them in prose, not snake_case, so use the table below rather than grepping the enum. A value with no anchor is not a category; a finding fitting none of the twenty-six needs a rule before a label. "Raised from" is not "checked in one mode only": `code_comments` and `commit_message` are read on every pass, and only `commit_message` narrows itself, to `mode=merge`. A category is mode-scoped only where its anchor names a mode section of `review-checklist`; § Universal checklist is every mode, so `spec_debt_missing` anchors there and is checked on every pass.
+The other **twelve** are raised by a `review-checklist` section or a section of this file, which titles them in prose, not snake_case, so use the table below rather than grepping the enum. A value with no anchor is not a category; a finding fitting none of the twenty-six needs a rule before a label. "Raised from" is not "checked in one mode only": `code_comments` and `commit_message` are read on every pass but `independent`, and only `commit_message` narrows itself, to `mode=merge`. A category is mode-scoped only where its anchor names a mode section of `review-checklist`; § Universal checklist is every mode, so `spec_debt_missing` anchors there and is checked on every pass.
 
 | Enum value | Raised from |
 |---|---|

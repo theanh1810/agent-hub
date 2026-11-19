@@ -5,7 +5,7 @@
 
 ---
 
-## Evidence — what a claim must carry (HARD)
+## Evidence — what a claim must carry
 
 - **A failure**: reproduction steps verbatim from the case, expected value verbatim, what actually happened. Quote both sides as written; never a paraphrase of either.
 - **A network claim**: captured request and response, secrets stripped, plus the field diff (no body, no finding).
@@ -39,7 +39,7 @@ passed_test_case_ids: [TC1, TC2, ...]
 
 Same header with `Status: RED`, `failed: M`, `failed_test_case_ids: [...]`, plus one failure report per failed case at `.cm-tmp/{task_id}/failure-docs/{test_case_id}.md` from `templates/test/FAILURE-report-template.md` (read it, never reproduce from memory). Each failure is listed verbatim with `test_case_id`, `evidence_path` and `failure_doc_path`, for brainstorm to transcribe. `flow_results[]` carries **only** failed cases. The run report lists failing commands, one row each `| cmd | exit | evidence_path |`.
 
-## Error batching (HARD)
+## Error batching
 
 Finish the whole run, then report once, across every resume segment (from `progress.yaml`). Never return on the first failure; a red step 1 is the one exception (`two-pass.md`). The loop is capped at two rounds, so a partial batch wastes one.
 

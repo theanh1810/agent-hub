@@ -13,7 +13,7 @@ Read when: building an `AskUserQuestion` call — every agent with a gate that a
 
 **AskUserQuestion mapping**: `label` ≤5 words, a verb plus a user-visible object, no jargon. `description` ≤2 sentences on the **consequence the user sees**, never the code mechanism. The rest goes in the preview text or markdown printed before the call.
 
-**Plain language (HARD).** A non-developer must understand `label` and `description`. Outside a code block, banned: refactor, DAG, polymorphism, hydration, idempotent, schema-migration, binding, coroutine, N+1, adapter, strategy pattern, side-effect, race condition. Unavoidable → move to **Explain** with a one-sentence gloss in the reply language and an everyday example.
+**Plain language.** A non-developer must understand `label` and `description`. Outside a code block, banned: refactor, DAG, polymorphism, hydration, idempotent, schema-migration, binding, coroutine, N+1, adapter, strategy pattern, side-effect, race condition. Unavoidable → move to **Explain** with a one-sentence gloss in the reply language and an everyday example.
 
 **The Explain block** — required when an option carries technical weight; code allowed with its meaning in words beside it, never bare. Seven points:
 
@@ -27,7 +27,7 @@ Read when: building an `AskUserQuestion` call — every agent with a gate that a
 
 5-15 sentences. A rename or copy change may skip Explain; an option touching the data model, an API contract or infrastructure **must** have it.
 
-**Recommended (HARD).** Exactly one option is marked Recommended, with a reason of ≥2 sentences: why it fits **this** project (constraint, data volume, team size, deadline) and why the alternatives are worse (trade-off numbers). Word each question so "yes" accepts your recommendation.
+**Recommended.** Exactly one option is marked Recommended, with a reason of ≥2 sentences: why it fits **this** project (constraint, data volume, team size, deadline) and why the alternatives are worse (trade-off numbers). Word each question so "yes" accepts your recommendation.
 
 **Forbidden**: a label plus a one-line description · "A faster, B safer" with no numbers · more than 4 options · a Recommended justified by "industry standard" · skipping the explanation because the user seems rushed · a code block inside `label` or `description` · an unglossed jargon term · dropping Explain on a data, API or infra option.
 

@@ -5,7 +5,7 @@
 
 ---
 
-## Where the workspace root is (HARD)
+## Where the workspace root is
 
 Artifacts live at the **workspace root**, one level above the code: `{workspace_root}` = `CODE_ROOT` + **exactly one segment** (`~/Code/acme`, never `~/Code` itself, never a repo one level deeper). `CODE_ROOT` resolves **argument > `$CODE_ROOT` env > `$HOME/Code`** (`plugins/agent-hub-auditor/scripts/run_auditor.py`, `error_stats.py`).
 
@@ -41,7 +41,7 @@ Every path below resolves from `{workspace_root}` (§ Where the workspace root i
 | `docs/reviews/baselines/{repo}-{route_slug}/{viewport}.png` | test | the only test output that survives; updated only after a green run |
 | `docs/reviews/INDEX.md` | reviewer · implement | one appended row per review: reviewer with no plan, else the `after_approve` spawn |
 | `docs/changes/<id>/` of the `.claude` workspace | brainstorm | the L-cfg design record: design and numbered steps, no plan files (`refs/lanes.md § L-cfg no-plan`) |
-| `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/record.md` | implement · reviewer · test | the record of a run with no plan; `{slug}` starts with the repo name. Implement writes; reviewer appends `mode=task`, test its exploratory cases (`refs/roles/test/explore.md` § Results). Template: `templates/adhoc/adhoc-record-template.md` |
+| `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/record.md` | implement (L1: main thread) · reviewer · test | the record of a run with no plan; `{slug}` starts with the repo name. Implement writes; reviewer appends `mode=task`, test its exploratory cases (`refs/roles/test/explore.md` § Results). Template: `templates/adhoc/adhoc-record-template.md` |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/independent.md` | reviewer | own file: the adhoc record holds implement's six answers the independent layer never reads |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/assets/` | reviewer · test | **at most 3 files**, only what a finding cites |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/diagrams/<n>-<slug>.html` | implement | the flow drawing of an L2 run (`refs/diagram.md`); outside `binding_scope`, as `record.md` |
@@ -77,7 +77,7 @@ A spawn with no `task_id` reads `{task_id}` in every `.cm-tmp/` and `evidence/` 
 
 **`.gitignore`.** Where the workspace root is inside a git repo, the first agent to create `.cm-tmp/` adds it to that repo's `.gitignore` (checking for a duplicate); where no git root sits at the workspace root, add the entry only in a sub-repo whose tree would show it.
 
-**A pre-edit backup goes outside the tree it protects (HARD).** With no git history (`~/.claude`), copy a file to `~/.claude-backups/{plan_id}/{task_id}/` before editing, never into `.cm-tmp/`: a copy inside the tree answers `grep -r` and a citation lands on it (`rules/core.md § No invented rule`). The `after_approve` spawn deletes it (in L1, the implement spawn at closeout step 5; `refs/closeout.md § End of a run`); left behind after that it is `artifact-litter`. With git, a parallel run uses a `git worktree`.
+**A pre-edit backup goes outside the tree it protects (HARD).** With no git history (`~/.claude`), copy a file to `~/.claude-backups/{plan_id}/{task_id}/` before editing, never into `.cm-tmp/`: a copy inside the tree answers `grep -r` and a citation lands on it (`rules/core.md § No invented rule`). The `after_approve` spawn deletes it (in L1, main thread at closeout step 5; `refs/closeout.md § End of a run`); left behind after that it is `artifact-litter`. With git, a parallel run uses a `git worktree`.
 
 ## The cleanup gate (HARD)
 

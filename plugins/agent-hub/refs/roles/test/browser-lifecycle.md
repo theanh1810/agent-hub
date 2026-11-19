@@ -58,7 +58,7 @@ A fixed wait only when time itself is under test (debounce, repeat interval, the
 
 State the choice and reason. Close the session at the end, pass or fail: `browser_close` for Playwright, the tabs opened for Chrome.
 
-## Lifecycle (HARD)
+## Lifecycle
 
 The MCP server owns one browser, launched at start; no `browser_*` tool takes a target, PID or CDP endpoint.
 

@@ -1,7 +1,7 @@
 {
   "name": "agent-hub",
   "displayName": "agentHub",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Multi-agent workflow for Claude Code: the main thread routes each request by a lane table to brainstorm, scout, designer, implement, reviewer, test and devops agents, with OpenSpec plan, spec and review gates.",
   "license": "MIT + Commons Clause 1.0",
   "userConfig": {
@@ -15,7 +15,7 @@
       "type": "string",
       "title": "Read guard",
       "description": "on or off. When on, reading a whole file longer than read_guard_lines lines or larger than read_guard_bytes bytes, with the Read tool or a plain cat, is refused and the agent is told to read it in parts.",
-      "default": "on"
+      "default": "off"
     },
     "read_guard_lines": {
       "type": "string",

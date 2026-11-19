@@ -43,6 +43,7 @@ Pick the form by the failure measured:
 
 - State the wanted action: a bare prohibition primes the forbidden behaviour.
 - Give the reason instead of capitalised MUST, written general and not narrowed to one example.
+- Mark a rule `(HARD)` only when breaking it once cannot be taken back: data, secrets, history, a host, or an approval the user has not given. Any other rule is a guideline the agent may weigh, so it carries no label.
 - A leading word the model already knows ("tight", "red") replaces a long sentence.
 - A real exception is its own rule; an "unless it matters" clause reopens negotiation.
 - Keep one source of truth: the environment (scripts, config, layout, `--help`) is the source and docs copying it are copies. Record what cannot be looked up: conventions, reasons, traps.

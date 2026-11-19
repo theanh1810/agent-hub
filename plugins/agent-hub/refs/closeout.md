@@ -33,9 +33,9 @@ Not "fixed bug X". Six questions:
 
 Quote the code, do not describe it (too long: `file:line`); one entry per meaningful change, a bulk rename one entry; `before` and `after` stay verbatim code. Reviewer: a missing cost, or a description with neither before nor after, is `category: result_write_back`, 🟠 (`refs/roles/reviewer/taxonomy.md`).
 
-# Closeout: every flow ends the same way (HARD)
+# Closeout: every flow ends the same way
 
-A run with a diff is not finished when the code works: four artefacts went stale the moment it landed (the code graph, the task boxes in `tasks.md`, the spec, memory), and stale ones do not fail loudly. Owner: the last agent to touch code or infrastructure; the closeout is the last step of the last implement spawn of the run (L3: the `mode=simplify` spawn) and of every fix-round spawn, and with no plan whichever agent made the change runs it inline before it returns; where it sits in the run: § End of a run.
+A run with a diff is not finished when the code works: four artefacts went stale the moment it landed (the code graph, the task boxes in `tasks.md`, the spec, memory), and stale ones do not fail loudly. Owner: the last agent to touch code or infrastructure; the closeout is the last step of the last implement spawn of the run (L3: the `mode=simplify` spawn) and of every fix-round spawn, and with no plan whichever agent made the change runs it inline before it returns (in L1, main thread, before its reply); where it sits in the run: § End of a run.
 
 ## The five steps, in this order
 
@@ -65,7 +65,7 @@ L3:
 9. **implement**, one spawn `after_approve: true`: the `docs/reviews/INDEX.md` rows and `docs/deferred-backlog.md` lines, then the closeout sweep, the backup sweep and the worktree sweep (`refs/artifact-layout.md § The cleanup gate`).
 10. **main thread**: the finish menu.
 
-L2 and L-cfg (L-cfg once per batch): brainstorm; one implement spawn that ends with simplify and the closeout (inline, no plan); then steps 5-7, 9 and 10, with no archive. L1 has no review and no final gate: its closeout step 5 runs every sweep.
+L2 and L-cfg (L-cfg once per batch): brainstorm; one implement spawn that ends with simplify and the closeout (inline, no plan); then steps 5-7, 9 and 10, with no archive. L1 has no review and no final gate: main thread runs the closeout inline and writes the `closeout` block under a last heading `## Closeout` of the adhoc record; its step 5 runs every sweep.
 
 **Definition of Done**: (1) every task is ticked, or `accepted_partial` with a note; (2) every `Covers:` scenario has evidence in test's report; (3) the planned tests are green; (4) no 🔴/🟠 finding is open; (5) every 🟡 finding is in the ledger (`deferred_errors[]` of `errors.yaml`); (6) the closeout steps are done; (7) the user approved at the final gate. The bar also asks: migrations, config and feature flags are accounted for; backward compatibility is kept or the break named; observability is in place where the change needs it; the rollback is stated. Closeout step 3 proves 1, 2 and 6; the final gate preview shows 3-5 from the last pass and `close_check` (`refs/gates.md`); 7 is the gate itself.
 

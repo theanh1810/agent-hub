@@ -8,6 +8,8 @@ Seven agents: brainstorm, scout, designer, implement, reviewer, test, devops. Th
 
 ## Before a release
 
+A person, not an agent, runs `/doctor prompt-audit plugins/agent-hub` in an interactive session at each release and after the default model changes, and applies only the proposals that pass the prune test of `plugins/agent-hub/refs/rule-authoring.md § Agent-file criteria`; no agent runs it, since it would mean a nested claude session.
+
 1. Run `python3 tools/check.py ruleset` (or `bash tools/check-ruleset.sh`). It checks the tree under `plugins/agent-hub`. Windows maintainers need bash for this mode (Git Bash or WSL).
 2. Run the unit tests, one directory at a time: `python3 -B -I -m unittest discover -s tests/<dir> -p 'test_*.py'` for `auditor`, `hooks`, `local-services`, `scripts` and `tools`.
 3. Run `python3 tools/scrub_check.py --require-private`. It must report 0 findings: no personal paths, no decision citations, no non-English text left in shipped files. Never commit the private pattern file it reads.

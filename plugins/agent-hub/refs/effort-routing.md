@@ -24,7 +24,7 @@ The one table of the ruleset that states a model; each agent file's frontmatter 
 
 ## Tier
 
-Brainstorm scores every request it takes and returns `tier`; before it returns, and in L1, a spawn runs at L2 (§ Fallback). Eight factors, 0-5 each, one evidence line each (a value with none is an estimate and says so), recorded in the machine record as `task_score: {factors: {C: {value, evidence}, …}, score, tier}`.
+Brainstorm scores every request it takes and returns `tier`; before it returns, a spawn runs at L2 (§ Fallback). Eight factors, 0-5 each, one evidence line each (a value with none is an estimate and says so), recorded in the machine record as `task_score: {factors: {C: {value, evidence}, …}, score, tier}`.
 
 | Value | C Complexity | S Scope | R Risk | U Uncertainty |
 |---|---|---|---|---|
