@@ -1,7 +1,7 @@
 {
   "name": "agent-hub-auditor",
   "displayName": "agentHub Auditor",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Optional auditor for agentHub: /audit scores what the agent fleet did in a time window and writes a report under docs/audits/.",
   "license": "MIT + Commons Clause 1.0",
   "dependencies": ["agent-hub"]
