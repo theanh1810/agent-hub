@@ -66,6 +66,7 @@ The MCP server owns one browser, launched at start; no `browser_*` tool takes a 
 - `browser_tabs` reaches only this server's browser: `list`, `new`, `select` / `close` by `index`.
 - Reuse before opening: the first call is `browser_tabs {action: "list"}`; `select` a tab already on the target origin; `close` every tab this run opened.
 - `browser_close` takes no parameters and ends the whole browser, not a tab; it is the single call that ends the run (step 7, `session_closed`).
+- `scout` also uses this server read-only (`refs/roles/scout/documents.md`): it opens and closes its own page within one call, and parallel scouts never share a tab; `test` still reads `browser_tabs` first and never assumes a tab is its own.
 - The user's real logged-in Chrome: switch to the `claude-in-chrome` skill, which opens new tabs in the existing session; close the tabs it opened.
 
 ## Untrusted content
