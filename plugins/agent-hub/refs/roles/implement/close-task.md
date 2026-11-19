@@ -1,4 +1,4 @@
-# Close the task (HARD)
+# Close the task
 <Owner: agents/implement.md § References>
 <Read when: Workflow step 1 (a change's first spawn: its branch) and step 8 (closing a task)>
 
@@ -11,7 +11,7 @@ Order at each task's close: freeze the snapshot, tick the task, then commit (a c
 Implement runs the bundled `simplify` skill through the Skill tool once per run, limited to what it changed.
 - **Small job (L2):** before reporting done, on the run's diff only.
 - **Planned job (L3):** one implement pass (`mode=simplify`) after the last wave, over the whole run's change.
-- Only inside `files_allowed[]`; re-run the tests after. Not run on the fast lane, a hotfix or a diff with no code file.
+- Only inside `files_allowed[]`; re-run the tests after. Not run on a hotfix or a diff with no code file.
 - A subagent that cannot invoke the skill skips it and reports `simplify: skipped, <reason>` in `## Risks`.
 
 ## Shortcuts
@@ -70,7 +70,7 @@ Before step 5, the drawing step of `refs/diagram.md` (L3: confirm or update; L2:
 
 ## Cleanup
 
-`rm -rf {workspace_root}/.cm-tmp/{task_id}`; every sweep beyond that runs in the `after_approve` spawn (in L1, at closeout step 5; `refs/closeout.md § End of a run`). Then `git status --short` in each sub-repo this task changed: remove or gitignore every `??` line this task created outside its `Files:` (a planned new file is `git add -N`, intent-to-add, shown ` A`). With no git, `~/.claude-backups/{plan_id}/{task_id}/` stays: the review packet diffs against it, and the `after_approve` spawn deletes it (in L1, closeout step 5).
+`rm -rf {workspace_root}/.cm-tmp/{task_id}`; every sweep beyond that runs in the `after_approve` spawn. Then `git status --short` in each sub-repo this task changed: remove or gitignore every `??` line this task created outside its `Files:` (a planned new file is `git add -N`, intent-to-add, shown ` A`). With no git, `~/.claude-backups/{plan_id}/{task_id}/` stays: the review packet diffs against it, and the `after_approve` spawn deletes it.
 
 ## Freeze for review
 
@@ -84,5 +84,4 @@ After its checks and before commit, a task freezes a snapshot its review reads w
 One spawn runs every implement task of a wave, in order; each task is frozen, ticked and committed before the next starts. `binding_scope` is one object for the spawn; each task edits only its own `Files:`.
 
 - A task whose intake fails, or that needs a file outside its `Files:`, stops the spawn there with `needs_revision` and `done_task_ids[]`.
-- Context past the budget of `refs/context-policy.md` stops it at the next task boundary with `in_progress`, `done_task_ids[]` and `remaining_task_ids[]`.
 - An approved plan runs straight through, never asking "continue?" between tasks.

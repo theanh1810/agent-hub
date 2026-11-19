@@ -4,7 +4,7 @@
 
 ---
 
-## Evidence (HARD)
+## Evidence
 
 Every claim in the brief carries its evidence; a claim with none is an invention.
 

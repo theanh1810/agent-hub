@@ -17,7 +17,7 @@ Language-agnostic; read on every code task. Five failures survive good naming an
 
 ---
 
-## 1. File budget (HARD)
+## 1. File budget
 
 **A new file needs a reason a reader would accept**, stated in the handoff, one line per new file. "Keeping things organised" is not a reason.
 
@@ -34,7 +34,7 @@ Language-agnostic; read on every code task. Five failures survive good naming an
 
 ---
 
-## 2. Case coverage (HARD)
+## 2. Case coverage
 
 Walk the list and write an answer for each; "cannot happen here" takes one clause, silence is not an answer.
 
@@ -72,7 +72,7 @@ Before writing, say what the smallest correct change looks like; after writing, 
 
 ---
 
-## 4. Scope (HARD)
+## 4. Scope
 
 - Every changed line traces to the request or to something the request broke; a line tracing to neither is removed before the commit, however small.
 - Formatting, renaming and reordering **outside** the touched functions stay out of the diff; they hide the real change.
@@ -81,7 +81,7 @@ Before writing, say what the smallest correct change looks like; after writing, 
 
 ---
 
-## 5. Comments (HARD)
+## 5. Comments
 
 A comment is justified one at a time, never budgeted. **Every comment in the diff is listed in the handoff** — one line each, with its `file:line` and the category below. A comment matching no category is a finding: rewrite it into one, or delete it.
 

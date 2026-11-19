@@ -84,7 +84,7 @@ Status: `completed` or a row of `refs/gates.md` table A.
 
 `user_questions[]`: `refs/option-explanation.md § The user_questions block`.
 
-## Evidence (HARD)
+## Evidence
 
 - **Health**: the probe and its output.
 - **Deploy**: SHA from the host, host, path, proof the new build serves (build marker or version endpoint); `rsync` exit 0 is no proof.

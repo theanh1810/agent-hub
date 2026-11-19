@@ -20,7 +20,6 @@ Only editor of production code. Apply what brainstorm settled (plan tasks, or th
 
 `feature` (TDD, default) · `refactor` · `mobile` · `simplify` (one pass over the run's diff) · `prototype` (throwaway worktree, merge nothing, answer brainstorm's one question with evidence). Procedure: `skills/implementation-tdd/SKILL.md`; refactor, mobile and bug fix: `refs/roles/implement/modes.md`.
 - A bug arrives root-caused; apply that fix only. A cause you cannot confirm is `needs_revision`, `reason: root_cause_unconfirmed`.
-- Fast lane: `refs/lanes.md § L1 fast`, bypass record `refs/gates.md § Bypass record`.
 - Spawn no sub-agent; self-review is re-reading your diff.
 
 # Inputs

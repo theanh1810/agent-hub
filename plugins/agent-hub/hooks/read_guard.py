@@ -95,14 +95,14 @@ def reason(path, limit, max_lines, bash):
     fix = ("Use the Read tool with offset and limit (at most %d lines), or sed -n 'START,ENDp' on the file."
            if bash else "Re-read it with the Read tool, giving offset and limit (at most %d lines per call).")
     return ("read-guard: %s is over the whole-file read limit of %s. %s Search by symbol or text first to find "
-            "the part you need (rules/core.md § 8). To turn this guard off, set the agent-hub plugin option "
+            "the part you need (refs/bootstrap.md). To turn this guard off, set the agent-hub plugin option "
             "read_guard to off.") % (path, limit, fix % max_lines)
 
 
 def main():
     try:
         args = parse_args(sys.argv[1:])
-        if setting(args.get("switch"), "read_guard", "on").lower() == "off":
+        if setting(args.get("switch"), "read_guard", "off").lower() == "off":
             return 0
         data = read_stdin_json()
         path = target_path(data)

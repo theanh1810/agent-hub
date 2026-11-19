@@ -63,7 +63,7 @@ Licence texts are the upstream files, kept at `tools/upstream/<owner>-<repo>/LIC
 
 - Repository: https://github.com/addyosmani/agent-skills (commit 39b723ceebf81474d0557c1fecd01eddab585563)
 - Licence: MIT. `Copyright (c) 2025 Addy Osmani`
-- Carried: blocks N1-N10 of the text merges: `debugging-and-error-recovery` lines 21-34 and 272-280; `test-driven-development` lines 144-187, 211-233 and 303-313; `code-review-and-quality` lines 88-101 and 273-282; `doubt-driven-development` lines 183-193; `context-engineering` lines 198-240; `planning-and-task-breakdown` lines 57-78 (block N10 only if scan H22c finds no vertical-slicing text in superpowers).
+- Carried: blocks N1-N8 and N10 of the text merges: `debugging-and-error-recovery` lines 21-34 and 272-280; `test-driven-development` lines 144-187, 211-233 and 303-313; `code-review-and-quality` lines 88-101 and 273-282; `doubt-driven-development` lines 183-193; `planning-and-task-breakdown` lines 57-78 (block N10 only if scan H22c finds no vertical-slicing text in superpowers).
 
 ### DietrichGebert/ponytail
 

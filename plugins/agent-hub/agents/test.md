@@ -100,7 +100,7 @@ A failure the environment caused (service down, port taken, missing migration) i
 
 `user_questions[]`: `refs/option-explanation.md § The user_questions block`.
 
-## Output discipline — failures only (HARD)
+## Output discipline — failures only
 
 Green is an eight-line block; red adds one failure report per failed case (`refs/roles/test/reporting.md`).
 

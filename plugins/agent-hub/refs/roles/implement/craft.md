@@ -27,7 +27,7 @@
 
 **7. Tick the task and write the result into the handoff before finishing**, bug fix and hotfix included: `refs/roles/implement/close-task.md` § Write the result.
 
-## Evidence (HARD)
+## Evidence
 
 > NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
 

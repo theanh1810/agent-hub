@@ -8,7 +8,7 @@ Caps follow score and pass mark. A turn is one API request; the cap counts per s
 
 ## What a cap is
 
-`maxTurns` in an agent file's frontmatter (values: the Turn caps table of `refs/effort-routing.md`; a spawn cannot pass another). At the cap Claude Code returns the output marked partial and main thread may resume it. A stop reading "no progress for 600s (stream watchdog did not recover)" is a hang, not a cap.
+`maxTurns` in an agent file's frontmatter (a spawn cannot pass another). At the cap Claude Code returns the output marked partial and main thread may resume it. A stop reading "no progress for 600s (stream watchdog did not recover)" is a hang, not a cap.
 
 ## The checkpoint
 

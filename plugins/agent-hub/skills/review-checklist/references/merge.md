@@ -30,7 +30,7 @@ In a plan: branch and local commit once per wave; push and MR by devops at the p
    ```
 3. **Push**: `git push -u origin <branch>`.
 4. **Open the MR** via `mcp__mcp_gitlab__save_merge_request` (in a plan only at the first wave commit; later ones update it):
-   - **title** (HARD): `<type>(<scope>): <clear imperative summary>`, ≤72 chars, never vague ("update code", "fixes", "wip"): intent from the title alone.
+   - **title**: `<type>(<scope>): <clear imperative summary>`, ≤72 chars, never vague ("update code", "fixes", "wip"): intent from the title alone.
    - **description** (HARD sections, in the project's documentation language):
      ```markdown
      ## Purpose

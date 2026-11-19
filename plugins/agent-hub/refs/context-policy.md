@@ -1,7 +1,7 @@
 # Context policy
 
 <Owner: rules/core.md § Load when, row "context pressure or compressing output">
-<Read when: budgeting a window, deciding what to load, or compressing anything; every agent, once>
+<Read when: deciding what to load, or compressing anything; every agent, once>
 
 ---
 
@@ -11,30 +11,7 @@ Load the minimum, in layers: global `AGENTS.md` → workspace → repo → the c
 
 **Hierarchy**: `system` + `AGENTS.md` are the source of truth · the session is working memory · claude-mem is durable memory · context-mode and Caveman only compress.
 
-**The limit is 400k tokens**, the one standard for when to stop widening (it replaces the 75%-full and 150k "sharp zone" ideas). Near it with analysis or task split unfinished → stop, hand off through a file. Input too long for the window → never truncate silently: tell the user, name the options (chunk, summarise), wait. Load only the part of the spec being worked on: window size is not attention budget.
-
-**Reading budgets** measure reading *after* bootstrap, from the first tool call: a flag raised before the limit, not a second limit. Bootstrap is a fixed floor charged first: the agent's own `agents/*.md`, the core view it receives (`rules/core.md`), and every skill in its frontmatter `skills:` (eager).
-
-```
-simple ≤10k · bug ≤20k (before root cause) · hotfix ≤12k (before patch)
-problem-solving ≤30k (before the answer; reset per scout spawn)
-feature ≤35k (before plan) · medium ≤35k (before the first edit)
-complex ≤55k (before plan, reset per wave) · refactor ≤70k (before plan, reset per wave)
-infra ≤15k (before the first host command) · docs ≤10k
-```
-
-**The bootstrap floor, per role** — already spent when the budget above starts counting:
-
-| Agent | Floor | Agent | Floor |
-|---|---|---|---|
-| brainstorm | ≈11,600 | scout | ≈5,200 |
-| designer | ≈8,600 | implement | ≈15,000 |
-| reviewer | ≈14,200 | test | ≈11,500 |
-| devops | ≈10,500 | | |
-
-Floor status: targets
-
-**These figures are derived, not measured (HARD).** They are targets set from the live byte counts of the v2 files (agent file + subagent view of the core + eager skills) on 2026-11-16, measured by `tools/check-ruleset.sh` check `bootstrap_floor_current`. The hard number is the byte count; tokens come from dividing it by 2.733 B/token. Treat every figure as **±10%**, cite bytes when precision matters, never re-quote as a direct measurement. Rule files only (`omitClaudeMd: true` counts no core view); the harness adds ≈34k before the first tool call.
+Input too long for the window → never truncate silently: tell the user, name the options (chunk, summarise), wait. Load only the part of the spec being worked on: window size is not attention budget.
 
 Put the task's most important material last and standing rules and spec first: the start and end are recalled better than the middle.
 
@@ -69,13 +46,12 @@ By output type: a diff, and anything on the never-compress list below → **neve
 
 # Context window — who manages it, and when
 
-The sections above set limit and budgets and what may be compressed; this is **when**.
+The sections above set what may be compressed; this is **when**.
 
 | Stage | Who | Rule |
 |---|---|---|
-| Bootstrap, before any tool call | every agent | Follow `rules/core.md § Start`; read nothing the task does not need. The floor (the table above) plus the harness share is already spent |
+| Bootstrap, before any tool call | every agent | Follow `rules/core.md § Start`; read nothing the task does not need. |
 | Mid-work, per tool call | every agent | Verbose CLI, build, test, log → context-mode. Snapshots, dumps, HTML, JSON → a file, then targeted lines. `grep`/`cat`/`find`/`ls` skip context-mode on purpose (`refs/toolset.md`) |
-| Mid-work, nearing a budget or the 400k limit | the agent itself | Stop widening. Write findings so far to `docs/brainstorm/` or `.cm-tmp/`, continue from the file. Reading on past a budget yields a summary of a summary |
 | Handoff, on return | every agent | Caveman **lite** on prose only. Paths and `file:line`, never file contents; ≤300 tokens per handoff section |
 | Wave boundary | main thread | Pass the **verbatim** worker output the next agent's brief names; a re-summary drops the `file:line` the next agent needs |
 | Error loop | test → brainstorm | One `RUN-REPORT.md` per run, not a message per failure. `errors.yaml` is byte-exact, never compressed |
@@ -86,55 +62,6 @@ The sections above set limit and budgets and what may be compressed; this is **w
 
 **Leaving a session at a task boundary**, write down: scope and decisions settled · task status and next task · files changed and tree state · the verify command and result · open questions, risks, pending approvals. A fresh session re-reads rules, spec, plan and real git state, re-runs the check when the marker is gone or code changed, and never infers "approved" from old history. Keep a short project index (one paragraph per area: main files, pattern to follow) so only the area in play loads.
 
-**Per-agent budget**: the reading-budget fence above is its only statement. **Never compressed, at any stage**: `skills/context-compression/SKILL.md` § Hard rules holds that list alone.
+**Never compressed, at any stage**: `skills/context-compression/SKILL.md` § Hard rules holds that list alone.
 
 **The compression self-check**: could someone reproduce the bug from this? run the validation? are contract and severity verbatim? Any "no" → revert to normal prose.
-
-## Additions from other packs
-
-The never-compress list of `skills/context-compression/SKILL.md` § Hard rules wins over the block below.
-
-<!-- vendored:begin id=as-n9 src=addyosmani/agent-skills@39b723ceebf81474d0557c1fecd01eddab585563:skills/context-engineering/SKILL.md#L198-L239 licence=MIT -->
-## Context Budget Management
-
-The context window is not a filing cabinet — it's a working desk. As a session runs, conversation history, tool output, and exploration accumulate. Most of it becomes deadweight. Budget proactively: waiting until the window is full causes abrupt quality drops; managing regularly keeps the agent coherent through long tasks.
-
-**Compact well before the host's limit; the threshold varies by host.** By the time the window is genuinely full, the model's attention is already fragmented across too many signals. The margin gives room to compress gracefully rather than cut desperately mid-task.
-
-### What to cut first
-
-| Content | When to cut |
-|---|---|
-| Past failed attempts and their error output | Once you've moved past them — keep the conclusion, not the journey |
-| Verbose tool output (long `find` results, full file listings) | After you've extracted what you needed |
-| Conversational back-and-forth | As soon as the decision is reached |
-| Earlier drafts of code that were replaced | Immediately on replacement — the current file is the record |
-
-### What to protect until the end
-
-- The original task definition and key constraints
-- The current error message or failing test output you are actively debugging
-- The file currently being edited, or its most recent version
-- Any hard constraints the agent has been asked to enforce (auth rules, naming conventions, etc.)
-
-### Compress before dropping
-
-Summarizing beats deleting. Before removing a long stretch of exploration, reduce it to one sentence capturing the conclusion:
-
-```
-Before: [8 messages debugging a failing import — various attempts, error logs, dead ends]
-After:  "Import issue traced to a circular dependency in src/lib/db.ts —
-         resolved by moving the shared type to src/types/index.ts."
-```
-
-The detail is gone; the decision is preserved. If the detail turns out to matter, the summary is a breadcrumb for re-investigation.
-
-### Order for recency
-
-Put the most task-critical content **last** in context. Models recall content at the start and end of the window more reliably than the middle (the lost-in-the-middle effect — Liu et al., 2023). Keep stable rules and specs at the start; put the active task material last, closest to the generation point:
-
-```
-← session start                              generation point →
-[background: rules, specs, architecture]  [working: current file, error, task]
-```
-<!-- vendored:end id=as-n9 -->

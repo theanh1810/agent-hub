@@ -1,4 +1,4 @@
-# Evidence paths (HARD)
+# Evidence paths
 
 `agents/test.md` § Evidence storage is the only tree: the `.cm-tmp/{task_id}/` layout, file-name shapes, the closed `{viewport}` list, the baseline path. Read it before writing a file; a second variant is a defect.
 

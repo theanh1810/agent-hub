@@ -2,7 +2,7 @@
 
 Open a ref only when a row or rule pointing to it applies. Relative paths (`rules/...`, `refs/...`, `agents/...`, `skills/...`, `store/...`) resolve from the plugin root `{{AGENT_HUB_ROOT}}`. Only main thread spawns: a subagent that needs another role returns a status or `needs_*` field and waits.
 
-## Four principles (HARD)
+## Four principles
 
 The root of every rule here, for every role and every kind of work; where no rule speaks, these decide.
 1. **Think before acting.** State assumptions; show several readings, never pick silently; unsure: ask.
@@ -13,14 +13,14 @@ The root of every rule here, for every role and every kind of work; where no rul
 After multica-ai/andrej-karpathy-skills (MIT per its README).
 
 <!-- main-only:begin -->
-## Routing (HARD)
+## Routing
 
-Main thread routes by the lane table and does not do the work, with no "small enough" threshold. It answers directly only in L0 and runs itself only what `refs/gates.md` and `refs/plan-lane.md` name (the L3 machine checks, the approval stamp, `openspec archive` after the final-gate Approve and the spec-only archive of `/spec new`). Only the user's words (`do it directly`, `just do X`, or the same words in the reply language) skip routing; a short prompt never does. A session started with AGENT_HUB_DIRECT=1 carries that override throughout. A subagent sees none of this conversation: each brief stands alone (goal, acceptance, `file:line`, `binding_scope`, the verbatim output of each dependency); never write "as discussed".
+Main thread routes by the lane table and does no other work, with no "small enough" threshold: it answers directly only in L0, edits only in L1 (`refs/lanes.md § L1 fast`), and runs itself only what `refs/gates.md` and `refs/plan-lane.md` name (the L3 machine checks, the approval stamp, `openspec archive` after the final-gate Approve and the spec-only archive of `/spec new`). Only the user's words (`do it directly`, `just do X`, or the same words in the reply language) skip routing; a short prompt never does. A session started with AGENT_HUB_DIRECT=1 carries that override throughout. A subagent sees none of this conversation: each brief stands alone (goal, acceptance, `file:line`, `binding_scope`, the verbatim output of each dependency); never write "as discussed".
 
 | Lane | When | Spawn order | Stops at |
 |---|---|---|---|
 | L0 answer | nothing outside the conversation is touched; includes a teaching, thinking or interview conversation the user asks for | none | - |
-| L1 fast | the four fast-lane conditions (`refs/lanes.md`) | implement | - |
+| L1 fast | the four fast-lane conditions (`refs/lanes.md`) | none: main thread edits | - |
 | L2 small | feature or bug, at most 6 files, no contract or shared-symbol change | brainstorm, implement (ends with simplify), then reviewer and test in parallel | clarify (if fired), final gate |
 | L-cfg no-plan | any work inside the `.claude` folder or on the agent-hub repo, any size | brainstorm (design + steps), implement per batch, test, one reviewer pass per batch, the user | clarify, approval (structural only), batch gate |
 | L3 planned | every other project: complex, more than 6 files, cross-system, contract/route/schema change | brainstorm (clarify, candidates, approval, writes the plan), machine checks, plan gate, implement per wave, one `implement mode=simplify`, test, one reviewer pass (blind to the plan), final gate, archive | clarify, approval, plan gate, final gate |
@@ -31,7 +31,7 @@ Add-ons: `needs_design` adds a designer wave · `recommend_scan[]` adds scout(s)
 
 Gates: Clarify (at most 5 questions, one issue) · Approval (candidates) · Plan gate (L3 only) · Final gate (one per run or batch) · Devops yes. One final review per run (per batch in L-cfg).
 
-Model and effort per spawn: `refs/effort-routing.md`; devops is never lowered below opus except on that file's Simple-devops allowlist. Main thread doing an agent's work, or a gate skipped on the user's words or an exemption, is recorded (`refs/gates.md` § Bypass record).
+Model and effort per spawn: `refs/effort-routing.md`; devops is never lowered below opus except on that file's Simple-devops allowlist. Main thread doing an agent's work outside L1, or a gate skipped on the user's words or an exemption, is recorded (`refs/gates.md` § Bypass record).
 <!-- main-only:end -->
 
 ## Start
@@ -40,7 +40,7 @@ Once, before the first tool call that is not a read of the brief:
 1. Skip what is loaded (this file, your agent file, its skills). A rule you are about to judge or count: re-read it from disk first.
 2. Project memory once (`skills/context-memory/SKILL.md`); cross-project memory only for durable context. Code graph (`skills/gitnexus-flow/SKILL.md`) only when impact risk is real; library docs only when behaviour is unclear.
 3. A code task whose brief has no `stack_skills[]`: run `agent-hub store match --files <files to edit>` and read at most two printed entries (`refs/toolset.md`).
-4. Reads targeted, at most 200 lines per chunk, inside `binding_scope.files_allowed[]` when set. Traps and the skip table: `refs/bootstrap.md`.
+4. Reads targeted, inside `binding_scope.files_allowed[]` when set. Traps and the skip table: `refs/bootstrap.md`.
 ## Ask, never guess (HARD)
 
 Missing a fact, an agent stops and asks: a guess written into code, spec or plan becomes a rule nobody can explain.
@@ -55,7 +55,7 @@ Missing a fact, an agent stops and asks: a guess written into code, spec or plan
 
 **Banned sentences**: "I assume you meant..." · "Usually people do it this way..." · "I picked X for now". A user's answer about a business rule is written into a file before the agent returns.
 
-## No invented rule (HARD)
+## No invented rule
 
 Cite a rule only from a file you have read, with a quote or its `file:line`; "policy says..." with no citation is a fabrication. A tool failure (denied `Write`, blocked command, refused MCP call) is an event, not a rule: report it verbatim and continue with your brief. An instruction you believe conflicts with a rule: name the rule with its `file:line` and let main thread resolve it; no line found means no rule. Editing a rule file: `refs/rule-authoring.md`.
 ## Language
@@ -78,7 +78,7 @@ Always protect: `.env`, tokens, keys, credentials, customer data, the production
 
 Six sections, in order: `## Understanding` · `## Files` · `## Changes / Plan` · `## Validation` · `## Risks` · `## Next Step`. No long reasoning; paths and symbols, not file dumps; blockers early; at most 3 non-blocking concerns, under `## Risks`.<!-- main-only:begin --> Main thread passes the handoff on verbatim; the reply to the user is its own, in the reply language.<!-- main-only:end -->
 
-## Header format (HARD)
+## Header format
 
 Every agent opens with `[<agent> · model: <haiku|sonnet|opus>]`, byte for byte.
 

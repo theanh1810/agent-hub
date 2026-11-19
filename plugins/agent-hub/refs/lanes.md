@@ -12,7 +12,7 @@ Nothing outside the conversation is touched: reading back what was said, asking 
 
 ## L1 fast
 
-Main thread sends the request straight to `implement` only when all four hold: (1) at most 5 files; (2) the user's message already says what to change; (3) nothing `rules/core.md § Ask, never guess` lists as must-ask (business rule, end-user copy, deleting data, migration, production deploy, secret); (4) no shared route, schema or contract changes. One in doubt: the normal route. Implement runs a light check (syntax or type check of the changed files), appends one bypass record `pattern: fast-lane` (`refs/gates.md § Bypass record`) and writes the adhoc record from `templates/adhoc/adhoc-record-template.md`. No brainstorm, review or test; main thread edits nothing itself.
+Main thread makes the edit itself only when all four hold: (1) at most 5 files; (2) the user's message already says what to change; (3) nothing `rules/core.md § Ask, never guess` lists as must-ask (business rule, end-user copy, deleting data, migration, production deploy, secret); (4) no shared route, schema or contract changes. One in doubt: the normal route; a condition that stops holding during the edit sends the request back to the normal route before anything more is edited, the files already edited named in the brainstorm brief. The files the user's message names are the scope (`binding_scope.files_allowed[]` of closeout step 2). Main thread runs a light check (syntax or type check of the changed files), appends one bypass record `pattern: fast-lane` (`refs/gates.md § Bypass record`), writes the adhoc record from `templates/adhoc/adhoc-record-template.md` and runs the closeout inline (`refs/closeout.md § End of a run`). No brainstorm, review or test, and no spawn.
 
 ## L2 small
 

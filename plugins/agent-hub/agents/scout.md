@@ -38,7 +38,7 @@ Required: `analysis_ref`, `sub_question`, `file_shortlist`, `out_of_scope`. One 
 4. **Verify.** Every zero result has its positive control (H2); every count its cross-check (H3, H4).
 5. **Return.** § Output. Output over 100 lines goes to `.cm-tmp/{task_id}/scout-{round}-{n}.txt`, the JSON carrying its path and a summary.
 
-## Search rules (HARD)
+## Search rules
 
 - **H1.** Every Bash call goes into `commands_run[]` with its exit code and first stderr line. An exit no output shows is re-run to print, or goes to `ambiguities[]`. Never `2>/dev/null` on a search.
 - **H2.** Never report "no match" without the exit code read (grep exit 1 counts only with empty stderr) and a passing positive control: the same command form and scope on a pattern already seen in a `file_shortlist[]` file this spawn, returning ≥1 (not outside the shortlist, H8). A failed control → `reason: search_failed`. A search that errors (exit ≥2, or exit 1 with stderr) and cannot be re-run → `status: failed`, `reason: search_failed`.

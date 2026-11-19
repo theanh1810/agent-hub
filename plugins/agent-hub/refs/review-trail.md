@@ -17,7 +17,7 @@ An `independent` section **opens with its verdict**, then follows the deep revie
 
 # Severity tags, learning mode, and the dashboard
 
-**Severity tags (HARD)**: `🔴 critical` blocks merge · `🟠 major` fix before merge · `🟡 minor` nice to have · `💡 learn` educational, never blocking. The deep review spec maps onto them: P0 = 🔴, P1 = 🟠, P2 and P3 = 🟡; 💡 stays outside the findings. A finding with no concrete case is a **hypothesis**, at most 🟡; a leaked secret is never downgraded.
+**Severity tags**: `🔴 critical` blocks merge · `🟠 major` fix before merge · `🟡 minor` nice to have · `💡 learn` educational, never blocking. The deep review spec maps onto them: P0 = 🔴, P1 = 🟠, P2 and P3 = 🟡; 💡 stays outside the findings. A finding with no concrete case is a **hypothesis**, at most 🟡; a leaked secret is never downgraded.
 
 **Learning mode.** With `learning: true`, every agent appends `## What was learned`: 1-3 bullets in the reply language explaining a concept, pattern or API used, with a source link, for a mid-level developer. Default off. `learning_focus: <topic>` goes deep on one subject; the method is `refs/vendored/teach.md`.
 

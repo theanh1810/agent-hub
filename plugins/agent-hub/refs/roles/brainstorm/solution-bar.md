@@ -5,7 +5,7 @@
 
 ---
 
-**Every candidate clears all three bars (HARD).** One failing any is not a candidate: say so and produce another; never put a weak option beside a strong one to make it look chosen. Each carries `approach`, `files_estimate`, `risk`, `tradeoffs`, `confidence`; none without trade-offs outside `quick` mode.
+**Every candidate clears all three bars.** One failing any is not a candidate: say so and produce another; never put a weak option beside a strong one to make it look chosen. Each carries `approach`, `files_estimate`, `risk`, `tradeoffs`, `confidence`; none without trade-offs outside `quick` mode.
 
 - **Minimum scope.** No feature, abstraction or configuration beyond the request: written in 200 lines when 50 would do, choose the 50. "Minimum code that solves the problem. Nothing speculative."
 - **Different for real.** On complex work, generate genuinely different candidates through lenses: invert it, drop one constraint, change the audience, combine, simplify tenfold.

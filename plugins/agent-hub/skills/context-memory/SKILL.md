@@ -37,7 +37,7 @@ At bootstrap (recall), at closeout (save a durable outcome), and whenever a fact
 
 An agent in a fresh session recalls the workspace without re-asking. It never leaves the workspace; claude-mem never holds what belongs here.
 
-### Discovery order (HARD) — the only statement of it
+### Discovery order — the only statement of it
 
 The project-local file wins; the global cache is a fallback, never a source. Stop at the first hit:
 
@@ -52,7 +52,7 @@ Monorepo: a sub-project's `.claude/MEMORY.md` and the workspace file both load, 
 
 `~/.claude/memory/MEMORY.md` is an index only: one line per project (`- <slug> · path: <abs root> · last_seen: <date>`), no project facts, never a fallback. Append the line the first time a project's memory file is written.
 
-### Save trigger (HARD)
+### Save trigger
 
 Copy the skeleton from `${CLAUDE_PLUGIN_ROOT}/templates/memory/PROJECT-MEM-template.md`. Every run with a durable outcome updates the file it read at closeout, into the matching section:
 
@@ -65,7 +65,7 @@ Copy the skeleton from `${CLAUDE_PLUGIN_ROOT}/templates/memory/PROJECT-MEM-templ
 
 Decision notes are a ledger: every claim carries a date, a claim about code carries commit and repo, and "currently" or "now" never appears without one. Operational notes describe the present and are updated in place.
 
-**Agent memory (HARD).** At most one agent-memory write per run, at closeout, from a verified lesson: read the agent's `MEMORY.md`, edit the line with the same meaning or append one short dated line, and merge entries near 200 lines or 25KB. Language: new project memory entries and agent memory are written in English, the user's words verbatim in quotes with the date; an old entry is translated when edited; the main session's auto memory follows the reply language.
+**Agent memory.** At most one agent-memory write per run, at closeout, from a verified lesson: read the agent's `MEMORY.md`, edit the line with the same meaning or append one short dated line, and merge entries near 200 lines or 25KB. Language: new project memory entries and agent memory are written in English, the user's words verbatim in quotes with the date; an old entry is translated when edited; the main session's auto memory follows the reply language.
 
 ## Keeping notes alive
 

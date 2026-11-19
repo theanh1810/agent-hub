@@ -1,4 +1,4 @@
-# Stale verdict refresh (HARD)
+# Stale verdict refresh
 <Owner: agents/reviewer.md § Gates>
 <Read when: `errors.yaml` has `meta.last_review_loop != meta.error_loop_count`>
 
