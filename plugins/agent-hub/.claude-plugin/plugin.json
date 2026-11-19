@@ -1,7 +1,7 @@
 {
   "name": "agent-hub",
   "displayName": "agentHub",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Multi-agent workflow for Claude Code: the main thread routes each request by a lane table to brainstorm, scout, designer, implement, reviewer, test and devops agents, with OpenSpec plan, spec and review gates.",
   "license": "MIT + Commons Clause 1.0",
   "userConfig": {

@@ -2,7 +2,7 @@
 <Owner: agents/devops.md>
 <Read when: an agent file's `tools:` or `disallowedTools:` is edited, a project is attached, or a tool, MCP server or skill is added, upgraded or removed>
 
-One row per tool, plugin, MCP server or skill: who may use it, how it loads, the guard. A server not yet installed is named by server only: `names owed (probe)`. Roles: brainstorm, scout, designer, implement, reviewer, test, devops; main = main thread. The agent files' frontmatter is the source of each role's lists; § Per-role lists mirrors it and `tools/check-ruleset.sh` compares the two.
+One row per tool, plugin, MCP server or skill: who, load mode, guard. Roles: brainstorm, scout, designer, implement, reviewer, test, devops; main = main thread. The agent files' frontmatter is the source of each role's lists; § Per-role lists mirrors it.
 
 ## Rows
 
@@ -22,7 +22,7 @@ One row per tool, plugin, MCP server or skill: who may use it, how it loads, the
 | Lark: lark-mcp, lark-contact, skill `lark-task` | devops; main on request | integrations plugin | acts as the user; writes only on request |
 | claude-code-setup | main, new repo or on request | plugin skill | recommends only, installs nothing |
 | qa-pilot MCP | test, first browser driver | MCP, not installed (deferred 2026-11-17); names owed | order and limits: `refs/roles/test/browser-order.md` |
-| Playwright | test (fallback driver); implement, devops | MCP, deferred | no `browser_run_code_unsafe` |
+| Playwright | test (fallback driver); implement, devops; scout (read-only) | MCP, deferred | no `browser_run_code_unsafe`; scout: no click or type |
 | chrome-devtools 1.11.0 | test, performance cases only | MCP, enabled, user scope; server name per manifest | local or staging pages |
 | pr-review-toolkit | main spawns one specialist on the reviewer's request | plugin | brief and limits: `refs/roles/reviewer/second-opinion.md` |
 | ui-ux-pro-max | designer, tier 3 | installed skill | after the Figma file and frontend-design |
@@ -43,12 +43,12 @@ Not installed: firecrawl, lightpanda, wordpress MCP, security-guidance, claude-s
 
 ## Per-role lists
 
-Shape as the old agent files (comma-separated names in `tools:` / `disallowedTools:`); P-LIST has not run, so MCP patterns and deferred names are unconfirmed. `GL-W` = the 11 gitlab write names `accept_merge_request, add_branch, add_commit, fork_repository, link_work_items, save_merge_request, save_merge_request_review, save_note, save_pipeline, save_project, save_work_item`, prefix `mcp__mcp_gitlab__`. `FG-W` = every figma tool except the read tools and `create_session`, prefix `mcp__mcp_figma__`. `CM` = `mcp__plugin_claude-mem_mcp-search`. CM tools outside these lists are unused on purpose (review 2026-11-17).
+Comma-separated names as in `tools:` / `disallowedTools:`; P-LIST has not run, so MCP patterns and deferred names are unconfirmed. `GL-W` = the 11 gitlab write names `accept_merge_request, add_branch, add_commit, fork_repository, link_work_items, save_merge_request, save_merge_request_review, save_note, save_pipeline, save_project, save_work_item`, prefix `mcp__mcp_gitlab__`. `FG-W` = every figma tool except the read tools and `create_session`, prefix `mcp__mcp_figma__`. `CM` = `mcp__plugin_claude-mem_mcp-search`. Other CM tools are unused on purpose.
 
 | Role | tools | disallowedTools |
 |---|---|---|
 | brainstorm | Read, Grep, Glob, Write, Bash, CM `search`, `timeline`, `get_observations`, `save_memory`, gitnexus `list_repos`, `query`, `context`, `impact`, `api_impact`, `route_map`, `tool_map`, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `search_design_system` | Agent, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs`, GL-W, FG-W |
-| scout | Read, Bash, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs` kindly `web_search`, `get_content` (tavily, serper) | Agent, GL-W, FG-W, figma `create_session`, `get_comments` |
+| scout | Read, Bash, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs` kindly `web_search`, `get_content` (tavily, serper), Playwright `navigate`, `navigate_back`, `snapshot`, `evaluate`, `wait_for`, `take_screenshot`, `tabs`, `close` | Agent, GL-W, FG-W, figma `create_session`, `get_comments` |
 | designer | Read, Grep, Glob, Write, Skill, CM `search`, `timeline`, `get_observations`, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map` | Agent |
 | implement | Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, CM `search`, `save_memory`, gitnexus, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map`, Playwright | Agent, `browser_run_code_unsafe` |
 | reviewer | no `tools:` line: every tool not denied | Agent, NotebookEdit, gitnexus `rename`, chrome-devtools server, GL-W, FG-W, figma `create_session`, `get_comments`, CM `important_workflow`, `work_state_write`, `build_corpus`, `prime_corpus`, `rebuild_corpus`, `reprime_corpus` |
