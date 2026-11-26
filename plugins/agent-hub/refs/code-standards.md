@@ -37,7 +37,7 @@ Before writing ≥10 new lines, cite `Pattern reference: <file:line>` from a nei
 
 The priority ladder, naming and shape rules: `refs/roles/implement/craft.md` § Priorities, § Craft; the forbidden list: `agents/implement.md` § Forbidden. Enforcement: `agents/reviewer.md`.
 
-**A written style, not a re-derived one.** `Pattern reference` alone let two sessions pick two neighbours in one module and produce two dialects. Before the first edit `implement` and `reviewer` read, in order:
+**A written style, not a re-derived one.** `Pattern reference` alone let two sessions pick two neighbours in one module and produce two dialects. Before the first edit `implement` and `reviewer` read, in order (`implement` gets row 3 by hook at its first write in that language, `refs/roles/implement/sources.md` 5b):
 
 | # | Source | When |
 |---|---|---|

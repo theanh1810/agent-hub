@@ -25,7 +25,7 @@ The plan (the change folder: `tasks.md`, `design.md` and the spec deltas, read p
 A fix-round spawn reads the round's `fix_list[]` from `errors.yaml` (`errors_path`, `round`; `refs/roles/brainstorm/error-batch.md`); each entry names the `files[]` it may touch and the `user_answer` that authorised anything outside its task. Findings reach implement only through it.
 
 - **Any entry unclear: stop and ask about every unclear one before fixing any**, since entries may relate.
-- **One entry at a time, a test per entry**: blockers first, then simple fixes, then complex; finish with a no-regression check.
+- **One entry at a time, red first**: each entry starts from a test that fails on the unfixed code, built from the finding's `repro` (none given: from its text), and that run is recorded as `red_before_fix`; an entry whose `check` is not a test (wording, a rename) is exempt. Blockers first, then simple fixes, then complex; finish with a no-regression check.
 - **In scope** (fix directly): every touched path is in the entry's `files[]` (its `user_answer` authorised any path outside the task, and any added case, copy, AC or expected-result change). Rerun that task's checks and the tests at its `Test:` layers, report finding id, files and fix snapshot in the handoff's `## Changes / Plan` (`refs/closeout.md` § Who writes it), freeze for review (`refs/roles/implement/close-task.md` § Freeze for review). Anything the entry does not name: `needs_revision`, `reason: plan_change_required`.
 - **"Make it standard" entry**: grep whether anything uses it. Unused: report a proposal to delete instead of polishing. "If we don't need this feature, don't add it."
 - **Entry looks technically wrong or would break working behaviour**: do not fix blind. Check five things (right for this codebase; breaks running behaviour; why the current code is so; works on every platform/version; the reviewer had enough context). Cannot check: say "cannot verify without X"; return the evidence for brainstorm to decide.
@@ -43,7 +43,7 @@ A fix-round spawn reads the round's `fix_list[]` from `errors.yaml` (`errors_pat
 | 4 | `design_brief_ref` → `{plan_dir}/design/{slug}/DESIGN.md` | FE work: pattern, screens, tokens. Build from them as given; never re-derive |
 | 5 | Project docs, `AGENTS.md` / `CLAUDE.md` of the repo | conventions the team wrote down |
 | 5a | `{sub_repo}/docs/CODE-STYLE.md` when it exists | the measured house dialect. Absent: `rules/code-style/README.md` § Precedence decides the fallback |
-| 5b | `rules/code-style/_discipline.md` always, plus `<language>.md` for each language in `binding_scope` and no other | file budget, case coverage, smallest diff, scope; language mechanics |
+| 5b | `rules/code-style/_discipline.md` always, read at intake; `<language>.md` for each language in `binding_scope` and no other, delivered by the moment hook on the first write of a file in that language (with `moment_hooks` off, or for a language the hook has no moment for, read it at intake, before writing code) | file budget, case coverage, smallest diff, scope; language mechanics |
 | 5c | `refs/code-standards.md` § Coding Principles, read before the first edit | think first, simplicity, surgical changes, goal-driven checks |
 | 6 | Neighbouring code: `mcp__gitnexus__query` then 2-3 files that already do this | the pattern to copy (`refs/roles/implement/craft.md` § Priorities rule 2) |
 | 7 | `mcp__gitnexus__impact` on every symbol about to change, `api_impact` on a route or handler file | who breaks if the signature moves |
@@ -53,13 +53,26 @@ Reading order, not rank: where style sources disagree `rules/code-style/README.m
 
 Not sources: broad repo scans outside `binding_scope`, web search, anything on a server (a `devops` spawn).
 
-**Read cache.** Read a file once per spawn, again only after another task of the spawn edited it; never re-read to confirm an edit (edit tools fail loudly). Read only the task's own lines of `tasks.md`, never the whole plan.
+**Read cache.** Never re-read to confirm an edit (edit tools fail loudly). Read only the task's own lines of `tasks.md`, never the whole plan.
 
 ## Running the checks
 
-- **Checks by kind, once before the spawn's first edit and once after its last, never between.** A code task lints its changed files, type-checks, runs the tests related to them (`vitest related --run --passWithNoTests=false <files>`, or the runner's own mode; the full suite when that finds 0 tests); the spawn's end runs full lint, type check and suite (a fix-round spawn too). A docs-only task runs the check its `Done when:` names and, in `~/.claude`, `python3 tools/check.py ruleset` (agent-hub repo only).
+- **Checks by kind, once before the spawn's first edit and once after its last, never between.** A code task lints its changed files, type-checks, runs the tests related to them (`vitest related --run --passWithNoTests=false <files>`, or the runner's own mode; the full suite when that finds 0 tests); the run's last spawn before review (L3: the `mode=simplify` spawn) and every fix-round spawn run the gate of the next line at their end, after simplify; a ceiling stop runs none (`refs/turn-budget.md § The ceiling`). A docs-only task runs the check its `Done when:` names and, in `~/.claude`, `python3 tools/check.py ruleset` (agent-hub repo only).
+- **The gate is the definition of done.** It runs once, last, after simplify and before the closeout, in a spawn the line above names, with its output in `.cm-tmp/{task_id}/gate.log`, and its exit 0 is the done criterion: the project's gate script (`scripts/gate.sh` in the sub-repo, or the path its `CLAUDE.md` or `AGENTS.md` names) when one exists, else the commands the brief names as the gate, else full lint, type check and suite. A gate script runs the commands CI runs with the tool versions CI pins (`templates/gate/gate.sh`); a difference from the CI file goes into `extra.findings[]`. Before that point run targeted tests only.
 - Every command goes into `extra.test_results.commands` with its real exit code read from the run, never inferred, and `tc_id` (TC-<task>-<n>, null if no case names it).
+- Return the gate's verdict lines (`ok`, `FAIL`, `SKIP`, one per step) verbatim in `extra.gate.lines[]` with `extra.gate.exit` and the log path; a `SKIP` line is named under `Risks`. With no gate script, write one line per gate command in the script's form (`ok   <name> (<n>s)`, `FAIL <name> (exit <n>)`).
 - A red check of your own is fixed in place and re-run (outside the error-loop cap; the Three-Fail Rule caps it).
+
+## Acceptance tests
+
+A task with items in `acceptance[]` (`refs/roles/brainstorm/modes.md § plan-write`: `design.yaml` in the change folder, else the record the brief names as `record_ref`) gets its tests before its code.
+
+- Start the task with one commit that adds one test per item, named by its `test_name`, in files that hold acceptance tests only (a later `Test:` case goes in another file), and nothing else. Run them and record the run in `extra.acceptance.red`: each fails for the reason its `then` names, never on an import, syntax or fixture error. A bug task's run is also its `red_before_fix`: run once, recorded in both, never re-run by a resume.
+- Record each file that step adds (the tests and any new fixture they read) with its `sha256` in `extra.acceptance.files[]` and the commit in `extra.acceptance.commit`; with no commit (no git, or a run with no change folder, `refs/roles/implement/close-task.md § Branch`) the `sha256` alone is the freeze, and each file is also copied to `~/.claude-backups/{plan_id}/{task_id}/acceptance/<path>` for the closeout to restore from. Once the run is recorded, add `acceptance:<task id>` to the checkpoint's `done[]` and write `extra.acceptance` to its `acceptance` key (`refs/turn-budget.md § The checkpoint`).
+- Then make the code meet the tests. An item you find wrong (it contradicts a scenario, `design.md` or an existing contract) is `needs_revision`, `reason: acceptance_test_change`, naming the item, the evidence and the change wanted; the test stays as committed. Refactor and simplify leave acceptance tests as they are.
+- A failed attempt restores the task's other files to the acceptance commit, never to before it; `extra.baseline` still names the run's start.
+- A fix round changes an acceptance test only when its `fix_list[]` entry names the file in `files[]` and carries a `user_answer`; that spawn records the new commit and `sha256` as the file's freeze in `extra.acceptance`.
+- No test runner, or a rule-file change: the item is a `script`-layer command with its expected output (rule files: `python3 tools/check.py ruleset` or a grep; a new rule: the pressure scenario of `refs/rule-authoring.md § Behavioural testing`). Nothing is frozen, `extra.acceptance` is null and `## Validation` says `acceptance_tests: none - <reason>`.
 
 ## Design brief
 
@@ -70,8 +83,8 @@ With `design_brief_ref`, read the brief's `chosen_pattern.id`, `screens_detail[]
 Rules in `rules/SDD.md`. Implement never edits behaviour specs (brainstorm owns them); it reads the spec and logs debt on a hotfix (`openspec/_debt.md`, else `docs/spec-debt.md`).
 
 - **Stop rule.** A business rule the spec does not cover (threshold, expiry, permission, state transition, rounding): `blocked_needs_spec` with `spec_question` (ONE decision, 2-4 options) and `blocked_at: file:line`. Main asks the user, brainstorm writes the scenario, then the task re-runs; picking the value that "sounds reasonable" is the failure this prevents.
-- **Escalation net (tier 2).** Before committing, check the diff against `rules/SDD.md` §11.1: migrations, `*.proto` / openapi, routes, business enums, policies and permissions, events, business constants, money and legal modules. A match with `spec_required: false`: `blocked_needs_spec` with `reason: spec_required_escalation`, the pattern in `spec_question` and `blocked_at: file:line`; do not commit. Exceptions: a hotfix never blocks (it logs the spec debt file); a purely mechanical change (rename, format, move) says so in `handoff.risks` and proceeds.
-- **Naming** follows the glossary. A code name that contradicts it: name it in `handoff.risks` (`<code name> vs <glossary term>`), never coin a synonym.
+- **Escalation net (tier 2).** Before committing, check the diff against `rules/SDD.md` §11.1: migrations, `*.proto` / openapi, routes, business enums, policies and permissions, events, business constants, money and legal modules. A match with `spec_required: false`: `blocked_needs_spec` with `reason: spec_required_escalation`, the pattern in `spec_question` and `blocked_at: file:line`; do not commit. Exceptions: a hotfix never blocks (it logs the spec debt file); a purely mechanical change (rename, format, move) says so in `## Risks` and proceeds.
+- **Naming** follows the glossary. A code name that contradicts it: name it in `## Risks` (`<code name> vs <glossary term>`), never coin a synonym.
 - **Rules found while coding** take the stop rule above: brainstorm writes the scenario before the task re-runs. Leave the spec files to brainstorm; never edit one.
 
 ## Artifact layout

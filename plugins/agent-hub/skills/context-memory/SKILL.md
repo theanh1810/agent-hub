@@ -32,6 +32,7 @@ At bootstrap (recall), at closeout (save a durable outcome), and whenever a fact
 2. Cannot finish "this is still true after the plan is archived"? It is not memory; it is a task outcome in the change folder.
 3. Task outcome: the change folder (`tasks.md`, `reviews/`). Test evidence: `{plan_dir}/evidence/` (only when images must outlive the run). Both die with the plan.
 4. A lesson that helps only one role do its job (a mistake it repeats, a check that caught an error, a search order that worked): that agent's memory. User and architecture decisions stay in claude-mem or the project memory file; one project's facts in the project memory file; tool and environment traps in skill `## Gotchas`; a lesson several roles need in claude-mem. The never-store list below applies to agent memory.
+5. What an outside source says (docs, a paper, a vendor page), with its URL and the day it was checked: the research cache (`refs/research-cache.md`), never claude-mem or a memory file; a memory may name the entry by its file.
 
 ## Project memory file
 

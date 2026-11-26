@@ -117,5 +117,5 @@ A floor, not a ceiling.
 ### 11.2 The three nets
 
 - **Net 1, brainstorm:** after the dependency trace, raise `spec_required` on a shared symbol, contract, route, schema or § 11.1 match; record `spec_required_escalated_from`. Never lower.
-- **Net 2, implement, before committing:** `spec_required: false` but § 11.1 matches or a business rule is added: `blocked_needs_spec`, `reason: spec_required_escalation`, pattern, `file:line`. A hotfix logs debt; a mechanical change says so in `handoff.risks`.
+- **Net 2, implement, before committing:** `spec_required: false` but § 11.1 matches or a business rule is added: `blocked_needs_spec`, `reason: spec_required_escalation`, pattern, `file:line`. A hotfix logs debt; a mechanical change says so in `## Risks`.
 - **Net 3, reviewer:** at `false`, a new field, enum value, route, event, migration or unsourced business constant is finding `spec_required_misclassified` (major); the user decides.

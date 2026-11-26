@@ -15,21 +15,12 @@ Roles, as on a dev team:
 
 ### Phase A — devops opens the MR (author role)
 
-In a plan: branch and local commit once per wave; push and MR by devops at the plan's end, after the user's approval. With no plan: only when the user asks, through devops.
+In a plan: branch once and a local commit per task; push and MR by devops at the plan's end, after the user's approval. With no plan: only when the user asks, through devops.
 
-1. **Branch**: in a plan `feat/<plan_id>`, made once before its first task (`refs/gates.md § Gate procedures`); otherwise `git checkout -b <type>/<plan_id>-<slug>`, types `feat | fix | refactor | hotfix | chore | docs`, slug kebab ≤40 chars.
-2. **Commit** (Conventional Commits): one per wave in a plan (R-COMMIT-WAVE; a fix after merge review is its own commit, Phase B step 8), else one logical unit. Subject ≤72 chars; body explains WHY; reference `plan_id`, the wave and each `task_id`.
-   ```
-   <type>(<scope>): <imperative subject>
-
-   <body — why this change, not what>
-
-   Plan: <plan_id>
-   Wave: <wave_id> — <task_id>, <task_id>, …
-   Refs: <issue id if any>
-   ```
+1. **Branch**: in a plan `feat/<change>`, made by the first implement spawn (`refs/roles/implement/close-task.md` § Branch); otherwise `git checkout -b <type>/<plan_id>-<slug>`, types `feat | fix | refactor | hotfix | chore | docs`, slug kebab ≤40 chars.
+2. **Commit**: one per task in a plan (a fix after merge review is its own commit, Phase B step 8), else one logical unit; the format is `refs/roles/implement/close-task.md` § Commit, the task named only in its `Refs: <change> / <task_id> / <ticket_id if any>` line.
 3. **Push**: `git push -u origin <branch>`.
-4. **Open the MR** via `mcp__mcp_gitlab__save_merge_request` (in a plan only at the first wave commit; later ones update it):
+4. **Open the MR** via `mcp__mcp_gitlab__save_merge_request` (in a plan once, at the plan's end after the final-gate Approve):
    - **title**: `<type>(<scope>): <clear imperative summary>`, ≤72 chars, never vague ("update code", "fixes", "wip"): intent from the title alone.
    - **description** (HARD sections, in the project's documentation language):
      ```markdown
@@ -65,7 +56,7 @@ In a plan: branch and local commit once per wave; push and MR by devops at the p
      - [ ] the task's box ticked in `tasks.md` and its handoff written (`refs/closeout.md § Recording What a Change Did`)
      ```
    - **author**: the GitLab user from config, never a generic bot unless the project sets one. **target_branch**: project default (`main` / `develop`). **source_branch**: step 1. **labels**: `<type>`, `plan:<plan_id>`, priority if hotfix, `needs-review`. **assignees**: empty; **reviewers**: project rotation or specified. **draft**: `true` if tests are not yet green.
-5. **Return** `mr_iid`, `mr_url`, `source_branch`, `target_branch`, `commits[]` to main thread, which routes to reviewer (`mode=merge`), in a plan once, after its last wave commit.
+5. **Return** `mr_iid`, `mr_url`, `source_branch`, `target_branch`, `commits[]` to main thread, which routes to reviewer (`mode=merge`), in a plan once, after the final-gate Approve.
 
 ### Phase B — reviewer pulls and reviews
 

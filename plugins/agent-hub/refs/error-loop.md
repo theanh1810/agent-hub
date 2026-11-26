@@ -6,25 +6,26 @@
 
 ## The cycle
 
-Main thread sends every failure to brainstorm first (step 1) and never routes one straight back to `implement`.
+Main thread sends every critical or major failure to brainstorm first (step 1) and never routes one straight back to `implement`.
 
-1. `[main:brainstorm mode=error-batch]` records every red result of one review-and-test pass verbatim as one round in `{plan_dir}/errors.yaml` and analyses it in the same pass (`refs/roles/brainstorm/error-batch.md`). `reviewer` and `test` write no `errors.yaml`; brainstorm is the only writer and counter holder.
+1. Main thread saves each return of one review-and-test pass verbatim, sections and fenced block, as one file under `.cm-tmp/{plan_id}/returns/` (a run with no plan: the folder `refs/gates.md`, the paragraph on reviewer's `verdict` names), runs `agent-hub return-check <file>` on each (exit 1: re-spawn that agent with the printed problems before going on) and then `agent-hub ledger --errors <errors file> --round <n> --input <each file> --close-resolved` (test's failure docs: `--failure-docs <dir>`). The script records the pass verbatim as one round in `{plan_dir}/errors.yaml`, files every minor entry under the round's `deferred_errors[]` and prints the round's verdict. It records only a return whose `status` is `completed` and exits 2 on any other, and `--close-resolved` needs both a reviewer return and a test return, each `completed`: a `failed` or `in_progress` return is never a green round and closes nothing (`refs/gates.md` table A handles that status first). Only a `red` verdict (a critical or major entry) spawns `[main:brainstorm mode=error-batch]`, which analyses that round (`refs/roles/brainstorm/error-batch.md`); `yellow` and `green` spawn nothing. Main thread then runs the secret scan on the errors file, on every round whatever its verdict (`refs/gates.md`, the paragraph on reviewer's `verdict`). `reviewer` and `test` write no `errors.yaml`: the script writes the entries, brainstorm writes the analysis and holds the counter.
 2. One `[main:implement]` fix-round spawn works from the round's `fix_list[]`, `closeout` re-run at its end.
-3. `[main:reviewer mode=independent]` `||` `[main:test]` over the fix, one message: the fix round's diff-only file and the previous independent review file for the reviewer (`refs/gates.md`, Final gate, steps 1-2), part (a) in full and part (b) per `refs/roles/test/retest-scope.md`.
+3. `[main:reviewer mode=independent]` `||` `[main:test]` over the fix, one message, under the gate condition of `refs/closeout.md § End of a run` step 5: the fix round's diff-only file and the previous independent review file for the reviewer (`refs/gates.md`, Final gate, steps 1-2), plus the fix's diff range, `machine_gate` from the fix-round spawn's `extra.gate.lines[]` (main thread's fix in L2-direct: the record's `gate:` lines), the same `acceptance[]` as the first pass and `triaged_findings[]` (shape and use: `refs/roles/reviewer/finding-bar.md § Re-review and deferral`). Main thread builds that list from the errors file: an entry with `closed_in` is `fixed` (reason: the fix entry that resolves it), an entry named in the last `fix_list[*].resolves` with no `closed_in` is passed as `fixed` too (reason: the fix id) and is still checked as ADDRESSED, an entry in either `deferred_errors[]` list (the round's or `analysis`'s) is `deferred`, an entry in `analysis.dropped_findings[]` is `rejected`, the last two with the reason recorded there. Test runs part (a) in full and part (b) per `refs/roles/test/retest-scope.md`. The pass is then recorded and scanned as in step 1.
 
 Part (a) is always whole on the new build. Main thread passes `rerun_test_case_ids` (cases that owned the failing errors) so the report says which turned green; they never narrow part (a). Part (a) also includes every `added_cases[]` case of the fix entries of earlier rounds.
 
 ## The counter
 
-- `meta.error_loop_count` heads `{plan_dir}/errors.yaml` (or `docs/errors/{session_id}.yaml` with no plan): a YAML scalar before the rounds, 0 when absent, written only by brainstorm `mode=error-batch`. Main thread reads `meta:` (`cap_summary` included) and never writes it.
+- `meta.error_loop_count` heads `{plan_dir}/errors.yaml` (or `docs/errors/{session_id}.yaml` with no plan): a YAML scalar before the rounds, 0 when absent, changed only by brainstorm `mode=error-batch` (`agent-hub ledger` creates the file with it at 0). Main thread reads `meta:` (`cap_summary` included) and never writes it.
 - A different signature in a later round belongs to that round; a round counts as 1.
 - Resets only on the user's explicit "reset error loop".
 
 ## What does not count
 
 - A user's `Request changes` at the final gate: a round with `source: user-final-gate`, fixed through the same cycle, at most once per plan and diff-only (`refs/gates.md`, Final gate, step 5).
-- A yellow round (only 🟡 left): it opens no fix round.
+- A yellow round (only 🟡 left): it opens no fix round and no brainstorm spawn.
 - A checkpoint fix round (build, check, fix, check, stop on an unexpectedly broken test): bounded by implement's three-fail rule.
+- A red machine gate before review: fixed in place by implement (`refs/roles/implement/sources.md § Running the checks`), bounded by its three-fail rule.
 - Items a previous run deferred or blocked (`deferred_errors[]`, `accepted_partial` tests): priority input of a new run, a **new pass**, not a loop of the old plan.
 - A turn-cap resume (`refs/turn-budget.md`).
 

@@ -21,7 +21,7 @@ Artifacts live at the **workspace root**, one level above the code: `{workspace_
 
 ## Where writing is allowed
 
-Every path below resolves from `{workspace_root}` (§ Where the workspace root is) unless the row names another root. The seven that do not (two of them, `openspec/glossary.md` and `openspec/_debt.md`, resolve from the repo `openspec/` root): `docs/CODE-STYLE.md` belongs to the sub-repo it describes, `docs/design-library/` is pinned globally under `~/.claude/`, `~/.claude/logs/` holds the fleet's machine-wide logs, `templates/thresholds/` holds the master threshold file (global, one copy for every project), and `~/.claude-backups/` sits outside every workspace root on purpose (§ Ephemeral output).
+Every path below resolves from `{workspace_root}` (§ Where the workspace root is) unless the row names another root. The eight that do not (two of them, `openspec/glossary.md` and `openspec/_debt.md`, resolve from the repo `openspec/` root): `docs/CODE-STYLE.md` belongs to the sub-repo it describes, `docs/design-library/` is pinned globally under `~/.claude/`, `~/.claude/logs/` holds the fleet's machine-wide logs, `templates/thresholds/` holds the master threshold file (global, one copy for every project), `~/.claude-backups/` sits outside every workspace root on purpose (§ Ephemeral output), and `<Claude config dir>/research-cache/` is global like the logs.
 
 | Path | Who | Lifetime |
 |---|---|---|
@@ -35,19 +35,19 @@ Every path below resolves from `{workspace_root}` (§ Where the workspace root i
 | `{plan_dir}/reviews/annex-<n>.md` | main thread | a second opinion's result, beside `review.md` (`refs/gates.md`) |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/reviews/annex-<n>.md` | main thread | a second opinion's result of a run with no plan, beside its `independent.md` (`refs/gates.md`) |
 | `{plan_dir}/evidence/` | reviewer · test | only when images or logs must outlive the run: **at most 3 files** per task, only what a finding cites |
-| `.cm-tmp/{plan_id}/` | implement · devops | throwaway outputs of a run: the review packets built by `agent-hub review-packet` as closeout's last command, fetched server logs; swept by the `after_approve` spawn (§ The cleanup gate) |
+| `.cm-tmp/{plan_id}/` | implement · devops · main thread | throwaway outputs of a run: the review packets built by `agent-hub review-packet` as closeout's last command, fetched server logs, the rulings ledger (`rulings.md`, `refs/gates.md § Rulings ledger`), the returns `agent-hub ledger` reads (`returns/`; a run with no plan keeps the folder under its change id, `refs/gates.md`, the paragraph on reviewer's `verdict`); swept by the `after_approve` spawn (§ The cleanup gate) |
 | `openspec/glossary.md` (else `docs/glossary.md`) | brainstorm | the project's terms, one file, living |
 | `openspec/_debt.md` (else `docs/spec-debt.md`) | brainstorm · implement | spec debt, one file, living |
 | `docs/reviews/baselines/{repo}-{route_slug}/{viewport}.png` | test | the only test output that survives; updated only after a green run |
 | `docs/reviews/INDEX.md` | reviewer · implement | one appended row per review: reviewer with no plan, else the `after_approve` spawn |
 | `docs/changes/<id>/` of the `.claude` workspace | brainstorm | the L-cfg design record: design and numbered steps, no plan files (`refs/lanes.md § L-cfg no-plan`) |
-| `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/record.md` | implement (L1: main thread) · reviewer · test | the record of a run with no plan; `{slug}` starts with the repo name. Implement writes; reviewer appends `mode=task`, test its exploratory cases (`refs/roles/test/explore.md` § Results). Template: `templates/adhoc/adhoc-record-template.md` |
+| `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/record.md` | implement (L1 and L2-direct: main thread) · reviewer · test | the record of a run with no plan; `{slug}` starts with the repo name. Implement writes; reviewer appends `mode=task`, test its exploratory cases (`refs/roles/test/explore.md` § Results). Template: `templates/adhoc/adhoc-record-template.md` |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/independent.md` | reviewer | own file: the adhoc record holds implement's six answers the independent layer never reads |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/assets/` | reviewer · test | **at most 3 files**, only what a finding cites |
 | `docs/changes/adhoc/{YYYY-MM-DD}-{slug}/diagrams/<n>-<slug>.html` | implement | the flow drawing of an L2 run (`refs/diagram.md`); outside `binding_scope`, as `record.md` |
 | `docs/adr/` <!-- scrub-allow: product path --> | devops | with the workspace; only where there is no OpenSpec, otherwise a decision goes in the change's `design.md` |
 | `docs/devops/` | devops | whole folder (`SERVER-INFO.md` and what it references) |
-| `docs/brainstorm/{slug}.yaml` | brainstorm | the inbox, work with no change id: the record, `docs/brainstorm/{slug}/` for its extra files, rejected requests in `docs/brainstorm/rejected-requests.md`. Living files |
+| `docs/brainstorm/{slug}.yaml` | brainstorm (L2-direct: main thread) | the inbox, work with no change id: the record, `docs/brainstorm/{slug}/` for its extra files, rejected requests in `docs/brainstorm/rejected-requests.md`. Living files |
 | `{plan_dir}/design/{slug}/DESIGN.md` | designer | **exactly one file**, images in `assets/`; with no change id, `docs/brainstorm/{slug}/design/DESIGN.md` |
 | `{plan_dir}/design/{slug}/assets/` | designer | only the images `DESIGN.md` cites |
 | `~/.claude/docs/design-library/{lib}/` | designer · implement | **global**; never copied per product or repo |
@@ -60,6 +60,7 @@ Every path below resolves from `{workspace_root}` (§ Where the workspace root i
 | `docs/thresholds.yaml` | implement | the project copy of the master: written at closeout when absent, each approved group stamped (`refs/thresholds.md`); with the workspace, edited in place |
 | `.cm-tmp/{task_id}/` | any | **ephemeral**: deleted when the task closes, swept by the `after_approve` spawn |
 | `~/.claude-backups/{plan_id}/{task_id}/` | any | **global, outside every workspace root**; the pre-edit copy and the review packet's no-git base, deleted by the `after_approve` spawn (L1: at its closeout); a fix round's copies of its `fix_list[].files[]` are `~/.claude-backups/{plan_id}/fix-r{round}/` |
+| `<Claude config dir>/research-cache/` | scout (`pending/<slug>.md` only); main thread, via `agent-hub cache promote` | **global, outside every workspace root**; living: an entry stays until it is archived (`refs/research-cache.md`) |
 
 Anything outside this table is not created unless the user named it. A decision record is 1-3 sentences and exists only when the decision is hard to reverse, surprising without its context, and a real trade-off. Template and numbering: `refs/rule-authoring.md` § ADRs.
 

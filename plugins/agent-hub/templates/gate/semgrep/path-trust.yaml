@@ -1,0 +1,132 @@
+# agent-hub path-trust rules, run by the gate's `paths` step (templates/gate/gate.sh) with Semgrep CE.
+# Class: a file path taken from input (argv, environment, request, parsed JSON) reaches a filesystem
+# call without being resolved and checked against a base directory.
+# Matched: a flow inside one function into a sink listed below. Not matched: a flow through another
+# function; a check is credited when it is called on the resolved value, whatever the branch does with
+# its answer and whatever its argument is (`startsWith` with no trailing separator, `relative_to`
+# against any base). A finding here adds to the review; a clean run clears no path for the reviewer.
+# A one-argument `x.rename(p)` or `x.replace(p)` is a destination sink whatever `x` is, so a positional
+# non-literal mapping such as `df.rename(mapping)` is a known false positive; keyword forms
+# (`columns=`, `index=`, `mapper=`, `axis=`) and a literal dict argument are not matched.
+# Silence one line only with `# nosemgrep: <rule-id> - <reason>`; the reviewer reads every such line.
+# Fixtures: tests/path-trust.py and tests/path-trust.ts; `semgrep --test --metrics off --config <this dir> <this dir>/tests` exits 0.
+rules:
+  - id: agent-hub-path-trust-python
+    mode: taint
+    languages: [python]
+    severity: ERROR
+    message: >-
+      A path from input reaches a filesystem call with no Path.resolve() followed by
+      relative_to() or is_relative_to() against a base on the way.
+    pattern-sources:
+      - pattern: sys.argv
+      - pattern: os.environ
+      - pattern: os.getenv(...)
+      - pattern: $PARSER.parse_args(...)
+      - pattern: json.load(...)
+      - pattern: json.loads(...)
+      - pattern: input(...)
+      - pattern: request.$ATTR
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: open($P, ...)
+              - pattern: io.open($P, ...)
+              - pattern: os.open($P, ...)
+              - pattern: os.rename($P, ...)
+              - pattern: os.rename($S, $P, ...)
+              - pattern: os.replace($P, ...)
+              - pattern: os.replace($S, $P, ...)
+              - pattern: os.remove($P, ...)
+              - pattern: os.unlink($P, ...)
+              - pattern: os.mkdir($P, ...)
+              - pattern: os.makedirs($P, ...)
+              - pattern: shutil.$F($P, ...)
+              - pattern: shutil.$F($S, $P, ...)
+              - pattern: $P.write_text(...)
+              - pattern: $P.write_bytes(...)
+              - pattern: $P.read_text(...)
+              - pattern: $P.read_bytes(...)
+              - pattern: $P.mkdir(...)
+              - pattern: $P.open(...)
+              - pattern: $P.unlink(...)
+              - pattern: $P.rename(...)
+              - pattern: $P.replace($T)
+              - patterns:
+                  - pattern-either:
+                      - pattern: $X.rename($P)
+                      - pattern: $X.replace($P)
+                      - pattern: $X.rename(target=$P)
+                      - pattern: $X.replace(target=$P)
+                  - pattern-not: $X.rename({...})
+                  - pattern-not: $X.replace({...})
+          - focus-metavariable: $P
+    pattern-sanitizers:
+      - by-side-effect: true
+        patterns:
+          - pattern-inside: |
+              $R = $E.resolve(...)
+              ...
+          - pattern-either:
+              - pattern: $R.relative_to(...)
+              - pattern: $R.is_relative_to(...)
+          - focus-metavariable: $R
+
+  - id: agent-hub-path-trust-js
+    mode: taint
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      A path from input reaches an fs call with no path.resolve() followed by a
+      startsWith() check against a base on the way.
+    pattern-sources:
+      - pattern: process.argv
+      - pattern: process.env
+      - pattern: JSON.parse(...)
+      - pattern: $REQ.body
+      - pattern: $REQ.query
+      - pattern: $REQ.params
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: fs.$F($P, ...)
+              - pattern: fs.promises.$F($P, ...)
+              - pattern: fsp.$F($P, ...)
+              - patterns:
+                  - pattern-either:
+                      - pattern-inside: |
+                          import { $F } from "$M";
+                          ...
+                      - pattern-inside: |
+                          import { $I as $F } from "$M";
+                          ...
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(node:)?fs(/promises)?$
+                  - pattern: $F($P, ...)
+          - focus-metavariable: $P
+      - patterns:
+          - pattern-either:
+              - pattern: fs.$F($S, $P, ...)
+              - pattern: fs.promises.$F($S, $P, ...)
+              - pattern: fsp.$F($S, $P, ...)
+              - patterns:
+                  - pattern-inside: |
+                      import { $F } from "$M";
+                      ...
+                  - metavariable-regex:
+                      metavariable: $M
+                      regex: ^(node:)?fs(/promises)?$
+                  - pattern: $F($S, $P, ...)
+          - metavariable-regex:
+              metavariable: $F
+              regex: ^(rename|copyFile|cp|symlink|link)(Sync)?$
+          - focus-metavariable: $P
+    pattern-sanitizers:
+      - by-side-effect: true
+        patterns:
+          - pattern-inside: |
+              $R = path.resolve(...);
+              ...
+          - pattern: $R.startsWith(...)
+          - focus-metavariable: $R

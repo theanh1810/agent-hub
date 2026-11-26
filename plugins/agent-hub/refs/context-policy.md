@@ -24,11 +24,15 @@ Put the task's most important material last and standing rules and spec first: t
 | Operation | Do | Do not |
 |---|---|---|
 | Analyse, count, parse | a small script printing ≤20 lines; more → a file | read whole files and compute mentally |
-| Large CLI output | run it bare (the context-mode PostToolUse hook compresses main-thread output; subagents pass through, R19), or redirect to a file and grep it | raw `Bash` with the full dump |
+| Build, lint, test and other large CLI output | a subagent redirects it to a file under `.cm-tmp/` and prints the exit code and the failing lines (`grep -n -m 20`); main thread may run it bare (the context-mode PostToolUse hook compresses main-thread output; subagents pass through, R19) | raw `Bash` with the full dump; opening the whole log of a green run |
+| Independent commands | one call, each followed by `; echo "exit=$?"` so every exit code stays visible; a command whose result decides the next one runs alone | one call per command |
+| MCP tools behind `ToolSearch` | one `ToolSearch` call naming every tool the step needs, before the first use | one search per tool |
 | Browser snapshot, network, console | save to a file, read targeted lines | inline the snapshot |
 | Web fetch | `WebFetch` with an extraction prompt | `curl` then read the body |
 
 Raw Bash is fine for `mkdir/cp/mv/rm/chmod/cd/pwd/which/kill`, `git add/commit/push/branch`, package installs, `echo/printf`, short reads; otherwise write an artifact and return `path + one-line summary`. Every tool call re-reads the whole context, so bookkeeping rides in the turn already running, never its own.
+
+**Reporting a check.** A claim that a command passed or failed (test, lint, build, gate) is reported with the exact command, its exit code and at most the last 50 lines of its output. Longer output is written to a file under the run's `.cm-tmp/` folder and the report gives that path: a handoff carries the tail and the path, never the raw log. A failing run's first error line is quoted even when it lies above that tail.
 
 # Tool Policy
 
@@ -40,7 +44,7 @@ Raw Bash is fine for `mkdir/cp/mv/rm/chmod/cd/pwd/which/kill`, `git add/commit/p
 | Caveman | handoff prose only; **never** on the final user response or anything `skills/context-compression/SKILL.md` § Hard rules lists; ambiguity introduced → revert |
 | Context7 | a library's behaviour genuinely uncertain; prefix `mcp__plugin_context7_context7__` (a plugin) |
 
-By output type: a diff, and anything on the never-compress list below → **never compress**; tool output → context-mode, >100 lines after → a file; prose narration → Caveman lite; raw data (JSON, snapshots, HTML) → a file + one-line summary; memory file → Caveman, keep `.original.md`. Targets: build/test log ≤30 lines keeping the first error, exit code and `file:line` traceback; handoff prose ≤300 tokens per handoff section; review findings uncompressed; test evidence keeps scenario, expected vs actual, evidence path, first console and network error.
+By output type: a diff, and anything on the never-compress list below → **never compress**; tool output → context-mode, >100 lines after → a file; prose narration → Caveman lite; raw data (JSON, snapshots, HTML) → a file + one-line summary; memory file → Caveman, keep `.original.md`. Targets: build/test log as **Reporting a check** above sets, keeping the `file:line` traceback; handoff prose ≤300 tokens per handoff section; review findings uncompressed; test evidence keeps scenario, expected vs actual, evidence path, first console and network error.
 
 **Forbidden**: `skills/context-compression/SKILL.md` § Hard rules is the ruleset's only never-compress list; read it before compressing anything, keep no copy here. **Self-check after compressing**: could someone reproduce the bug from this, run the validation? Are contract and severity verbatim? Any "no" → revert to normal prose.
 
@@ -51,7 +55,7 @@ The sections above set what may be compressed; this is **when**.
 | Stage | Who | Rule |
 |---|---|---|
 | Bootstrap, before any tool call | every agent | Follow `rules/core.md § Start`; read nothing the task does not need. |
-| Mid-work, per tool call | every agent | Verbose CLI, build, test, log → context-mode. Snapshots, dumps, HTML, JSON → a file, then targeted lines. `grep`/`cat`/`find`/`ls` skip context-mode on purpose (`refs/toolset.md`) |
+| Mid-work, per tool call | every agent | Verbose CLI, build, test, log → a file, with the verdict and failing lines printed (the table above). Snapshots, dumps, HTML, JSON → a file, then targeted lines. `grep`/`cat`/`find`/`ls` skip context-mode on purpose (`refs/toolset.md`) |
 | Handoff, on return | every agent | Caveman **lite** on prose only. Paths and `file:line`, never file contents; ≤300 tokens per handoff section |
 | Wave boundary | main thread | Pass the **verbatim** worker output the next agent's brief names; a re-summary drops the `file:line` the next agent needs |
 | Error loop | test → brainstorm | One `RUN-REPORT.md` per run, not a message per failure. `errors.yaml` is byte-exact, never compressed |

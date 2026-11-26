@@ -49,8 +49,8 @@ echo "scanned: ${TEST_PATHS:-<no test directory found>}"
 # 5. tests exist but are unnamed → tell "Missing test" apart from "Not measurable"
 find $(echo "$TEST_PATHS") -type f \( -name '*.test.*' -o -name '*.spec.*' -o -name '*_test.*' -o -name 'test_*' \) 2>/dev/null | wc -l
 
-# 6. Trace Ratio: numerator and denominator, summed over every repo; the task id <n>.<m> sits in the subject
-for r in $(echo $REPOS); do git -C "$r" log --since="<sdd_adopted>" --pretty=%s | grep -cE "[0-9]+\.[0-9]+"; done | paste -sd+ - | bc
+# 6. Trace Ratio: numerator and denominator, summed over every repo; the task id sits in the commit's `Refs:` line
+for r in $(echo $REPOS); do git -C "$r" log --since="<sdd_adopted>" --pretty=%B | grep -cE "^Refs: .+ / .+"; done | paste -sd+ - | bc
 for r in $(echo $REPOS); do git -C "$r" log --since="<sdd_adopted>" --oneline | wc -l; done | paste -sd+ - | bc
 ```
 

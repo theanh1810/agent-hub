@@ -25,9 +25,11 @@ consecutive_hung: 0
 restarted_from: null   # { build, dropped } after a build change
 ```
 
+The file also carries `next_step`, `commands`, `pending_commands`, `constraints` and `reason`, each shaped and filled as `refs/turn-budget.md § The checkpoint` states; a resume is bound by `constraints[]` exactly as by its brief.
+
 ## Returning before the list is done
 
-With about 8 turns left, stop at a case boundary and return `status: in_progress` with `remaining_test_case_ids[]` and `progress_path`. Run `browser_close` (step 7) but **not** step 8: `.cm-tmp/{task_id}/` is the run's memory.
+At the ceiling (`refs/turn-budget.md § The ceiling`), stop at a case boundary and return `status: in_progress` with `remaining_test_case_ids[]` and `progress_path`. Run `browser_close` (step 7) but **not** step 8: `.cm-tmp/{task_id}/` is the run's memory.
 
 ## Resuming
 

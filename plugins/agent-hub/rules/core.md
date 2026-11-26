@@ -1,10 +1,10 @@
 # Global Agent Rules
 
-Open a ref only when a row or rule pointing to it applies. Relative paths (`rules/...`, `refs/...`, `agents/...`, `skills/...`, `store/...`) resolve from the plugin root `{{AGENT_HUB_ROOT}}`. Only main thread spawns: a subagent that needs another role returns a status or `needs_*` field and waits.
+Open a ref only when a row or rule pointing to it applies. Relative paths (`rules/`, `refs/`, `agents/`, `skills/`, `store/`) resolve from the plugin root `{{AGENT_HUB_ROOT}}`. Only main thread spawns: a subagent that needs another role returns a status or `needs_*` field and waits.
 
 ## Four principles
 
-The root of every rule here, for every role and every kind of work; where no rule speaks, these decide.
+The root of every rule here, for every role and kind of work; where no rule speaks, these decide.
 1. **Think before acting.** State assumptions; show several readings, never pick silently; unsure: ask.
 2. **Simplest.** The least that solves it; nothing speculative.
 3. **Smallest change.** Every changed line traces to the request; match the style; report unrelated problems, leave them.
@@ -15,12 +15,13 @@ After multica-ai/andrej-karpathy-skills (MIT per its README).
 <!-- main-only:begin -->
 ## Routing
 
-Main thread routes by the lane table and does no other work, with no "small enough" threshold: it answers directly only in L0, edits only in L1 (`refs/lanes.md § L1 fast`), and runs itself only what `refs/gates.md` and `refs/plan-lane.md` name (the L3 machine checks, the approval stamp, `openspec archive` after the final-gate Approve and the spec-only archive of `/spec new`). Only the user's words (`do it directly`, `just do X`, or the same words in the reply language) skip routing; a short prompt never does. A session started with AGENT_HUB_DIRECT=1 carries that override throughout. A subagent sees none of this conversation: each brief stands alone (goal, acceptance, `file:line`, `binding_scope`, the verbatim output of each dependency); never write "as discussed".
+Main thread routes by the lane table and does no other work, with no "small enough" threshold: it answers directly only in L0, edits only in L1 and L2-direct (`refs/lanes.md § L1 fast`, `§ L2-direct`), and runs itself only what those two lanes, `refs/gates.md` and `refs/plan-lane.md` name (the L3 machine checks, the approval stamp, `openspec archive` after the final-gate Approve and the spec-only archive of `/spec new`). Only the user's words (`do it directly`, `just do X`, or the same words in the reply language) skip routing; a short prompt never does. A session started with AGENT_HUB_DIRECT=1 carries that override throughout. A subagent sees none of this conversation: each brief stands alone (goal, acceptance, `file:line`, `binding_scope`, the verbatim output of each dependency); never write "as discussed".
 
 | Lane | When | Spawn order | Stops at |
 |---|---|---|---|
 | L0 answer | nothing outside the conversation is touched; includes a teaching, thinking or interview conversation the user asks for | none | - |
-| L1 fast | the four fast-lane conditions (`refs/lanes.md`) | none: main thread edits | - |
+| L1 fast | the five fast-lane conditions (`refs/lanes.md`) | none: main thread edits | - |
+| L2-direct | the six direct-lane conditions (`refs/lanes.md`) | none before the edit: main thread designs, edits and runs the gate; then reviewer and test in parallel | clarify (if fired), final gate |
 | L2 small | feature or bug, at most 6 files, no contract or shared-symbol change | brainstorm, implement (ends with simplify), then reviewer and test in parallel | clarify (if fired), final gate |
 | L-cfg no-plan | any work inside the `.claude` folder or on the agent-hub repo, any size | brainstorm (design + steps), implement per batch, test, one reviewer pass per batch, the user | clarify, approval (structural only), batch gate |
 | L3 planned | every other project: complex, more than 6 files, cross-system, contract/route/schema change | brainstorm (clarify, candidates, approval, writes the plan), machine checks, plan gate, implement per wave, one `implement mode=simplify`, test, one reviewer pass (blind to the plan), final gate, archive | clarify, approval, plan gate, final gate |
@@ -31,7 +32,7 @@ Add-ons: `needs_design` adds a designer wave · `recommend_scan[]` adds scout(s)
 
 Gates: Clarify (at most 5 questions, one issue) · Approval (candidates) · Plan gate (L3 only) · Final gate (one per run or batch) · Devops yes. One final review per run (per batch in L-cfg).
 
-Model and effort per spawn: `refs/effort-routing.md`; devops is never lowered below opus except on that file's Simple-devops allowlist. Main thread doing an agent's work outside L1, or a gate skipped on the user's words or an exemption, is recorded (`refs/gates.md` § Bypass record).
+Model and effort per spawn: `refs/effort-routing.md`; devops is never lowered below opus except on that file's Simple-devops allowlist. Main thread doing an agent's work outside L1 and L2-direct, or a gate skipped on the user's words or an exemption, is recorded (`refs/gates.md` § Bypass record).
 <!-- main-only:end -->
 
 ## Start
@@ -40,10 +41,10 @@ Once, before the first tool call that is not a read of the brief:
 1. Skip what is loaded (this file, your agent file, its skills). A rule you are about to judge or count: re-read it from disk first.
 2. Project memory once (`skills/context-memory/SKILL.md`); cross-project memory only for durable context. Code graph (`skills/gitnexus-flow/SKILL.md`) only when impact risk is real; library docs only when behaviour is unclear.
 3. A code task whose brief has no `stack_skills[]`: run `agent-hub store match --files <files to edit>` and read at most two printed entries (`refs/toolset.md`).
-4. Reads targeted, inside `binding_scope.files_allowed[]` when set. Traps and the skip table: `refs/bootstrap.md`.
+4. Reads targeted, inside `binding_scope.files_allowed[]` when set.
 ## Ask, never guess (HARD)
 
-Missing a fact, an agent stops and asks: a guess written into code, spec or plan becomes a rule nobody can explain.
+Missing a fact, stop and ask: a guess in code, spec or plan becomes a rule nobody can explain.
 
 **Must ask**: a business rule the spec does not state · a choice between options with different trade-offs · user-visible behaviour the plan does not describe · widening scope (a file outside `binding_scope` unless the ruling list below covers it, a new dependency) · anything irreversible (deleting data, a migration, rotating a secret, a force push, a production deploy) · end-user copy, unless an AC fixes the wording · skipping or adding a test case.
 
@@ -76,27 +77,23 @@ Always protect: `.env`, tokens, keys, credentials, customer data, the production
 
 ## Handoff contract
 
-Six sections, in order: `## Understanding` · `## Files` · `## Changes / Plan` · `## Validation` · `## Risks` · `## Next Step`. No long reasoning; paths and symbols, not file dumps; blockers early; at most 3 non-blocking concerns, under `## Risks`.<!-- main-only:begin --> Main thread passes the handoff on verbatim; the reply to the user is its own, in the reply language.<!-- main-only:end -->
+Return the header line, six sections in order (`## Understanding` · `## Files` · `## Changes / Plan` · `## Validation` · `## Risks` · `## Next Step`), then a fenced `json` block: your agent file's Output object minus `handoff`. Scout: the whole object, raw, from line 2. No long reasoning; paths and symbols, not file dumps; blockers early; at most 3 non-blocking concerns, under `## Risks`.<!-- main-only:begin --> Main thread passes the handoff on verbatim; the reply to the user is its own, in the reply language.<!-- main-only:end -->
 
 ## Header format
 
-Every agent opens with `[<agent> · model: <haiku|sonnet|opus>]`, byte for byte.
+Every agent opens with `[<agent> · model: <haiku|sonnet|opus>]`, byte for byte; the model word your environment's model ID contains, else your agent file's `model:`.
 
 ## Load when
 
 | Read when | File |
 |---|---|
-| writing or reviewing code | `rules/code-style/{_discipline,<language>}.md`; `refs/code-standards.md` |
-| the work touches UI | `rules/UI_RULES.md` |
-| the work reads or writes specs | `rules/SDD.md` |
-| writing a file, or unsure where one may go | `refs/artifact-layout.md` |
-| a vendor number (performance, security, rollout) | `refs/thresholds.md` |
 | closing a run | `refs/closeout.md` |
 <!-- main-only:begin -->
 | context pressure or compressing output | `refs/context-policy.md` |
 | picking a lane, the fast-lane conditions, add-on spawns | `refs/lanes.md` |
 | a worker `status`, a `needs_*` flag, an approval stamp, the rulings ledger | `refs/gates.md` |
 | a red result after implement | `refs/error-loop.md` |
+| before a spawn that will research outside sources, or a web or docs call of your own | run `agent-hub cache find <words>`; its last line goes into the brief (`refs/research-cache.md`) |
 | model or effort for a spawn | `refs/effort-routing.md` |
 | approving or checking a plan (L3) | `refs/plan-lane.md` |
 | writing the reply to the user | `refs/final-response.md` |

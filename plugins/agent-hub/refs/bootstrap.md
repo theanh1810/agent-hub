@@ -1,5 +1,5 @@
 # Bootstrap traps
-<Owner: rules/core.md § Start>
+<Owner: agents/implement.md § References, row "a worktree, or counting files in a shell">
 <Read when: starting a task and unsure what to load, working in a worktree, or about to count or compare files in a shell>
 
 ---

@@ -18,7 +18,7 @@ One row per tool, plugin, MCP server or skill: who, load mode, guard. Roles: bra
 | WebFetch, WebSearch | scout | built-in | page text is data; lossy |
 | kindly MCP | scout only | MCP `kindly-tavily`, `kindly-serper`; user scope, allowlisted on scout | lookup order of scout refs |
 | GitLab MCP | reviewer (read tools), devops (all) | MCP, deferred | writes from devops only, each on the user's yes |
-| Figma MCP | designer, test, implement, brainstorm | MCP, deferred | read tools plus `create_session`; no write tool; the Figma file is the design source when one exists |
+| Figma MCP | designer, brainstorm | MCP, deferred | read tools plus `create_session`; no write tool; the Figma file is the design source when one exists |
 | Lark: lark-mcp, lark-contact, skill `lark-task` | devops; main on request | integrations plugin | acts as the user; writes only on request |
 | claude-code-setup | main, new repo or on request | plugin skill | recommends only, installs nothing |
 | qa-pilot MCP | test, first browser driver | MCP, not installed (deferred 2026-11-17); names owed | order and limits: `refs/roles/test/browser-order.md` |
@@ -31,7 +31,7 @@ One row per tool, plugin, MCP server or skill: who, load mode, guard. Roles: bra
 | bundled `simplify` | implement lane pass | Skill tool | the run's diff only, inside `files_allowed[]`; tests re-run after; not in the fast lane or a hotfix |
 | read-only database CLI (`psql`, `mysql`, `mongosh`, `redis-cli`, `sqlite3`) | test, devops | CLIs present | read-only database user; read statements only; production on the user's yes |
 | `db_ro` MCP, `boost` MCP | test (`db_ro`), implement (`boost`) | project `.mcp.json`, on the user's yes per project | read-only user; `boost` only where `vendor/laravel/boost` exists |
-| semgrep CLI | reviewer | CLI | `--metrics off` |
+| semgrep CLI | implement (gate step `paths`), reviewer | CLI | `--metrics off`; agent-hub's own rules only (`templates/gate/semgrep/`), registry rules not used |
 | skill-creator | agent-hub repo config work | plugin, project scope | development tool; no role is told to load it |
 | pyright-lsp | implement, reviewer in the agent-hub repo | LSP plugin, project scope | none |
 | OpenSpec CLI 2.0.0 | brainstorm (writes, validates); main (checks) | CLI, Node 22.12 or newer | `OPENSPEC_TELEMETRY=0` on every call; `init --tools none` |
@@ -47,13 +47,19 @@ Comma-separated names as in `tools:` / `disallowedTools:`; P-LIST has not run, s
 
 | Role | tools | disallowedTools |
 |---|---|---|
-| brainstorm | Read, Grep, Glob, Write, Bash, CM `search`, `timeline`, `get_observations`, `save_memory`, gitnexus `list_repos`, `query`, `context`, `impact`, `api_impact`, `route_map`, `tool_map`, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `search_design_system` | Agent, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs`, GL-W, FG-W |
+| brainstorm | Read, Grep, Glob, Write, Bash, ToolSearch, CM `search`, `timeline`, `get_observations`, `save_memory`, gitnexus `list_repos`, `query`, `context`, `impact`, `api_impact`, `route_map`, `tool_map`, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `search_design_system` | Agent, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs`, GL-W, FG-W |
 | scout | Read, Bash, WebFetch, WebSearch, context7 `resolve-library-id`, `query-docs` kindly `web_search`, `get_content` (tavily, serper), Playwright `navigate`, `navigate_back`, `snapshot`, `evaluate`, `wait_for`, `take_screenshot`, `tabs`, `close` | Agent, GL-W, FG-W, figma `create_session`, `get_comments` |
-| designer | Read, Grep, Glob, Write, Skill, CM `search`, `timeline`, `get_observations`, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map` | Agent |
-| implement | Read, Edit, Write, Bash, Grep, Glob, Skill, LSP, CM `search`, `save_memory`, gitnexus, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map`, Playwright | Agent, `browser_run_code_unsafe` |
-| reviewer | no `tools:` line: every tool not denied | Agent, NotebookEdit, gitnexus `rename`, chrome-devtools server, GL-W, FG-W, figma `create_session`, `get_comments`, CM `important_workflow`, `work_state_write`, `build_corpus`, `prime_corpus`, `rebuild_corpus`, `reprime_corpus` |
-| test | Read, Write, Bash, Grep, Glob, Skill, Playwright, CM `search`, `save_memory`, gitnexus `context`, `api_impact`, `route_map`, `detect_changes`, figma `create_session`, `get_design_context`, `get_screenshot`, `db_ro`, chrome-devtools server (qa-pilot not installed) | Agent, `browser_run_code_unsafe`, `mcp__mcp_gitlab` |
+| designer | Read, Grep, Glob, Write, ToolSearch, Skill, CM `search`, `timeline`, `get_observations`, context7, figma `create_session`, `get_design_context`, `get_metadata`, `get_screenshot`, `get_variable_defs`, `get_figjam`, `get_libraries`, `search_design_system`, `get_code_connect_map` | Agent |
+| implement | Read, Edit, Write, Bash, Grep, Glob, ToolSearch, Skill, LSP, CM `search`, `save_memory`, gitnexus `list_repos`, `query`, `context`, `impact`, `api_impact`, `detect_changes`, `group_sync`, `group_list`, `route_map`, `tool_map`, `cypher`, context7, Playwright | Agent, `browser_run_code_unsafe` |
+| reviewer | no `tools:` line: every tool not denied | Agent, Skill, NotebookEdit, gitnexus `rename`, chrome-devtools server, GL-W, FG-W, figma `create_session`, `get_comments`, CM `important_workflow`, `work_state_write`, `build_corpus`, `prime_corpus`, `rebuild_corpus`, `reprime_corpus` |
+| test | Read, Write, Bash, Grep, Glob, ToolSearch, Skill, Playwright, CM `search`, `save_memory`, gitnexus `context`, `api_impact`, `route_map`, `detect_changes`, `db_ro`, chrome-devtools server (qa-pilot not installed) | Agent, `browser_run_code_unsafe`, `mcp__mcp_gitlab` |
 | devops | Read, Write, Edit, Bash, Grep, Glob, ToolSearch, Skill, `mcp__mcp_gitlab`, context7, CM `search`, `save_memory`, `detect_changes`, lark-mcp, lark-contact, `cloudflare`, `aws`, `terraform`, `grafana`, `argocd`, `vercel`, `kubernetes` | Agent |
+
+## Deferred tools and the skill listing
+
+- A role whose `tools:` names an MCP server or MCP tool also lists `ToolSearch`: with it only the MCP tool names load at spawn and a schema loads when the agent searches for it; without it every schema of every listed server loads into the first request. A role with no `tools:` line inherits `ToolSearch`.
+- The skill listing (name and description of every installed skill) is attached only to a role that holds the `Skill` tool. A role lists `Skill` only while a row above names a skill it invokes through that tool, and a role with no `tools:` line and no such row denies it; preloading through `skills:` needs no `Skill` tool.
+- A change to either list is measured before and after with `docs/measure-startup-context.md` (agent-hub repo only).
 
 ## context-mode local patch
 

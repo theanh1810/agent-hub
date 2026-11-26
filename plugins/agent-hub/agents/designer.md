@@ -6,7 +6,7 @@ maxTurns: 30
 color: pink
 skills:
   - design-ui
-tools: Read, Grep, Glob, Write, Skill, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__timeline, mcp__plugin_claude-mem_mcp-search__get_observations, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map
+tools: Read, Grep, Glob, Write, ToolSearch, Skill, mcp__plugin_claude-mem_mcp-search__search, mcp__plugin_claude-mem_mcp-search__timeline, mcp__plugin_claude-mem_mcp-search__get_observations, mcp__plugin_context7_context7, mcp__mcp_figma__create_session, mcp__mcp_figma__get_design_context, mcp__mcp_figma__get_metadata, mcp__mcp_figma__get_screenshot, mcp__mcp_figma__get_variable_defs, mcp__mcp_figma__get_figjam, mcp__mcp_figma__get_libraries, mcp__mcp_figma__search_design_system, mcp__mcp_figma__get_code_connect_map
 disallowedTools: Agent
 memory: user
 ---
@@ -52,7 +52,7 @@ A screen over a UC gap writes an unapproved business rule; an element the source
 
 # Output
 
-Statuses are rows of `refs/gates.md` table A (`completed` is plain); `needs_devops` is a row of table B. DESIGN.md and the JSON agree (`refs/roles/designer/brief-schema.md`).
+Statuses are rows of `refs/gates.md` table A (`completed` is plain); `needs_devops` is a row of table B. DESIGN.md and the JSON agree (`refs/roles/designer/brief-schema.md`). Shape: `rules/core.md § Handoff contract`.
 
 ```jsonc
 {
@@ -65,7 +65,7 @@ Statuses are rows of `refs/gates.md` table A (`completed` is plain); `needs_devo
   "tokens": {}, "state_matrix": {}, "design_dials": {}, "copy_draft": [{ "screen": "S1", "element": "", "text": "", "status": "ac_fixed|draft" }], "accessibility_floor": {},
   "user_questions": [], "open_questions": [],   // refs/option-explanation.md § The user_questions block
   "design_source": { "kind": "figma|image|existing_screen|none", "ref": "string|null" }, "requested_elements": [], "red_questions": [{ "id": "RQ-1", "status": "open|added|declined" }],
-  "implement_hooks": { "files_to_create_or_touch": [] }, "confidence": "0-1", "handoff": {}
+  "implement_hooks": { "files_to_create_or_touch": [] }, "confidence": "0-1"
 }
 ```
 
@@ -90,4 +90,4 @@ Statuses are rows of `refs/gates.md` table A (`completed` is plain); `needs_devo
 | `spec_required: true` | `refs/roles/designer/sources.md` Spec hook, then `rules/SDD.md` |
 | a stack-specific UI search | `refs/toolset.md` § Stack skills; script `~/.claude/skills/ui-ux-pro-max/scripts/search.py` <!-- scrub-allow: user-scope skill path, not a fleet file --> |
 | about to say a brief is complete or checked | `refs/vendored/verification-before-completion.md` |
-
+| the tool-call ceiling | `refs/turn-budget.md § The ceiling`: checkpoint |

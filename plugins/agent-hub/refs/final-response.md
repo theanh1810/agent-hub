@@ -52,7 +52,7 @@ The flow drawing (`refs/diagram.md`) is named under `Summary` by its absolute pa
 
 **Say the set, then look once outside it.** A number is a claim about a set: name the set first (which tree, which pattern), then look once for the same thing *outside* it — split across a line break, hidden by markdown emphasis, in a copy of the file itself.
 
-**Fresh evidence before any done claim.** The worker that claims done identifies the command that proves it, runs it in full, reads the output, the exit code and the failure count, and only then claims (obra verification-before-completion SKILL.md:14-36). Main thread quotes the worker's evidence path and runs nothing itself. Premature satisfaction before the run ("great", "done", "should work") and hedge words are red flags (:50-72).
+**Fresh evidence before any done claim.** The worker that claims done identifies the command that proves it, runs it in full, reads the output, the exit code and the failure count, and only then claims (`refs/vendored/verification-before-completion.md`, from obra SKILL.md:14-36). Main thread quotes the worker's evidence path and runs nothing itself. Premature satisfaction before the run ("great", "done", "should work") and hedge words are red flags (:50-72).
 
 Another agent's output is **not evidence** until cross-checked (agent said success → check the VCS diff). Quoting it names the source: "per `test`'s handoff: 216/216".
 
@@ -73,7 +73,7 @@ Model trace: brainstorm(opus) → implement(sonnet) → reviewer(opus) → test(
 
 Printed with it, one more line: `Size: <lane id>`, the lane of `refs/lanes.md` the run took.
 
-A missing header → re-spawn, or note it under `Risk`. Each `(model)` is the `model` the spawn passed to `Agent(model)` (`refs/effort-routing.md`), not the header, which under an override still names the frontmatter model.
+A missing header → re-spawn, or note it under `Risk`. Each `(model)` is the `model` the spawn passed to `Agent(model)` (`refs/effort-routing.md`), not the header.
 
 ## Field kinds
 

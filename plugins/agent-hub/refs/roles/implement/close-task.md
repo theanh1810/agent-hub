@@ -12,6 +12,7 @@ Implement runs the bundled `simplify` skill through the Skill tool once per run,
 - **Small job (L2):** before reporting done, on the run's diff only.
 - **Planned job (L3):** one implement pass (`mode=simplify`) after the last wave, over the whole run's change.
 - Only inside `files_allowed[]`; re-run the tests after. Not run on a hotfix or a diff with no code file.
+- The gate (`refs/roles/implement/sources.md § Running the checks`) runs after simplify, so its lines describe the code after it; a run that skips simplify still runs the gate.
 - A subagent that cannot invoke the skill skips it and reports `simplify: skipped, <reason>` in `## Risks`.
 
 ## Shortcuts
@@ -21,10 +22,6 @@ A deliberate shortcut gets a one-line comment stating the current limit and the 
 ## Commit
 
 Author is the configured git/GitLab user (`gitlab.user`, or `~/.claude/gitlab-user.txt`); Claude appears only in the `Co-Authored-By:` footer. None configured: `needs_user_input`, never the default identity.
-
-```bash
-git -c user.name="$GIT_USER_NAME" -c user.email="$GIT_USER_EMAIL" commit ...
-```
 
 ```
 <type>(<scope>): <imperative summary>     # ≤72 chars, no trailing period, no emoji
@@ -38,8 +35,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 - `type` ∈ `feat, fix, refactor, hotfix, chore, docs, test, perf, ci, build`; scope is the module; imperative present tense.
-- The subject states intent and stands alone ("fix mail Reply-To header", never "Fix bug", "Phase 1", "Update code"), with `[<task_id>]` leading it. The body says why, admits what is weak, carries no `TODO`, and any confirmed bug hypothesis.
-- **One local commit per task**, after its close steps pass; nothing is pushed. A fix or conflict-resolution commit after merge review is its own small commit.
+- The subject states intent and stands alone ("fix mail Reply-To header", never "Fix bug", "Phase 1", "Update code"); the task is named by the `Refs:` line, never in the subject. The body says why, admits what is weak, carries no `TODO`, and any confirmed bug hypothesis.
+- **One local commit per task**, after its close steps pass, preceded by the task's acceptance commit when it has one (`refs/roles/implement/sources.md § Acceptance tests`); nothing is pushed. A fix or conflict-resolution commit after merge review is its own small commit.
 
 ## Branch
 
@@ -48,8 +45,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - Push, MR and branch integration belong to `devops` on the user's word; never merge or review it.
 
 ## Write the result
-
-At the task's start write `date -u +%Y-%m-%dT%H:%M:%SZ` to `.cm-tmp/{task_id}/run-started-at` unless it exists; `## Validation` takes start and finish from it and the clock.
 
 - **Tick** the task's checkbox in `tasks.md` only when its `Done when:` is met by a command whose real exit code you read; otherwise leave it open and say why in `## Risks`. This is the only plan file a task edits. `plan.vi.md`, `design.md` and the spec deltas stay brainstorm's; only the closeout's drawing step rewrites `diagrams/`.
 - **Handoff** carries the result: files changed with a note each, commands run with exit codes and counts (red and green phases for a TDD task), deviations, the shortcut list, and per meaningful change what, where (`file:line`), before, after, the mechanism, what the user sees or what else is touched, and the cost paid (never empty).
