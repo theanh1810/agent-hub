@@ -1,4 +1,4 @@
-# Reporting — the two output blocks, and error batching
+# Reporting — the red block, and error batching
 
 <Owner: agents/test.md § Output discipline — failures only>
 <Read when: writing the run's output — Workflow step 6.>
@@ -13,31 +13,16 @@
 - **A visual claim**: screenshot path and the baseline compared against.
 - **A pass**: the case id, nothing else.
 - **An absence claim** ("no regressions"): the cases and commands it rests on, by id and command. No list, no claim.
-- **A command run**: into `commands[]` with `cmd`, `exit`, `evidence_path`, `tc_id` (null for a check no case names). The exit is read from the shell (`; echo exit=$?`), never inferred. `secret_scan: exit 0` records the Scan row of `agents/test.md` § Evidence storage.
+- **A command run**: into `commands[]` with `cmd`, `exit`, `evidence_path`, `tc_id` (null for a check no case names). The exit is read from the shell (`; echo exit=$?`), never inferred. The return check scans the evidence for secrets when the spawn stops (`hooks/return_check.py`); a hit comes back as a refusal naming the file.
 - **Impact**: the observed impact (wrong read, wrong write, hang, safe stop), never stronger than proved. A missing deciding fact (deployment, config, reachability) → "needs more verification" plus the smallest check.
 - **Redaction**: secrets as `<REDACTED>` before quoting; auth headers keep only signal lines; too little left → say so and ask.
 - **Never a diagnosis.** "POST /api/orders returned 500, likely backend route" is a scope hint; "the bug is in OrderService.create() because…" is brainstorm's.
 
-## The green block
-
-Eight lines, nothing more:
-
-```
-Status: GREEN
-Plan: {plan_id}  Task: {task_id}
-Test cases run: N  passed: N  failed: 0  steps: code, pass 1, pass 2 (n/a and accepted_drop named)
-Commands: N run, all exit 0  (table: <run_dir>)
-Coverage: scenarios=N/N  endpoints=N/N  bindings=N/N
-Evidence: <run_dir>
-Duration: Ns
-passed_test_case_ids: [TC1, TC2, ...]
-```
-
-`spec_required: true` adds one line, `ac_coverage: 4/4 scenarios tested, 0 missing` (missing scenarios by name). An accepted drop adds `accepted_not_run: [TC… | code] — <date of the user's answer>`. No per-case narrative for passes, no dumps, no inline screenshots. State which `thinking_mode` ran.
-
 ## The red block
 
-Same header with `Status: RED`, `failed: M`, `failed_test_case_ids: [...]`, plus one failure report per failed case at `.cm-tmp/{task_id}/failure-docs/{test_case_id}.md` from `templates/test/FAILURE-report-template.md` (read it, never reproduce from memory). Each failure is listed verbatim with `test_case_id`, `evidence_path` and `failure_doc_path`, for brainstorm to transcribe. `flow_results[]` carries **only** failed cases. The run report lists failing commands, one row each `| cmd | exit | evidence_path |`.
+A red run (`gate: RED`, `failed_test_case_ids[]` filled) writes one failure report per failed case at `.cm-tmp/{task_id}/failure-docs/{test_case_id}.md` from `templates/test/FAILURE-report-template.md` (read it, never reproduce from memory). Each failure is listed verbatim with `test_case_id`, `evidence_path` and `failure_doc_path`, for `agent-hub ledger` to record (`--failure-docs`). `flow_results[]` carries **only** failed cases. The run report lists failing commands, one row each `| cmd | exit | evidence_path |`.
+
+A failed exploratory case of severity `minor` gets one line in the report (`id — oracle — what happened`), at most 10 such lines, and no failure doc; `agent-hub ledger` files it.
 
 ## Error batching
 

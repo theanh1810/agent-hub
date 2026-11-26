@@ -178,12 +178,12 @@ class RealCore(unittest.TestCase):
             m = re.match(r'python3 "\$\{CLAUDE_PLUGIN_ROOT\}/hooks/([a-z_]+)\.py"( .*)?$', c)
             self.assertIsNotNone(m, c)
             scripts.append(m.group(1))
-        self.assertEqual(set(scripts), {"rules_inject", "clear_handoff", "post_compact_pointer", "git_guard", "read_guard", "worktree_create", "worktree_remove", "format_on_edit"})
+        self.assertEqual(set(scripts), {"rules_inject", "cache_index", "clear_handoff", "post_compact_pointer", "moment", "git_guard", "read_guard", "worktree_create", "return_check", "worktree_remove", "format_on_edit"})
         for ev in ("SessionStart", "SubagentStart", "PreToolUse", "PostToolUse", "SessionEnd", "WorktreeCreate", "WorktreeRemove"):
             self.assertIn(ev, data["hooks"])
         post = [h["command"] for g in data["hooks"]["PostToolUse"] for h in g["hooks"]]
-        self.assertEqual(len(post), 1)
         self.assertIn("format_on_edit.py", post[0])
+        self.assertEqual([c for c in post[1:] if "moment.py" not in c], [])
         rj = [c for c in cmds if "rules_inject" in c]
         self.assertEqual(sorted(rj), sorted([
             'python3 "${CLAUDE_PLUGIN_ROOT}/hooks/rules_inject.py" SessionStart 1',
@@ -307,6 +307,26 @@ class Subagent(unittest.TestCase):
         self.assertNotIn("SESSION DIRECTIVE", c)
         self.assertTrue(c.startswith("# Global Agent Rules"))
         self.assertEqual(c, ri.render(core_text(), PLUGIN.as_posix(), "en", "subagent"))
+
+    def test_session_start_inside_a_subagent_gets_the_subagent_view(self):
+        sub = ri.render(core_text(), PLUGIN.as_posix(), "en", "subagent")
+        for stdin in ('{"agent_id":"a1","agent_type":"agent-hub:brainstorm","source":"compact"}',
+                      '{"agent_id":"a1","source":"compact"}',
+                      '{"source":"compact","transcript_path":"/x/s1/subagents/agent-a1.jsonl"}'):
+            first = run(["SessionStart", "1"], stdin=stdin, env_extra={"AGENT_HUB_DIRECT": "1"})
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(ctx(first), sub, stdin)
+            self.assertNotIn("SESSION DIRECTIVE", ctx(first))
+            self.assertEqual(run(["SessionStart", "2"], stdin=stdin).stdout, "", stdin)
+
+    def test_session_start_inside_another_plugins_agent_prints_nothing(self):
+        p = run(["SessionStart", "1"], stdin='{"agent_id":"a1","agent_type":"other:probe","source":"compact"}')
+        self.assertEqual((p.returncode, p.stdout), (0, ""))
+
+    def test_main_thread_session_start_keeps_the_main_view(self):
+        p = run(["SessionStart", "1"], stdin='{"source":"compact","transcript_path":"/x/s1.jsonl"}')
+        self.assertIn("## Routing", ctx(p))
+        self.assertEqual(len(ri.build_chunks(core_text(), PLUGIN.as_posix(), "en", "main")), 2)
 
 
 class NonUtf8Locale(unittest.TestCase):

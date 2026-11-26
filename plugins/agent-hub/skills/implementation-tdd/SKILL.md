@@ -20,6 +20,7 @@ The test-first procedure for implement. Rules and gates stay in `agents/implemen
 - Integration cases hit a real store, never a mock; the layer follows the task's `Test:` key.
 - Find how this repo tests first (its wrapper, the single-test command, the CI command); never default to `npm test`; the `npm` lines below are examples.
 - Gate 6 (`refs/gates.md`): every `Test:` case green before the task leaves implement; a bug task also records `red_before_fix`.
+- The first failing tests of a task are its acceptance examples (`refs/roles/implement/sources.md § Acceptance tests`); refactor leaves them as committed.
 - A fix that stays red after three attempts returns to the restore point and stops (`refs/error-loop.md`); close-out steps: `refs/closeout.md`.
 - Refactor, mobile and bug-fix procedures: `refs/roles/implement/modes.md`; the bug is root-caused by brainstorm, never here.
 - "your human partner" means the user; an ask is a blocking status. General: no install, fetch, clone or sub-agent spawn; no browser; memory is claude-mem.

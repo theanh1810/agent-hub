@@ -58,7 +58,7 @@
 - Delete what the change orphans, leave what it does not; unrelated dead code is a finding.
 - **File budget**: each new file needs an accepted reason, one line per file. No `utils` / `helpers` / `common` for one function, `types` / `constants` file for one symbol, one-call wrapper, or surplus README.
 - **A file you create** nearing ~400 lines or gaining a second concern is split, and you say what you split; new files stay inside `files_allowed[]`, else `scope_extension_needed`.
-- **Slices**: work the plan cuts small ships in slices, each leaving the project compiling with old tests green. An unfinished user-facing part sits behind a flag defaulting off; a flag the plan never names is forbidden. One commit per wave (`refs/roles/implement/close-task.md`).
+- **Slices**: work the plan cuts small ships in slices, each leaving the project compiling with old tests green. An unfinished user-facing part sits behind a flag defaulting off; a flag the plan never names is forbidden. One commit per task (`refs/roles/implement/close-task.md` § Commit).
 
 ### Cases and security
 

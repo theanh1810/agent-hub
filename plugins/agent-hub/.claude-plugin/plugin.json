@@ -1,7 +1,7 @@
 {
   "name": "agent-hub",
   "displayName": "agentHub",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Multi-agent workflow for Claude Code: the main thread routes each request by a lane table to brainstorm, scout, designer, implement, reviewer, test and devops agents, with OpenSpec plan, spec and review gates.",
   "license": "MIT + Commons Clause 1.0",
   "userConfig": {
@@ -10,6 +10,24 @@
       "title": "Reply language",
       "description": "Language code (ISO 639-1, for example en, vi, ja) for replies, questions to you and the plan summary file. Files the agents read stay in English.",
       "default": "en"
+    },
+    "research_cache_dir": {
+      "type": "string",
+      "title": "Research cache folder",
+      "description": "Folder where the agents keep what outside sources (docs, papers, vendor pages) were found to say, so the same research is not repeated. Empty means research-cache inside your Claude config folder.",
+      "default": ""
+    },
+    "moment_hooks": {
+      "type": "string",
+      "title": "Moment hooks",
+      "description": "on or off. When on, the plugin hands an agent a rule at the moment it applies (the research cache index before a web search, for example). off turns every such hook off.",
+      "default": "on"
+    },
+    "hook_blocks": {
+      "type": "string",
+      "title": "Blocking checks",
+      "description": "on or off. When on, three checks may refuse a step of an agent, each at most twice per agent run: the implement agent editing code before a test run or committing with no Refs: line, and any agent's final report in the wrong shape. off turns each into a reminder.",
+      "default": "on"
     },
     "read_guard": {
       "type": "string",

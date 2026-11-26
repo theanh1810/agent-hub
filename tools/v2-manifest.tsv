@@ -123,7 +123,7 @@ plugins/agent-hub/refs/roles/implement/modes.md	NEW	OLD skills/implementation-td
 plugins/agent-hub/refs/roles/implement/perf-deps.md	PORT	plugins/agent-hub/refs/roles/implement/perf-deps.md	A
 plugins/agent-hub/refs/roles/implement/sources.md	PORT+EDIT	plugins/agent-hub/refs/roles/implement/sources.md	F2
 plugins/agent-hub/refs/roles/reviewer/finding-bar.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/finding-bar.md	F3
-plugins/agent-hub/refs/roles/reviewer/merge-policy.md	PORT	plugins/agent-hub/refs/roles/reviewer/merge-policy.md	A
+plugins/agent-hub/refs/roles/reviewer/merge-policy.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/merge-policy.md	A
 plugins/agent-hub/refs/roles/reviewer/second-opinion.md	NEW	blueprint 3.6	P
 plugins/agent-hub/refs/roles/reviewer/sources.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/sources.md	F3
 plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	PORT+EDIT	plugins/agent-hub/refs/roles/reviewer/stale-verdict.md	A
@@ -140,7 +140,7 @@ plugins/agent-hub/refs/roles/test/levels.md	PORT+EDIT	plugins/agent-hub/refs/rol
 plugins/agent-hub/refs/roles/test/read-only.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/read-only.md	F6
 plugins/agent-hub/refs/roles/test/reporting.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/reporting.md	F6
 plugins/agent-hub/refs/roles/test/repro.md	PORT	plugins/agent-hub/refs/roles/test/repro.md	A
-plugins/agent-hub/refs/roles/test/resume.md	PORT	plugins/agent-hub/refs/roles/test/resume.md	A
+plugins/agent-hub/refs/roles/test/resume.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/resume.md	A
 plugins/agent-hub/refs/roles/test/retest-scope.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/retest-scope.md	F6
 plugins/agent-hub/refs/roles/test/spec-layer.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/spec-layer.md	F3
 plugins/agent-hub/refs/roles/test/two-pass.md	PORT+EDIT	plugins/agent-hub/refs/roles/test/two-pass.md	F3
@@ -477,3 +477,28 @@ tools/upstream/zhaoxuya520-reverse-skill/LICENSE	NEW	WP-D pinned upstream / attr
 tools/upstream/zhaoxuya520-reverse-skill/skills/apk-reverse/SKILL.md	NEW	WP-D pinned upstream / attribution	D
 tools/v2-dropped.tsv	NEW	this build	A
 tools/v2-manifest.tsv	NEW	this build	A
+plugins/agent-hub/templates/gate/gate.sh	NEW	gate template, item 4	OPT
+plugins/agent-hub/refs/design-pitfalls.md	NEW	design pitfalls, item 5	OPT
+plugins/agent-hub/scripts/ledger-record.py	NEW	ledger script, item 6	OPT
+tests/scripts/test_ledger_record.py	NEW	ledger script tests, item 6	OPT
+docs/measure-startup-context.md	NEW	startup-context measurement recipe	OPT
+plugins/agent-hub/scripts/idle-report.py	NEW	idle report script, opt-A item A4	OPT
+tests/scripts/test_idle_report.py	NEW	idle report script tests, opt-A item A4	OPT
+plugins/agent-hub/templates/gate/semgrep/path-trust.yaml	NEW	path-trust rules, opt-structure B3	OPT
+plugins/agent-hub/templates/gate/semgrep/tests/path-trust.py	NEW	path-trust rule fixture, opt-structure B3	OPT
+plugins/agent-hub/templates/gate/semgrep/tests/path-trust.ts	NEW	path-trust rule fixture, opt-structure B3	OPT
+tests/scripts/test_gate_template.py	NEW	gate template tests, opt-structure B3	OPT
+plugins/agent-hub/hooks/_state.py	NEW	per-spawn hook state, rule-delivery	OPT
+plugins/agent-hub/scripts/research-cache.py	NEW	research cache CLI, rule-delivery batch 4	OPT
+tests/scripts/test_research_cache.py	NEW	research cache CLI tests, rule-delivery batch 4	OPT
+plugins/agent-hub/hooks/cache_index.py	NEW	research cache index hook, rule-delivery batch 4	OPT
+tests/hooks/test_cache_index.py	NEW	research cache hook and hook state tests, rule-delivery batch 4	OPT
+plugins/agent-hub/refs/research-cache.md	NEW	research cache rules, rule-delivery batch 4	OPT
+plugins/agent-hub/scripts/rule-slice.py	NEW	rule slicer (agent-hub rule), rule-delivery batch 2	OPT
+plugins/agent-hub/hooks/moment.py	NEW	moment-of-use hook, rule-delivery batch 2	OPT
+plugins/agent-hub/hooks/runners.py	NEW	shell-runner classification split out of moment.py, rule-delivery B2-fix-r2	OPT
+plugins/agent-hub/hooks/moments.json	NEW	moment table, rule-delivery batch 2	OPT
+tests/hooks/test_moment.py	NEW	moment hook, moment table and slicer tests, rule-delivery batch 2	OPT
+tests/hooks/test_return_check.py	NEW	return validator tests, rule-delivery batch 3	OPT
+plugins/agent-hub/scripts/return-check.py	NEW	return validator (agent-hub return-check), rule-delivery batch 3	OPT
+plugins/agent-hub/hooks/return_check.py	NEW	return validator hook, rule-delivery batch 3	OPT

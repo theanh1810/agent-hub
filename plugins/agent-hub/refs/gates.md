@@ -4,7 +4,7 @@
 
 ---
 
-**A. Blocking `status` — spawn nothing else until resolved.** Every blocking value an agent can return is listed; `completed` blocks nothing. A blocking status with no row is a bug in this table, not licence to improvise.
+**A. Blocking `status` — spawn nothing else until resolved.** Every blocking value an agent can return is listed; `completed` blocks nothing. A blocking status with no row is a bug in this table, not licence to improvise. A return's shape is checked when the subagent stops (`hooks/return_check.py`, at most two refusals). A return that arrives with the note "returned with N unfixed problems", and every return while the hooks are off, is saved to a file and checked with `agent-hub return-check <file>` before its `status` is routed; exit 1 re-spawns the same agent with the printed problems (`refs/roles/reviewer/taxonomy.md`, `handoff_incomplete`).
 
 | Status | Returned by | Main thread does |
 |---|---|---|
@@ -13,8 +13,8 @@
 | `needs_design` | brainstorm | spawn designer, re-spawn brainstorm `mode=design-followup` |
 | `needs_prototype` | brainstorm | implement `mode=prototype` in a throwaway worktree, re-spawn brainstorm with the result; once per change |
 | `needs_more_context` | designer | hand over the named artifact, re-spawn; never let it proceed on a guess |
-| `needs_revision` | brainstorm · devops · implement · reviewer · scout · test | the input was wrong: route by `reason` to the agent that produced the artifact, never back to the reporter. A plan gap (`plan_internal_conflict`, `task_schema_incomplete`) or, after approval, `plan_change_required`: `brainstorm mode=error-batch`; before the plan gate: `brainstorm mode=plan-write`. `devops_op_not_simple`: devops on opus. A mid-run user change waits for the final gate |
-| `in_progress` | brainstorm · designer · implement · reviewer · test | a turn cap, not a verdict: resume at most 2 times (`refs/turn-budget.md`); brainstorm with `effort_rise_requested: true` goes one rung up (`refs/effort-routing.md`), at most 2 rises. Not an error loop |
+| `needs_revision` | brainstorm · devops · implement · reviewer · scout · test | the input was wrong: route by `reason` to the agent that produced the artifact, never back to the reporter. A plan gap (`plan_internal_conflict`, `task_schema_incomplete`) or, after approval, `plan_change_required`: `brainstorm mode=error-batch`; before the plan gate: `brainstorm mode=plan-write`. `acceptance_test_change` (implement holds an acceptance item wrong): `brainstorm mode=error-batch`, `round_source: plan-gap`, in every lane (no plan: the record's path in `context_hints[]`). `devops_op_not_simple`: devops on opus. A mid-run user change waits for the final gate |
+| `in_progress` | brainstorm · designer · devops · implement · reviewer · test | a ceiling or turn-cap stop, not a verdict: resume it as `refs/turn-budget.md` states (§ The ceiling, § Main thread on a cap), which alone holds the resume count; brainstorm with `effort_rise_requested: true` goes one rung up (`refs/effort-routing.md`), at most 2 rises. Not an error loop |
 | `blocked_needs_spec` | implement | a business rule exists in no scenario: brainstorm drafts it and asks the user; no code before. A hotfix records the spec-debt file and continues (`rules/SDD.md`) |
 | `needs_design_clarification` | designer · implement | the loop hit its cap of 2: designer with the exact question, then the user; no third pass |
 | `needs_approval` | devops | surface change, blast radius and rollback path; re-spawn only on approval, which never carries to the next step |
@@ -27,11 +27,11 @@
 |---|---|---|
 | `needs_devops` | brainstorm · designer · implement · test | one devops wave (a log fetch included), then re-spawn the asker with devops's output verbatim |
 | `approval_required` | brainstorm | the approval gate is on for this task |
-| `recommend_scan[]` non-empty | brainstorm | one scout per entry, re-spawn brainstorm with `scout_results_refs[]` |
+| `recommend_scan[]` non-empty | brainstorm | one scout per entry, an entry with `doc_sources[]` carrying `cache_refs[]` (`refs/research-cache.md § Before a research spawn`); each returned `cache_pending[]` file: `agent-hub cache promote <slug>`, its `Ruling:` line into the ledger; then re-spawn brainstorm with `scout_results_refs[]` |
 | `needs_repro` | brainstorm | `test mode=script` runs `repro_request`, output passed back verbatim |
 | `second_opinion_request[]` non-empty | reviewer, first pass | one spawn per entry, all in one message; annex path, triage and the skip record: `refs/roles/reviewer/second-opinion.md` |
 
-Reviewer's `verdict` (`pass` · `needs_changes` · `blocking`) is a separate vocabulary: `needs_changes` and `blocking` go to one brainstorm error-batch, never straight to implement.
+Reviewer's `verdict` (`pass` · `needs_changes` · `blocking`) is a separate vocabulary: `needs_changes` and `blocking` go to one brainstorm error-batch, never straight to implement. Main thread runs `agent-hub ledger` on every review-and-test pass before that spawn (`refs/error-loop.md § The cycle`, step 1), then `agent-hub secret-scan <errors file>` on every round whatever its verdict, masking a hit fully and rescanning until exit 0: a yellow or green round spawns no brainstorm, so no later step scans it. A run with no plan puts its returns under `.cm-tmp/{change_id}/returns/`, the change id being the `<id>` of `docs/changes/<id>/` (L-cfg) or the `{YYYY-MM-DD}-{slug}` of its adhoc record (L2) (`refs/artifact-layout.md § Where writing is allowed`).
 
 # Gate procedures
 
@@ -53,7 +53,7 @@ Once per run (L-cfg: per batch), after review and test. The steps before and aft
 
 ## Rulings ledger
 
-At the final gate main thread lists every `Ruling:` line (format: `rules/core.md § Ask, never guess`) in the reply, before any cleanup.
+Main thread appends every `Ruling:` line (format: `rules/core.md § Ask, never guess`), its own and each one a return carries, to `.cm-tmp/{plan_id}/rulings.md` as it writes or reads it, one line each, in order; the file outlives a compaction, the conversation does not. At the final gate it lists every line of that file in the reply, before any cleanup.
 
 <!-- owned:begin id=sp-rulings-head -->
 Upstream text (obra/superpowers, MIT):
@@ -71,4 +71,4 @@ made in secret.
 
 ## Bypass record
 
-A gate that applies and is skipped (a review exemption of `refs/lanes.md`, or the user's words) makes main append one entry to the nearest `{plan_dir}/errors.yaml` (else `docs/errors/{session_id}.yaml`): `source: gate-bypass`, `pattern` (`review-layers` | `final-user-review` | `orchestrator-first` | `approval-gate` | `test-pass` | `fast-lane`), `when` (ISO date), `by` (the user's words verbatim, or the exemption id), `task_ids[]`, `wave` (or null). A gate that does not apply writes nothing; main thread appends `fast-lane` itself for an L1 edit, `by` naming the conditions met. Main thread doing a worker's work outside L1 appends `source: main-thread-violation`, `pattern: orchestrator-bypass` there too.
+A gate that applies and is skipped (a review exemption of `refs/lanes.md`, or the user's words) makes main append one entry to the nearest `{plan_dir}/errors.yaml` (else `docs/errors/{session_id}.yaml`): `source: gate-bypass`, `pattern` (`review-layers` | `final-user-review` | `orchestrator-first` | `approval-gate` | `test-pass` | `fast-lane`), `when` (ISO date), `by` (the user's words verbatim, or the exemption id), `task_ids[]`, `wave` (or null). A gate that does not apply writes nothing; main thread appends `fast-lane` itself for an L1 edit, `by` naming the conditions met. Main thread doing a worker's work outside L1 and L2-direct (`refs/lanes.md`) appends `source: main-thread-violation`, `pattern: orchestrator-bypass` there too.

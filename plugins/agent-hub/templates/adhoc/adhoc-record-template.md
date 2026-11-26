@@ -2,7 +2,7 @@
 slug: "<repo>-<what-was-done>"          # starts with the repo name (refs/artifact-layout.md § Where writing is allowed)
 date: "YYYY-MM-DD"
 run:
-  started_at: "YYYY-MM-DDTHH:MM:SSZ"   # ISO 8601 UTC, seconds; taken from .cm-tmp/{task_id}/run-started-at
+  started_at: "YYYY-MM-DDTHH:MM:SSZ"   # ISO 8601 UTC, seconds; the committer date of the commit this change started from (TZ=UTC git log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd <baseline head>), or omit the key
   finished_at: "YYYY-MM-DDTHH:MM:SSZ"
 files_changed: ["<path/to/file>"]
 commits: []   # SHAs of this change, when it was committed

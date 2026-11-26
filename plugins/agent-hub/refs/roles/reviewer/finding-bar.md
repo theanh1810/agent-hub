@@ -47,8 +47,12 @@ Answer by experiment: on a copy under `.cm-tmp/` (never in the tree), invert a c
 
 ## Re-review and deferral
 
-- After a fix round, review only the fix's diff: each earlier finding is ADDRESSED or NOT ADDRESSED, plus anything newly broken in that diff. Out-of-scope observations go to a ledger; they do not stretch the round.
-- A 🟡 minor goes to the run's ledger (`deferred_errors[]` of `errors.yaml`, written by brainstorm `mode=error-batch`); it never enters a fix round and never blocks close; the user sees the ledger once at the final gate.
+- A 🔴 or 🟠 finding carries `repro`: the shortest command or test sketch that fails on the current code, written from reading and run only when the brief carries `repro: true`. The fix round turns it into its failing test (`refs/roles/implement/sources.md § Fix round`).
+- Every round after a fix (`round` 1 and later; the first pass is `round` 0) reviews only the fix's diff plus one hop from it (the direct callers and callees of each changed symbol): each earlier finding is ADDRESSED or NOT ADDRESSED, plus anything newly broken in that reach.
+- The brief of such a round carries `triaged_findings[]`, every finding an earlier round already settled (fixed, deferred or rejected, with the reason); raise one again only with evidence the earlier round did not have, and name that evidence.
+- A finding outside that reach is debt at any severity: it is written to the review file under `Out of diff` with its severity and returned as a `minor[]` line opening `[out-of-diff 🔴|🟠|🟡]`, so the ledger files it and no fix round opens; the user sees it at the final gate.
+- A 🟡 minor goes to the run's ledger (`deferred_errors[]` of `errors.yaml`, written by `agent-hub ledger` with no brainstorm spawn); it never enters a fix round and never blocks close; the user sees the ledger once at the final gate.
+- The review file carries every finding: each 🔴 and 🟠 in full and every 🟡 as one line (`file:line — what — fix`), none left out. The return carries each 🔴 and 🟠 in full and the 🟡 ones in `minor[]`, at most 10 lines: the 10 with the most impact when there are more, with the number left out and the review file's path stated in `summary`. A `security`-category finding of any severity and an `[out-of-diff]` line are always returned and stay outside that count.
 
 ## Review shape
 

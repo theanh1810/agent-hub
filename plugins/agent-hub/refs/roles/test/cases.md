@@ -11,6 +11,7 @@ Test derives every case from the task, never from the chat; it adds no kind or l
 
 - Sources, per task of `tasks.md` (`refs/plan-lane.md § tasks.md shape`): each scenario its `Covers:` names (WHEN/THEN from the spec delta under `specs/`, else the live spec), its `Done when:`, and its `Test:` layers. No plan: the acceptance and `flows:` of brainstorm's record (`record_ref`).
 - At least one case per covered scenario and one for `Done when:`, at each layer the rows below require. Case id `TC-<task id>-<n>` (`TC-1.2-3`). A case carries `covers`: the scenario names verbatim, or `done-when`.
+- An acceptance test from implement's first commit (`refs/roles/implement/sources.md § Acceptance tests`) is the case for its item: run it under id `TC-<task>-<n>` with `covers` naming the scenario or `done-when` its item stands for and `ac_id` set to the item id; derive a case of your own only for a scenario, layer or state no acceptance test covers.
 - The test name in code carries the scenario name; a converted UC's old id survives only inside that title (`rules/SDD.md § 2`).
 - A good test checks external behaviour only; the case names a similar test already in the codebase to follow.
 - Extra-input lines (inputs or errors the spec implies but no task tests, written by brainstorm under "Also check") become one case each in the task that owns the code, most harmful first: "its silence on an input is not permission for that input to break the program".

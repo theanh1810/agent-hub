@@ -56,16 +56,17 @@ Return the status and stop (`rules/core.md § Ask, never guess`). One approval c
 | a deploy step not in the plan | `needs_revision`, `reason: plan_change_required` |
 | `devops_op_class: simple` or a sonnet run, and a step is outside `refs/effort-routing.md § Simple devops` or matches a `needs_approval` row | `needs_revision`, `reason: devops_op_not_simple`, naming the step; checked at bootstrap, nothing run |
 | a `Write` outside `binding_scope.files_allowed[]`, `.cm-tmp/{task_id}/`, a brief-declared path or project memory | `needs_user_input`; append `source: devops-scope-violation` to nearest `errors.yaml` |
+| a push or pipeline trigger for a commit on which the project gate (`refs/roles/implement/sources.md § Running the checks`) has not exited 0 | run the gate first; red: `failed`, naming the first failing step, for `implement` to fix |
 | the task fails | `failed`, with failure record and rollback taken |
 
 Infrastructure decisions use an ADR, not use cases (`refs/roles/devops/server-touching.md § Spec layer`).
 
-# Output (line 1 the header, raw JSON from line 2)
+# Output (shape: `rules/core.md § Handoff contract`)
 
 Status: `completed` or a row of `refs/gates.md` table A.
 
 ```jsonc
-{ "status": "completed|failed|needs_revision|needs_approval|needs_user_input",
+{ "status": "completed|in_progress|failed|needs_revision|needs_approval|needs_user_input",
   "task_id": "string", "plan_id": "string|null", "summary": "≤3 sentences",
   "failure_type": "transient|fixable|needs_replan|escalate|null",
   "reason": "plan_change_required|devops_op_not_simple|null",
@@ -78,8 +79,7 @@ Status: `completed` or a row of `refs/gates.md` table A.
       "lines_total": "number", "match_count": "number", "first_match_excerpt": "≤50 lines, secrets redacted" },
     "server_info_path": "docs/devops/SERVER-INFO.md|null", "memory_saved": "boolean" },
   "user_questions": [{ "id": "UQ1", "question": "…", "why_blocking": "…", "options": [{ "label": "…", "description": "…", "explain": "…" }] }],
-  "handoff": { "understanding": "…", "files_touched_or_referenced": ["path"], "changes_or_findings": "…",
-    "validation_done": "command and output, or why not run", "risks": ["≤3"], "next_step": "…" } }
+}
 ```
 
 `user_questions[]`: `refs/option-explanation.md § The user_questions block`.
@@ -117,3 +117,5 @@ Status: `completed` or a row of `refs/gates.md` table A.
 | a local service, port or task database | `agent-hub-local-services: refs/local-services.md`, `agent-hub-local-services: refs/local-postgres.md` | shared services |
 | writing or deleting a file | `refs/artifact-layout.md` | where files may go |
 | before reporting a deploy, restart or fetch done | `refs/vendored/verification-before-completion.md` | principle 4 in detail |
+| a pipeline or deploy log, several checks | `refs/context-policy.md` (Think-in-code, Reporting) | one call; log to a file |
+| the tool-call ceiling | `refs/turn-budget.md § The ceiling` | checkpoint |

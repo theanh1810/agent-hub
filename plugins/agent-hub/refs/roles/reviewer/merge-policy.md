@@ -18,8 +18,8 @@ Against `refs/roles/implement/close-task.md` § Commit:
 |---|---|
 | Author is not the configured git/GitLab user (Claude, a bot, the default identity); implement re-commits with an explicit `git -c user.name/email` | `blocking` |
 | Subject not Conventional Commits, over 72 chars, not imperative; or "Fix bugs" / "Update code" / "Misc" / "Phase 1", or past tense | `warning` |
-| `Refs:` missing when a plan exists (it names `plan_id`, the wave and task ids; a fix after merge review names its review finding ids instead, `skills/review-checklist/references/merge.md` Phase B step 8) | `warning` |
-| Unrelated subsystems in one commit (fixed by splitting). A plan's wave commit is exempt (R-COMMIT-WAVE), and so is a fix or conflict-resolution commit after merge review (R-MERGE-FIX-COMMIT) | `warning` |
+| `Refs:` missing when a plan exists (it reads `Refs: <change> / <task_id> / <ticket_id if any>`; a fix after merge review names its review finding ids instead, `skills/review-checklist/references/merge.md` Phase B step 8) | `warning` |
+| Unrelated subsystems in one commit (fixed by splitting). A task's own planned `Files:` count as related, so a single task commit never draws this. A fix or conflict-resolution commit after merge review is exempt (R-MERGE-FIX-COMMIT) | `warning` |
 | The subject cannot stand alone in the history; the body does not say why, or admits nothing about the approach's weak points | `suggestion` |
 | Body not a bullet list with a subsystem prefix per bullet naming exact identifiers (free-form paragraph, paraphrased reference) | `suggestion` |
 | `Co-Authored-By: Claude` missing on AI-assisted commits | `suggestion` |

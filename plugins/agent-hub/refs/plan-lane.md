@@ -51,7 +51,7 @@ Start from `templates/plan/tasks-template.md`. Group tasks under `## Wave <n>`. 
 
 This file is Vietnamese and richer than `tasks.md`; it is not a mirror of it. The user reads it at the plan gate, so write it to be understood without the other files. Start from `templates/plan/plan.vi-template.md`.
 
-One block per task, headed `### <n>.<m> <tiêu đề>`, in the task-id order of `tasks.md`. Each block holds: what will be done and why, before and after in words, the files touched, how it is tested, the risks, what stays out of scope. Each block ends with the heading `#### Dữ liệu và màn hình bị ảnh hưởng`, listing tables, columns, stored files, API fields and screens the task changes; write `Không có` when none.
+One block per task, headed `### <n>.<m> <tiêu đề>`, in the task-id order of `tasks.md`. Each block holds: what will be done and why, before and after in words, the files touched, how it is tested (each `acceptance[]` example of the task in words: given, when, then), the risks, what stays out of scope. Each block ends with the heading `#### Dữ liệu và màn hình bị ảnh hưởng`, listing tables, columns, stored files, API fields and screens the task changes; write `Không có` when none.
 
 Use the project glossary's terms. Keep field names, endpoints, statuses and file names in English.
 

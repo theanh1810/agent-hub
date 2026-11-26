@@ -18,9 +18,9 @@ The other **twelve** are raised by a `review-checklist` section or a section of 
 
 The severity in each heading is that section's; `agents/reviewer.md § Severity` maps it to a verdict.
 
-## `handoff_incomplete` — blocking — the upstream agent's output lacks the top-level `handoff`, or one of the six sub-fields `rules/core.md § Handoff contract` defines
+## `handoff_incomplete` — blocking — the upstream agent's output lacks one of the six sections `rules/core.md § Handoff contract` names, or its fenced `json` block
 
-Read the names in `rules/core.md § Handoff contract`. Blocks the wave-close; main re-spawns the agent with the missing fields named. Skip for a gate status such as `needs_user_input`.
+Read the names in `rules/core.md § Handoff contract`. Blocks the wave-close; main re-spawns the agent with the missing parts named. Scout returns the raw object from line 2, with no fenced block. Skip for a gate status such as `needs_user_input`.
 
 ## `pattern_violation` — blocking — implement edited ≥10 lines of real logic and cited no `pattern_reference`, or one that does not exist, or one that is unrelated
 
@@ -65,10 +65,10 @@ Read the task's `what`, `purpose` and `files[].why` first; unanswerable is a fin
 
 Major: complexity >12, nesting >3, more than 4 parameters, a boolean parameter that switches behaviour · a function over 80 lines (a flag to check the job count, not a cap) · naming diverging from the neighbouring file · a helper duplicating one that exists · an assertion loosened to pass · a name no longer describing the code.
 
-## `plan_fidelity` — 🔴 blocking — a file in the diff that is not in `task.files[]`, a plan task committed alone instead of with its wave, two waves in one commit, or a `review_checkpoint.focus[]` the diff cannot answer
+## `plan_fidelity` — 🔴 blocking — a file in the diff that is not in `task.files[]`, a commit holding more than one task's work, a task's work split over several commits, or a `review_checkpoint.focus[]` the diff cannot answer
 
 1. **Out of scope**: a file in the diff not in `task.files[]` and not declared in the handoff as rename fan-out or a compile fix. Name the path.
-2. **Batched tasks**: in a plan, a task committed alone instead of with its wave, or two waves in one commit (a fix after merge review is neither: `skills/review-checklist/references/merge.md` Phase B step 8); or a task diff, read while its wave is uncommitted (`refs/gates.md § Gate procedures`), containing another task's work.
+2. **Batched tasks**: a commit holding more than one task's work, or a task's work split over several commits (aside from its acceptance commit, a fix after merge review (`skills/review-checklist/references/merge.md` Phase B step 8), a fix-round commit (`agents/implement.md` Close step) and an acceptance restore commit (`refs/closeout.md` step 2)); or a task snapshot (`refs/roles/implement/close-task.md § Freeze for review`) containing another task's work.
 3. **`review_checkpoint.focus[]` not checkable from the diff**: the task or the checkpoint is wrong.
 
 ## `spec_drift` — 🔴 critical, blocking — the code implements a business rule no AC covers, or contradicts one that exists. Propose both routes and **choose neither**: it is a business decision, so it goes to the user

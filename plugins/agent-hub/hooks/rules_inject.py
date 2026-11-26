@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""rules_inject.py <event> <n> [--lang CODE]: print chunk n of rules/core.md: the main view on SessionStart, the subagent view on SubagentStart."""
+"""rules_inject.py <event> <n> [--lang CODE]: print chunk n of rules/core.md: the main view on SessionStart, the subagent view on SubagentStart
+and on a SessionStart that fires inside an agent-hub subagent (its own compaction); another plugin's subagent gets nothing."""
 import sys
 
 if sys.version_info < (3, 11):  # the doctor hook reports it; stay silent here
@@ -78,6 +79,24 @@ def parse_args(argv):
     return event, n, lang_arg
 
 
+def in_subagent(payload):
+    """True when the hook input names an agent (agent_id or agent_type, Claude Code 2.1.69+) or the transcript is a subagent's."""
+    if not isinstance(payload, dict):
+        return False
+    if payload.get("agent_id") or payload.get("agent_type"):
+        return True
+    return "/subagents/" in str(payload.get("transcript_path") or "").replace("\\", "/")
+
+
+def view_of(event, payload):
+    """The view an event gets; None prints nothing. SessionStart(compact) also fires inside a subagent that compacted:
+    an agent-hub subagent (or one whose type is not given) gets its own view back, never the main one."""
+    if event != "SessionStart" or not in_subagent(payload):
+        return VIEW_OF[event]
+    kind = payload.get("agent_type")
+    return "subagent" if not isinstance(kind, str) or not kind or kind.startswith("agent-hub:") else None
+
+
 def main(argv):
     event, n, lang_arg = parse_args(argv)
     data = _common.read_stdin_json()
@@ -90,14 +109,17 @@ def main(argv):
     except OSError as exc:
         sys.stderr.write("rules_inject: cannot read core.md: %s\n" % exc)
         return 0
-    chunks = build_chunks(core, root.as_posix(), _common.reply_language(lang_arg), VIEW_OF[event])
+    view = view_of(event, data)
+    if view is None:
+        return 0
+    chunks = build_chunks(core, root.as_posix(), _common.reply_language(lang_arg), view)
     if n > len(chunks):
         return 0
     body = chunks[n - 1]
-    if event == "SessionStart" and n == 1:
+    if view == "main" and n == 1:
         direct = os.environ.get("AGENT_HUB_DIRECT") == "1"
         body = (DIRECT_DIRECTIVE + "\n\n" + body) if direct else body
-    limit = MAX_CHUNKS[event]
+    limit = MAX_CHUNKS["SubagentStart" if view == "subagent" else event]
     msg = "agent-hub: rules exceed %d hook chunks; some rules were not loaded" % limit if n == 1 and len(chunks) > limit else None
     _common.emit(event, body, msg)
     return 0

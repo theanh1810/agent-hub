@@ -17,6 +17,11 @@ SUBCOMMANDS = {  # subcommand -> script file in scripts/
     "secret-scan": "secret-scan.py",
     "worktree-sweep": "worktree-sweep.py",
     "lesson": "lesson-ledger.py",
+    "return-check": "return-check.py",  # return-check <file> [--agent <role>] [--cwd <dir>]
+    "ledger": "ledger-record.py",
+    "rule": "rule-slice.py",  # rule <file>[#<heading>]: print one section of a rule file
+    "idle": "idle-report.py",  # idle <session.jsonl | session dir> [--json]
+    "cache": "research-cache.py",  # cache <find <words...> | promote [--archive] <slug> | lint> [--dir <cache dir>]
 }
 RULESET_MESSAGE = "ruleset mode runs only in the agent-hub package repo: python3 tools/check.py ruleset"
 OPENSPEC_ABSENT = "openspec: not installed, validate skipped (owed)"
